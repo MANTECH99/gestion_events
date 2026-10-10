@@ -130,7 +130,7 @@
                 <div class="sticky top-24 space-y-4">
                     <div class="card overflow-hidden">
                         @if ($event->image_url)
-                            <img src="{{ $event->image_url }}" alt="" class="aspect-[16/9] w-full object-cover">
+                            <img src="{{ $event->image_url }}" alt="Affiche de {{ $event->title }}" class="aspect-[16/9] w-full object-cover">
                         @endif
                         <div class="p-5">
                             <p class="text-xs font-medium uppercase tracking-wide text-ink-500">Votre réservation</p>

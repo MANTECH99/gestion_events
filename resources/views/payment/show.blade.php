@@ -81,7 +81,7 @@
                                             <input type="radio" name="operator" value="{{ $operator['code'] }}"
                                                    x-model="operator" class="radio">
                                             @if ($operator['logo'])
-                                                <img src="{{ $operator['logo'] }}" alt=""
+                                                <img src="{{ $operator['logo'] }}" alt="{{ $operator['name'] }}"
                                                      class="h-10 w-10 rounded-lg object-contain" loading="lazy"
                                                      onerror="this.style.display='none'">
                                             @else
@@ -147,7 +147,7 @@
                     <div class="sticky top-24">
                         <div class="card overflow-hidden">
                             @if ($reservation->event->image_url)
-                                <img src="{{ $reservation->event->image_url }}" alt="" class="aspect-[16/9] w-full object-cover">
+                                <img src="{{ $reservation->event->image_url }}" alt="Affiche de {{ $reservation->event->title }}" class="aspect-[16/9] w-full object-cover">
                             @endif
 
                             <div class="p-6">
