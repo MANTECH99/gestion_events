@@ -1,0 +1,218 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/*
+ * Les couleurs de badge sont construites dynamiquement dans les vues
+ * (ex : bg-{{ $reservation->status_color }}-100). Tailwind ne voit pas ces
+ * noms : on déclare explicitement les teintes utilisées (100 pour le fond,
+ * 600/700 pour le texte, 500 pour les pastilles pleines).
+ */
+@source inline('bg-{brand,emerald,amber,orange,rose,sky,violet}-{50,100,500,600,700}');
+@source inline('text-{brand,emerald,amber,orange,rose,sky,violet}-{50,500,600,700,800,900}');
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Marque Billeterie Express */
+    --color-brand-50: #eef4ff;
+    --color-brand-100: #dae6ff;
+    --color-brand-200: #bdd3ff;
+    --color-brand-300: #90b7ff;
+    --color-brand-400: #5b8dff;
+    --color-brand-500: #3665fb;
+    --color-brand-600: #1f41f0;
+    --color-brand-700: #1a2ed8;
+    --color-brand-800: #1c28af;
+    --color-brand-900: #1c288a;
+    --color-brand-950: #151b57;
+
+    --color-accent-300: #ffd166;
+    --color-accent-400: #ffb020;
+    --color-accent-500: #f98c1b;
+    --color-accent-600: #ea6a0a;
+
+    --color-ink-50: #f6f7f9;
+    --color-ink-100: #eceef2;
+    --color-ink-200: #d5dae3;
+    --color-ink-300: #b0b9c9;
+    --color-ink-400: #8593aa;
+    --color-ink-500: #667490;
+    --color-ink-600: #515d77;
+    --color-ink-700: #434c61;
+    --color-ink-800: #3a4152;
+    --color-ink-900: #343946;
+    --color-ink-950: #12141c;
+
+    --radius-card: 1.125rem;
+}
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-ink-50 text-ink-900 antialiased;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    /*
+     * Les navigateurs n'impriment pas les fonds par défaut : l'en-tête dégradé,
+     * le pied et les badges d'un billet sortiraient en texte blanc sur blanc.
+     */
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+
+        .print-color {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+    }
+}
+
+/* iOS standalone (PWA) : le contenu passe sous le notch et la barre d'accueil. */
+@layer base {
+    body {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /*
+     * En mode standalone (PWA installée), la vue s'étend sous la barre de
+     * statut et le notch : le header doit redescendre sous la zone sûre
+     * pour que le logo et les liens restent visibles et tapables.
+     */
+    @media (display-mode: standalone) {
+        .app-header {
+            padding-top: env(safe-area-inset-top, 0px);
+        }
+    }
+}
+
+/*
+ * Base des boutons déclarée comme utility afin que les variantes puissent
+ * l'utiliser via @apply (Tailwind 4 n'autorise pas @apply sur une classe
+ * déclarée dans @layer components).
+ *
+ * ATTENTION : btn est une base interne, à ne jamais utiliser seule dans une
+ * vue. Comme btn est dans la layer utilities et btn-sm dans components, un
+ * `class="btn btn-sm"` verrait les paddings de btn ecraser ceux de btn-sm
+ * (la layer prime sur la specificite). Utilisez une variante btn-*.
+ */
+@utility btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+           transition duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500
+           focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@layer components {
+    .btn-primary {
+        @apply btn bg-brand-600 text-white shadow-sm shadow-brand-600/25 hover:bg-brand-700 active:bg-brand-800;
+    }
+
+    /* Le texte blanc sur accent-500 ne montait qu'a 2.4:1 : on assombrit le texte. */
+    .btn-accent {
+        @apply btn bg-accent-500 text-ink-950 shadow-sm shadow-accent-500/25 hover:bg-accent-400 active:bg-accent-600;
+    }
+
+    .btn-outline {
+        @apply btn border border-ink-200 bg-white text-ink-700 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700;
+    }
+
+    .btn-ghost {
+        @apply btn text-ink-600 hover:bg-ink-100 hover:text-ink-900;
+    }
+
+    .btn-sm {
+        @apply px-3 py-1.5 text-xs;
+    }
+
+    /* Bouton fantome pose sur le degrade brand (hero). */
+    .btn-invert {
+        @apply btn border border-white/30 bg-white/10 text-white backdrop-blur hover:bg-white/20
+               focus-visible:ring-white focus-visible:ring-offset-0;
+    }
+
+    /* Etat indisponible : le bouton est desactive dans la vue. */
+    .btn-disabled {
+        @apply btn cursor-not-allowed bg-ink-200 text-ink-500;
+    }
+
+    .card {
+        @apply rounded-[var(--radius-card)] border border-ink-200/70 bg-white shadow-sm;
+    }
+
+    .input {
+        @apply w-full rounded-xl border border-ink-200 bg-white px-3.5 py-2.5 text-sm text-ink-900
+               placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20;
+    }
+
+    .input-error {
+        @apply border-rose-400 focus:border-rose-500 focus:ring-rose-500/20;
+    }
+
+    .label {
+        @apply mb-1.5 block text-sm font-medium text-ink-700;
+    }
+
+    /* 23 usages, souvent sur fond ink-50 : ink-500 n'y montait qu'a 4.39:1. */
+    .hint {
+        @apply mt-1 text-xs text-ink-600;
+    }
+
+    .badge {
+        @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+    }
+
+    .checkbox {
+        @apply h-4 w-4 shrink-0 cursor-pointer rounded border-ink-300 text-brand-600 accent-brand-600
+               focus:ring-2 focus:ring-brand-500/30;
+    }
+
+    /* Sélecteur d'opérateur de paiement : le libellé porte l'état actif (has-[:checked]). */
+    .radio {
+        @apply h-5 w-5 shrink-0 cursor-pointer border-ink-300 accent-brand-600
+               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600;
+    }
+
+    /* Tableau de données générique (utilisé par les espaces authentifiés). */
+    .table {
+        @apply w-full min-w-[42rem] text-left text-sm;
+    }
+
+    .table thead th {
+        @apply whitespace-nowrap border-b border-ink-200 bg-ink-50 px-4 py-3 text-xs font-semibold
+               uppercase tracking-wide text-ink-500;
+    }
+
+    .table tbody td {
+        @apply border-b border-ink-100 px-4 py-3 align-middle;
+    }
+
+    .table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+
+    .table tbody tr:hover {
+        @apply bg-ink-50/60;
+    }
+}
+
+@layer utilities {
+    .gradient-brand {
+        background-image: linear-gradient(135deg, #1f41f0 0%, #3665fb 45%, #6d3bf5 100%);
+    }
+
+    .text-gradient {
+        @apply bg-clip-text text-transparent;
+        background-image: linear-gradient(120deg, #1f41f0, #6d3bf5);
+    }
+}
