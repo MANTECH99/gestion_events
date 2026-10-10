@@ -29,8 +29,7 @@
     <meta name="apple-mobile-web-app-title" content="Billeterie Express">
     <link rel="manifest" href="{{ route('pwa.manifest') }}">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/icon.svg') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/icon-192.png') }}">
-    <link rel="apple-touch-icon" sizes="512x512" href="{{ asset('images/icon-512.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')

@@ -17,6 +17,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Asset / PWA Cache Version
+    |--------------------------------------------------------------------------
+    |
+    | Bump this value on each deploy that changes static assets (icons, images)
+    | to invalidate the service worker caches for existing installs.
+    |
+    */
+
+    'asset_version' => env('ASSET_VERSION', '2'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |
