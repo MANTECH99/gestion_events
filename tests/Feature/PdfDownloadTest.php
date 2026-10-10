@@ -79,7 +79,11 @@ class PdfDownloadTest extends TestCase
 
     private function pdfPageCount(string $content): int
     {
-        return preg_match('/\/Count (\d+)/', $content, $m) ? (int) $m[1] : 0;
+        // Le catalogue d'outline peut précéder la page tree avec /Count 0 :
+        // on prend la valeur maximale rencontrée.
+        preg_match_all('/\/Count (\d+)/', $content, $m);
+
+        return $m[1] ? max(array_map('intval', $m[1])) : 0;
     }
 
     public function test_organizer_downloads_the_reservation_pdf(): void
@@ -233,5 +237,61 @@ class PdfDownloadTest extends TestCase
         $response = $this->get(URL::signedRoute('reservations.download', $reservation->reference));
 
         $this->assertStringContainsString('application/pdf', (string) $response->headers->get('content-type'));
+    }
+
+    public function test_dompdf_fallback_produces_a_valid_ticket_pdf(): void
+    {
+        // Force le repli pur PHP, disponible même sans navigateur (serveur mutualisé).
+        config(['services.ticket_pdf.engine' => 'dompdf']);
+
+        $reservation = $this->reservationFixture();
+        $ticket = $reservation->tickets->first();
+
+        $response = $this->withSession(['ticket_access.'.$ticket->id => true])
+            ->get(route('tickets.download', $ticket));
+
+        $response->assertOk();
+        $this->assertStringContainsString('application/pdf', (string) $response->headers->get('content-type'));
+        $this->assertStringStartsWith('%PDF', $response->getContent());
+    }
+
+    public function test_dompdf_fallback_renders_one_page_per_ticket(): void
+    {
+        config(['services.ticket_pdf.engine' => 'dompdf']);
+
+        $reservation = $this->reservationFixture();
+
+        Ticket::create([
+            'code' => Ticket::makeCode(),
+            'reservation_id' => $reservation->id,
+            'event_id' => $reservation->event_id,
+            'ticket_type_id' => $reservation->ticket_type_id,
+            'holder_name' => 'Client PDF',
+            'price' => 2000,
+        ]);
+
+        $response = $this->actingAs($reservation->event->organizer)
+            ->get(route('organizer.reservations.tickets', $reservation));
+
+        $response->assertOk();
+        $this->assertStringStartsWith('%PDF', $response->getContent());
+        $this->assertSame(2, $this->pdfPageCount($response->getContent()));
+    }
+
+    public function test_dompdf_ticket_template_reproduces_the_card(): void
+    {
+        $reservation = $this->reservationFixture();
+        $ticket = $reservation->tickets->first();
+        $qr = app(QrCodeService::class);
+
+        $html = view('tickets.print-pdf', [
+            'tickets' => $reservation->tickets,
+            'qr' => fn (Ticket $item) => $qr->dataUri($item->qrPayload(), 320),
+        ])->render();
+
+        $this->assertStringContainsString($ticket->code, $html);
+        $this->assertStringContainsString($ticket->event->title, $html);
+        $this->assertStringContainsString($ticket->holder_name, $html);
+        $this->assertStringContainsString('data:image/svg+xml', $html);
     }
 }

@@ -39,8 +39,13 @@ return [
     | Moteur utilisé pour générer le PDF des billets (impression fidèle de la
     | carte affichée dans l'application). Chemin explicite optionnel : si vide,
     | Chrome, Edge puis wkhtmltopdf sont détectés automatiquement.
+    |
+    | 'engine' : "auto" (défaut) = navigateur si disponible, sinon repli dompdf ;
+    | "browser" = navigateur obligatoire (échec si absent) ;
+    | "dompdf"  = repli pur PHP forcé (utile en serveur mutualisé sans navigateur).
     */
     'ticket_pdf' => [
+        'engine' => env('TICKET_PDF_ENGINE'),
         'chrome' => env('TICKET_PDF_CHROME'),
         'wkhtmltopdf' => env('TICKET_PDF_WKHTMLTOPDF'),
     ],

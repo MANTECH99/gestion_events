@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Ticket;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -11,11 +12,14 @@ use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
- * Génère le PDF des billets en imprimant la carte HTML réelle (celle montrée
- * dans l'application) via un navigateur headless (Chrome/Edge ou wkhtmltopdf).
+ * Génère le PDF des billets.
  *
- * Contrairement à dompdf, un moteur de navigateur rend fidèlement la carte
- * Tailwind (dégradé, icônes, mise en page portrait).
+ * En priorité, la carte HTML réelle (celle montrée dans l'application) est
+ * imprimée via un navigateur headless (Chrome/Edge ou wkhtmltopdf) car un
+ * moteur de navigateur rend fidèlement la carte Tailwind (dégradé, icônes,
+ * portrait). Si aucun navigateur n'est disponible (serveur mutualisé), on
+ * bascule sur dompdf (pur PHP, aucune dépendance système) via le template
+ * `tickets.print-pdf`.
  */
 class TicketPdfService
 {
@@ -31,6 +35,36 @@ class TicketPdfService
             'event.organizer', 'ticketType', 'reservation', 'validator',
         ]));
 
+        $engine = config('services.ticket_pdf.engine');
+
+        if ($engine === 'dompdf') {
+            return $this->renderWithDompdf($tickets);
+        }
+
+        if ($engine === 'browser' || ($engine === null && $this->binary() !== null)) {
+            try {
+                return $this->renderWithBrowser($tickets);
+            } catch (RuntimeException $e) {
+                // Navigateur indisponible/échoué : on retombe sur dompdf, sauf si
+                // l'opérateur a explicitement exigé le moteur navigateur.
+                if ($engine === 'browser') {
+                    throw $e;
+                }
+            }
+        }
+
+        return $this->renderWithDompdf($tickets);
+    }
+
+    public static function isAvailable(): bool
+    {
+        return class_exists(Pdf::class)
+            || (new self(app(QrCodeService::class)))->binary() !== null;
+    }
+
+    /** Impression fidèle de la carte Tailwind via un navigateur headless. */
+    private function renderWithBrowser(Collection $tickets): string
+    {
         $html = view('tickets.print', [
             'tickets' => $tickets,
             'qr' => fn (Ticket $ticket) => $this->qr->svg($ticket->qrPayload(), 512),
@@ -60,9 +94,18 @@ class TicketPdfService
         return $bytes;
     }
 
-    public static function isAvailable(): bool
+    /** Repli 100 % PHP (dompdf) — aucune dépendance système requise. */
+    private function renderWithDompdf(Collection $tickets): string
     {
-        return (new self(app(QrCodeService::class)))->binary() !== null;
+        $html = view('tickets.print-pdf', [
+            'tickets' => $tickets,
+            'qr' => fn (Ticket $ticket) => $this->qr->dataUri($ticket->qrPayload(), 320),
+        ])->render();
+
+        // 105 mm x 200 mm en points (1 mm = 2.834645669 pt).
+        return Pdf::loadHtml($html)
+            ->setPaper([0, 0, 297.64, 566.93], 'portrait')
+            ->output();
     }
 
     private function print(string $htmlPath, string $pdfPath, string $profileDir): void
