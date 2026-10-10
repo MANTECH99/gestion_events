@@ -1,4 +1,7 @@
-@extends('layouts.app', ['description' => 'Découvrez les concerts, festivals et événements àickets au Sénégal. Paiement Wave ou Orange Money.'])
+@extends('layouts.app', [
+    'description' => 'Découvrez les concerts, festivals et événements à venir au Sénégal. Réservez en ligne et payez avec Wave ou Orange Money.',
+    'schema' => [\App\Support\Seo::website()],
+])
 
 @section('content')
 

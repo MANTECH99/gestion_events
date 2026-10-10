@@ -1,12 +1,27 @@
-@props(['title' => null, 'description' => null])
+@props([
+    'title' => null,
+    'description' => null,
+    'image' => null,
+    'canonical' => null,
+    'robots' => null,
+    'ogType' => null,
+    'schema' => [],
+])
 
 <!DOCTYPE html>
 <html lang="fr" class="h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>{{ $title ? $title.' — Billeterie Express' : 'Billeterie Express — Réservez vos billets en quelques secondes' }}</title>
-    <meta name="description" content="{{ $description ?? 'Billeterie Express : concerts, festivals, événements au Sénégal. Payez en toute sécurité avec Wave ou Orange Money.' }}">
+    @include('partials.seo', [
+        'title' => $title,
+        'description' => $description,
+        'image' => $image,
+        'canonical' => $canonical,
+        'robots' => $robots ?? (view()->hasSection('sidebar') ? 'noindex, nofollow' : null),
+        'ogType' => $ogType,
+        'schema' => $schema,
+    ])
     <meta name="theme-color" content="#1f41f0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="apple-mobile-web-app-capable" content="yes">

@@ -1,4 +1,10 @@
-@extends('layouts.app', ['title' => $event->title, 'description' => $event->title.' — '.event_date_fr($event->event_date).' à '.$event->location])
+@extends('layouts.app', [
+    'title' => $event->title,
+    'description' => $event->title.' — '.event_date_fr($event->event_date).' à '.$event->location,
+    'image' => $event->image_url,
+    'ogType' => 'article',
+    'schema' => [\App\Support\Seo::event($event)],
+])
 
 @section('content')
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
