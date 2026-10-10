@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 220" width="840" height="220" role="img" aria-label="Billeterie Express">
+    <defs>
+        <linearGradient id="beBrand" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#1f41f0"/>
+            <stop offset="55%" stop-color="#3665fb"/>
+            <stop offset="100%" stop-color="#6d3bf5"/>
+        </linearGradient>
+        <mask id="beTicket" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+            <rect x="104" y="176" width="304" height="160" rx="30" fill="#ffffff"/>
+            <circle cx="286" cy="176" r="21" fill="#000000"/>
+            <circle cx="286" cy="336" r="21" fill="#000000"/>
+            <line x1="286" y1="198" x2="286" y2="314" stroke="#000000" stroke-width="9" stroke-dasharray="13 19" stroke-linecap="round"/>
+        </mask>
+    </defs>
+
+    <g transform="translate(20,14) scale(0.375)">
+        <rect width="512" height="512" rx="112" fill="url(#beBrand)"/>
+        <g mask="url(#beTicket)">
+            <rect x="104" y="176" width="304" height="160" rx="30" fill="#ffffff"/>
+        </g>
+        <path d="M206 196 L148 262 L188 262 L170 316 L234 244 L194 244 Z" fill="#f98c1b"/>
+    </g>
+
+    <text x="240" y="122" font-family="'Instrument Sans', 'Segoe UI', system-ui, -apple-system, sans-serif" font-size="56" font-weight="800" letter-spacing="-1.5">
+        <tspan fill="#151b57">Billeterie</tspan>
+        <tspan fill="url(#beBrand)" dx="16">Express</tspan>
+    </text>
+    <text x="242" y="166" font-family="'Instrument Sans', 'Segoe UI', system-ui, -apple-system, sans-serif" font-size="23" font-weight="500" fill="#6b7280" letter-spacing="0.2">La billetterie en ligne au Sénégal</text>
+</svg>

@@ -6,82 +6,108 @@
 @section('content')
 
     {{-- Héro --}}
-    <section class="relative overflow-hidden">
-        <div class="absolute inset-0 gradient-brand"></div>
-        <div class="absolute inset-0 opacity-25" style="background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,.45) 0, transparent 45%), radial-gradient(circle at 80% 10%, rgba(255,255,255,.35) 0, transparent 40%);"></div>
+    <section class="relative overflow-hidden gradient-brand">
+        {{-- Décor --}}
+        <div class="pointer-events-none absolute inset-0 opacity-[0.12]" style="background-image: linear-gradient(rgba(255,255,255,.7) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.7) 1px, transparent 1px); background-size: 46px 46px;"></div>
+        <div class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/15 blur-3xl"></div>
+        <div class="pointer-events-none absolute -left-20 bottom-0 h-80 w-80 rounded-full bg-accent-400/25 blur-3xl"></div>
 
-        <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-            <div class="mx-auto max-w-3xl text-center">
-                <span class="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white ring-1 ring-white/25 backdrop-blur">
-                    @icon('star', 'w-3.5 h-3.5') {{ $totalTickets }} événements à venir
-                </span>
+        <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+            <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+                {{-- Texte --}}
+                <div class="text-center lg:text-left">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wide text-white ring-1 ring-white/25 backdrop-blur">
+                        @icon('check-circle', 'w-3.5 h-3.5') Plateforme officielle de billetterie
+                    </span>
 
-                <h1 class="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-                    Vos billets, <span class="text-accent-300">en un clic</span>
-                </h1>
+                    <h1 class="mt-6 text-3xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
+                        Achetez vos billets en ligne,<br class="hidden sm:block">
+                        en toute <span class="text-accent-300">confiance</span>
+                    </h1>
 
-                <p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
-                    Réservez vos places pour les meilleurs événements du Sénégal et payez en toute
-                    sécurité avec <strong class="font-semibold text-white">Wave</strong> ou
-                    <strong class="font-semibold text-white">Orange Money</strong>.
-                </p>
+                    <p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg lg:mx-0">
+                        Concerts, festivals, sport et spectacles au Sénégal : réservez votre place en
+                        quelques secondes et payez avec Wave ou Orange Money.
+                    </p>
 
-                <div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                    <a href="#evenements" class="btn-accent w-full sm:w-auto">
-                        @icon('ticket', 'w-5 h-5') Voir les événements
-                    </a>
-                    <a href="{{ route('agent.scan') }}" class="btn-invert w-full sm:w-auto">
-                        @icon('scan', 'w-5 h-5') Scanner un billet
-                    </a>
+                    <div class="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center lg:justify-start">
+                        <a href="#evenements" class="btn-accent sm:w-auto">
+                            @icon('ticket', 'w-5 h-5') Voir les événements
+                        </a>
+                        <a href="{{ route('register') }}" class="btn-invert sm:w-auto">
+                            @icon('user', 'w-5 h-5') S'inscrire
+                        </a>
+                    </div>
+
+                    <div class="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/75 lg:justify-start">
+                        <span class="flex items-center gap-2">@icon('shield', 'w-4 h-4') Paiement sécurisé</span>
+                        <span class="hidden h-4 w-px bg-white/25 sm:block"></span>
+                        <span class="flex items-center gap-2">@icon('qr-code', 'w-4 h-4') Billets à QR code</span>
+                    </div>
                 </div>
 
-                <dl class="mx-auto mt-12 grid max-w-2xl grid-cols-3 gap-4 text-center">
-                    <div class="rounded-2xl bg-white/10 px-3 py-4 ring-1 ring-white/15 backdrop-blur">
-                        <dt class="text-xs text-white/80">Paiement</dt>
-                        <dd class="mt-1 text-lg font-bold text-white">Wave · OM</dd>
+                {{-- Carte de recherche --}}
+                <div class="mx-auto w-full max-w-md">
+                    <div class="rounded-3xl bg-white p-6 shadow-2xl shadow-ink-950/30 ring-1 ring-black/5 sm:p-7">
+                        <h2 class="text-lg font-bold text-ink-950">Trouvez votre prochain événement</h2>
+                        <p class="mt-1 text-sm text-ink-500">Par nom, ville ou type d'événement.</p>
+
+                        <form method="GET" action="{{ route('home') }}" class="mt-5 space-y-3.5">
+                            <label class="block">
+                                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-500">Recherche</span>
+                                <div class="flex items-center gap-2 rounded-xl border border-ink-200 bg-ink-50/60 px-3.5 py-2.5 transition focus-within:border-brand-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-500/20">
+                                    <span class="text-ink-400">@icon('search', 'w-4 h-4')</span>
+                                    <input type="search" name="q" value="{{ request('q') }}" placeholder="Nom de l'événement, ville…"
+                                           class="w-full border-0 bg-transparent text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none">
+                                </div>
+                            </label>
+
+                            <label class="block">
+                                <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-500">Type d'événement</span>
+                                <div class="flex items-center gap-2 rounded-xl border border-ink-200 bg-ink-50/60 px-3.5 py-2.5 transition focus-within:border-brand-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-500/20">
+                                    <span class="text-ink-400">@icon('filter', 'w-4 h-4')</span>
+                                    <select name="type" class="w-full border-0 bg-transparent text-sm text-ink-700 focus:outline-none">
+                                        <option value="">Tous les types</option>
+                                        @foreach ($types as $key => $label)
+                                            <option value="{{ $key }}" @selected(request('type') === $key)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </label>
+
+                            <button type="submit" class="btn-primary w-full">
+                                @icon('search', 'w-4 h-4') Rechercher
+                            </button>
+                        </form>
+
+                        <p class="mt-4 flex items-center justify-center gap-1.5 text-xs text-ink-500">
+                            @icon('shield', 'w-3.5 h-3.5') Paiement 100 % sécurisé via DexPay
+                        </p>
                     </div>
-                    <div class="rounded-2xl bg-white/10 px-3 py-4 ring-1 ring-white/15 backdrop-blur">
-                        <dt class="text-xs text-white/80">Ticket</dt>
-                        <dd class="mt-1 text-lg font-bold text-white">QR unique</dd>
-                    </div>
-                    <div class="rounded-2xl bg-white/10 px-3 py-4 ring-1 ring-white/15 backdrop-blur">
-                        <dt class="text-xs text-white/80">Validation</dt>
-                        <dd class="mt-1 text-lg font-bold text-white">Immédiate</dd>
-                    </div>
-                </dl>
+                </div>
             </div>
         </div>
     </section>
 
     {{-- Filtres --}}
     <section id="evenements" class="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 lg:px-8">
-        <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <h2 class="text-2xl font-extrabold tracking-tight text-ink-950 sm:text-3xl">Événements à venir</h2>
                 <p class="mt-1.5 text-sm text-ink-600">
                     <span class="font-semibold text-ink-900">{{ $events->total() }}</span>
                     événement{{ $events->total() > 1 ? 's' : '' }} disponible{{ $events->total() > 1 ? 's' : '' }}
+                    @if (request()->filled('q') || request()->filled('type'))
+                        pour « <span class="font-semibold text-ink-900">{{ request('q') ?: request('type') }}</span> »
+                    @endif
                 </p>
             </div>
 
-            <form method="GET" class="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
-                <div class="relative">
-                    <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400">
-                        @icon('search', 'w-4 h-4')
-                    </span>
-                    <input type="search" name="q" value="{{ request('q') }}" placeholder="Rechercher un événement…"
-                           class="input sm:w-64 sm:pl-9">
-                </div>
-
-                <select name="type" class="input sm:w-48" onchange="this.form.submit()">
-                    <option value="">Tous les types</option>
-                    @foreach ($types as $key => $label)
-                        <option value="{{ $key }}" @selected(request('type') === $key)>{{ $label }}</option>
-                    @endforeach
-                </select>
-
-                <button type="submit" class="btn-primary">Filtrer</button>
-            </form>
+            @if (request()->filled('q') || request()->filled('type'))
+                <a href="{{ route('home') }}" class="btn-outline btn-sm w-fit">
+                    @icon('close', 'w-4 h-4') Réinitialiser les filtres
+                </a>
+            @endif
         </div>
 
         @if ($events->isEmpty())

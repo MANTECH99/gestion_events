@@ -2,10 +2,9 @@
     <div class="{{ ($hasSidebar ?? false) ? 'w-full' : 'mx-auto max-w-7xl' }} px-4 py-12 sm:px-6 lg:px-8">
         <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div class="lg:col-span-2">
-                <div class="flex items-center gap-2">
-                    <span class="grid h-9 w-9 place-items-center rounded-xl gradient-brand text-white">
-                        @icon('ticket', 'w-5 h-5')
-                    </span>
+                <div class="flex items-center gap-2.5">
+                    <img src="{{ asset('images/icon.svg') }}" alt="" width="36" height="36"
+                         class="h-9 w-9 shrink-0 rounded-xl">
                     <span class="text-lg font-extrabold tracking-tight text-ink-950">
                         Billeterie <span class="text-gradient">Express</span>
                     </span>

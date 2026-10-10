@@ -6,19 +6,18 @@
 <header class="app-header sticky top-0 z-50 border-b border-ink-200/60 bg-white/85 backdrop-blur-lg no-print">
     {{-- Sur les interfaces de gestion, la colonne fixe occupe la bande gauche du header. --}}
     <div class="{{ $hasSidebar ? 'lg:pl-64' : '' }}">
-        <div class="flex h-16 {{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} items-center gap-4 px-4 sm:px-6 lg:px-8">
-            <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2">
-                <span class="grid h-9 w-9 place-items-center rounded-xl gradient-brand text-white shadow-lg shadow-brand-600/30">
-                    @icon('ticket', 'w-5 h-5')
-                </span>
+        <div x-data="{ open: false }" @click.outside="open = false" class="relative flex h-16 {{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} items-center gap-4 px-4 sm:px-6 lg:px-8">
+            <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2.5">
+                <img src="{{ asset('images/icon.svg') }}" alt="" width="36" height="36"
+                     class="h-9 w-9 shrink-0 rounded-xl shadow-lg shadow-brand-600/30">
                 <span class="text-lg font-extrabold tracking-tight text-ink-950">
                     Billeterie <span class="text-gradient">Express</span>
                 </span>
             </a>
 
             {{-- Menu mobile : la navigation principale est masquée sous lg --}}
-            <div class="relative lg:hidden" x-data="{ open: false }">
-                <button @click="open = !open" @click.outside="open = false"
+            <div class="lg:hidden">
+                <button @click="open = !open"
                         class="grid h-9 w-9 place-items-center rounded-xl border border-ink-200 bg-white text-ink-700 transition hover:border-ink-300"
                         :aria-expanded="open ? 'true' : 'false'" aria-controls="menu-mobile" aria-label="Ouvrir le menu">
                     <span x-show="!open">@icon('menu', 'w-5 h-5')</span>
@@ -26,7 +25,7 @@
                 </button>
 
                 <div id="menu-mobile" x-cloak x-show="open" x-transition
-                     class="absolute left-0 top-11 w-64 overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-xl">
+                     class="absolute left-4 top-full mt-px w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-xl">
                     <div class="p-1.5 text-sm">
                         <a href="{{ route('home') }}"
                            class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-ink-700 hover:bg-ink-50 {{ request()->routeIs('home') ? 'bg-brand-50 text-brand-700' : '' }}">
@@ -166,7 +165,7 @@
                     </div>
                 @else
                     <a href="{{ route('login') }}" class="btn-ghost btn-sm hidden sm:inline-flex">Connexion</a>
-                    <a href="{{ route('register') }}" class="btn-primary btn-sm">Créer un compte</a>
+                    <a href="{{ route('register') }}" class="btn-primary btn-sm">S'inscrire</a>
                 @endauth
             </div>
         </div>
