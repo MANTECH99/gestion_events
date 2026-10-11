@@ -12,21 +12,13 @@
     <div class="max-h-full w-full max-w-xs overflow-auto rounded-3xl bg-white p-4 shadow-2xl" @click.outside="close()">
         <img :src="dataUrl" alt="Billet" class="mx-auto max-h-[64vh] w-auto max-w-full rounded-2xl ring-1 ring-ink-200">
 
-        <p class="mt-3 text-center text-xs text-ink-500">
-            Sur téléphone : appui long sur l'image puis « Enregistrer dans Photos ».
-        </p>
-
         <div class="mt-4 flex gap-2">
             <button type="button" x-show="canShare" @click="share()" class="btn-primary btn-sm flex-1 justify-center">
                 @icon('download', 'w-4 h-4') Enregistrer
             </button>
-            <button type="button" @click="download()" class="btn-outline btn-sm flex-1 justify-center">
-                @icon('download', 'w-4 h-4') Télécharger
+            <button type="button" @click="close()" class="btn-outline btn-sm flex-1 justify-center">
+                Fermer
             </button>
         </div>
-
-        <button type="button" @click="close()" class="btn-ghost btn-sm mt-2 w-full justify-center">
-            Fermer
-        </button>
     </div>
 </div>
