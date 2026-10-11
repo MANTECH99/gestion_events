@@ -43,9 +43,9 @@
                         <option :value="e.id" x-text="e.title"></option>
                     </template>
                 </select>
-                <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-                    <input type="date" name="from" value="{{ $from->toDateString() }}" class="input min-w-0 py-1.5 text-sm" aria-label="Du">
-                    <input type="date" name="to" value="{{ $to->toDateString() }}" class="input min-w-0 py-1.5 text-sm" aria-label="Au">
+                <div class="grid grid-cols-1 gap-2 sm:flex sm:items-center">
+                    <input type="date" name="from" value="{{ $from->toDateString() }}" class="input min-w-0 py-1.5 text-sm sm:w-auto" aria-label="Du">
+                    <input type="date" name="to" value="{{ $to->toDateString() }}" class="input min-w-0 py-1.5 text-sm sm:w-auto" aria-label="Au">
                 </div>
                 <button class="btn-outline btn-sm w-full justify-center sm:w-auto">Filtrer</button>
             </form>

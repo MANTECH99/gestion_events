@@ -94,15 +94,31 @@
         .app-header {
             padding-top: env(safe-area-inset-top, 0px);
         }
+    }
+}
 
-        /*
-         * Le tiroir de gestion (colonne plein écran sous lg) part lui aussi du
-         * haut de la vue : on le décale sous la zone sûre pour que son titre et
-         * son bouton de fermeture restent visibles et tapables, comme le header.
-         */
-        #sidebar-gestion {
-            top: env(safe-area-inset-top, 0px);
-        }
+/*
+ * Le tiroir de gestion est ancré en haut de la vue par l'utilitaire `top-0`.
+ * Sous notch (iPhone / PWA) il doit redescendre sous la zone sûre, comme le
+ * header. La règle est volontairement HORS couche : les utilitaires Tailwind
+ * vivent dans une @layer et une règle non-layerée l'emporte sur `top-0`.
+ * Partout ailleurs env() vaut 0, donc aucun effet.
+ */
+#sidebar-gestion {
+    top: env(safe-area-inset-top, 0px);
+}
+
+/*
+ * iOS Safari zoome automatiquement la page dès qu'un champ focalisé a une
+ * police < 16px. Nos champs utilisent `text-sm` (14px) : on force 16px sous le
+ * breakpoint mobile pour supprimer ce zoom involontaire et gênant.
+ * Règle HORS couche pour primer sur les utilitaires text-*.
+ */
+@media (max-width: 639px) {
+    input,
+    select,
+    textarea {
+        font-size: 16px;
     }
 }
 
