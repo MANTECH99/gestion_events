@@ -43,9 +43,6 @@
 
             @if ($reservation->isPaid())
                 <div class="mt-5 flex flex-wrap gap-2 border-t border-ink-100 pt-4">
-                    <a href="{{ route('reservations.download', $reservation->reference) }}" class="btn-primary btn-sm">
-                        @icon('download', 'w-4 h-4') Tout télécharger en PDF
-                    </a>
                     <button onclick="window.print()" class="btn-outline btn-sm no-print">
                         @icon('print', 'w-4 h-4') Imprimer
                     </button>
@@ -60,17 +57,24 @@
 
             <div class="flex flex-wrap justify-center gap-8 lg:justify-start">
                 @foreach ($reservation->tickets as $ticket)
-                    <div class="w-full max-w-[24rem]">
-                        @include('tickets.partials.card', ['ticket' => $ticket, 'qr' => $qr($ticket)])
+                    <div class="w-full max-w-[24rem]" x-data="ticketImage">
+                        <div x-ref="card">
+                            @include('tickets.partials.card', ['ticket' => $ticket, 'qr' => $qr($ticket)])
+                        </div>
 
                         <div class="mt-4 flex gap-2 no-print">
                             <a href="{{ route('tickets.show', $ticket) }}" class="btn-outline btn-sm flex-1 justify-center">
                                 @icon('eye', 'w-4 h-4') Agrandir
                             </a>
-                            <a href="{{ route('tickets.download', $ticket) }}" class="btn-primary btn-sm flex-1 justify-center">
-                                @icon('download', 'w-4 h-4') PDF
-                            </a>
+                            <button type="button" @click="capture($refs.card, '{{ $ticket->code }}')" :disabled="busy"
+                                    class="btn-primary btn-sm flex-1 justify-center disabled:opacity-60">
+                                @icon('download', 'w-4 h-4')
+                                <span x-show="!busy">Enregistrer l'image</span>
+                                <span x-show="busy" x-cloak>Génération…</span>
+                            </button>
                         </div>
+
+                        @include('tickets.partials.image-modal')
                     </div>
                 @endforeach
             </div>

@@ -4,6 +4,7 @@ import './charts';
 import './payment';
 import './scanner';
 import './pwa';
+import './ticket-image';
 import { toast } from './utils';
 
 window.Alpine = Alpine;

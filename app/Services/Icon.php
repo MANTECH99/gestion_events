@@ -95,21 +95,6 @@ class Icon
             .'class="'.$class.'" aria-hidden="true">'.$path.'</svg>';
     }
 
-    /**
-     * Icône en data-URI, utilisable dans un <img> (par ex. le rendu PDF dompdf
-     * qui n'interprète pas le SVG inline et ignore `currentColor`).
-     */
-    public static function dataUri(string $name, string $color = '#000000', int $size = 18, float $stroke = 1.7): string
-    {
-        $path = self::PATHS[$name] ?? self::PATHS['info'];
-
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="'.$size.'" height="'.$size.'" '
-            .'fill="none" stroke="'.$color.'" stroke-width="'.$stroke.'" stroke-linecap="round" stroke-linejoin="round">'
-            .$path.'</svg>';
-
-        return 'data:image/svg+xml;base64,'.base64_encode($svg);
-    }
-
     public static function register(): void
     {
         Blade::directive('icon', function (string $expression) {

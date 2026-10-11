@@ -9,10 +9,6 @@
                     Réservation {{ $reservation->reference }} · {{ event_date_fr($reservation->event->event_date, 'd/m/Y à H:i') }}
                 </p>
             </div>
-
-            <a href="{{ URL::signedRoute('reservations.download', $reservation->reference) }}" class="btn-outline btn-sm no-print">
-                @icon('download', 'w-4 h-4') Tout télécharger
-            </a>
         </div>
 
         @if ($reservation->tickets->isEmpty())
@@ -22,17 +18,24 @@
         @else
             <div class="mt-8 flex flex-wrap justify-center gap-8">
                 @foreach ($tickets as $ticket)
-                    <div class="w-full max-w-[24rem]">
-                        @include('tickets.partials.card', ['ticket' => $ticket, 'qr' => $qr($ticket)])
+                    <div class="w-full max-w-[24rem]" x-data="ticketImage">
+                        <div x-ref="card">
+                            @include('tickets.partials.card', ['ticket' => $ticket, 'qr' => $qr($ticket)])
+                        </div>
 
                         <div class="mt-4 flex gap-2 no-print">
                             <a href="{{ URL::signedRoute('tickets.show', $ticket) }}" class="btn-outline btn-sm flex-1">
                                 @icon('eye', 'w-4 h-4') Agrandir
                             </a>
-                            <a href="{{ URL::signedRoute('tickets.download', $ticket) }}" class="btn-primary btn-sm flex-1">
-                                @icon('download', 'w-4 h-4') PDF
-                            </a>
+                            <button type="button" @click="capture($refs.card, '{{ $ticket->code }}')" :disabled="busy"
+                                    class="btn-primary btn-sm flex-1 disabled:opacity-60">
+                                @icon('download', 'w-4 h-4')
+                                <span x-show="!busy">Enregistrer l'image</span>
+                                <span x-show="busy" x-cloak>Génération…</span>
+                            </button>
                         </div>
+
+                        @include('tickets.partials.image-modal')
                     </div>
                 @endforeach
             </div>

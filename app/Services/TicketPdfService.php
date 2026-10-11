@@ -97,55 +97,15 @@ class TicketPdfService
     /** Repli 100 % PHP (dompdf) — aucune dépendance système requise. */
     private function renderWithDompdf(Collection $tickets): string
     {
-        $pdf = Pdf::loadView('tickets.print-pdf', [
+        $html = view('tickets.print-pdf', [
             'tickets' => $tickets,
             'qr' => fn (Ticket $ticket) => $this->qr->dataUri($ticket->qrPayload(), 320),
-            'icon' => fn (string $name, string $color = '#8593aa', int $size = 18) => Icon::dataUri($name, $color, $size),
-            'headerImage' => $this->headerImageDataUri(),
-        ]);
-
-        $this->registerPdfFonts($pdf);
+        ])->render();
 
         // 105 mm x 200 mm en points (1 mm = 2.834645669 pt).
-        return $pdf->setPaper([0, 0, 297.64, 566.93], 'portrait')->output();
-    }
-
-    /** Charge le dégradé d'en-tête (généré une fois, sans dépendre de GD). */
-    private function headerImageDataUri(): string
-    {
-        $path = public_path('images/ticket-header.png');
-
-        if (! File::exists($path)) {
-            return '';
-        }
-
-        return 'data:image/png;base64,'.base64_encode(File::get($path));
-    }
-
-    /**
-     * Enregistre la police de la carte (Instrument Sans) depuis les .woff
-     * compilés par Vite. En cas d'échec, dompdf retombe sur DejaVu Sans.
-     */
-    private function registerPdfFonts($pdf): void
-    {
-        try {
-            $metrics = $pdf->getDomPDF()->getFontMetrics();
-
-            $weights = [
-                'normal' => '400',
-                'bold' => '600',
-            ];
-
-            foreach ($weights as $style => $weight) {
-                $file = glob(public_path('build/assets/instrument-sans-'.$weight.'-normal-*.woff'))[0] ?? null;
-
-                if ($file) {
-                    $metrics->registerFont(['family' => 'Instrument Sans', 'style' => 'normal', 'weight' => $style], $file);
-                }
-            }
-        } catch (\Throwable $e) {
-            // Police indisponible : on garde la police par défaut, le billet reste généré.
-        }
+        return Pdf::loadHtml($html)
+            ->setPaper([0, 0, 297.64, 566.93], 'portrait')
+            ->output();
     }
 
     private function print(string $htmlPath, string $pdfPath, string $profileDir): void

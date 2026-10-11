@@ -7,7 +7,6 @@ use App\Models\Reservation;
 use App\Models\Ticket;
 use App\Models\TicketType;
 use App\Models\User;
-use App\Services\Icon;
 use App\Services\QrCodeService;
 use App\Services\TicketPdfService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -169,6 +168,29 @@ class PdfDownloadTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_organizer_gets_ticket_cards_html_for_image_export(): void
+    {
+        $reservation = $this->reservationFixture();
+        $ticket = $reservation->tickets->first();
+
+        $response = $this->actingAs($reservation->event->organizer)
+            ->get(route('organizer.reservations.cards', $reservation));
+
+        $response->assertOk();
+        $this->assertStringContainsString($ticket->code, $response->getContent());
+        $this->assertStringContainsString($ticket->event->title, $response->getContent());
+        $this->assertStringContainsString('<svg', $response->getContent());
+    }
+
+    public function test_ticket_cards_html_from_another_organizer_is_forbidden(): void
+    {
+        $reservation = $this->reservationFixture();
+
+        $this->actingAs(User::factory()->organizer()->create())
+            ->get(route('organizer.reservations.cards', $reservation))
+            ->assertForbidden();
+    }
+
     public function test_guest_with_session_access_downloads_the_reservation_summary(): void
     {
         $reservation = $this->reservationFixture();
@@ -288,8 +310,6 @@ class PdfDownloadTest extends TestCase
         $html = view('tickets.print-pdf', [
             'tickets' => $reservation->tickets,
             'qr' => fn (Ticket $item) => $qr->dataUri($item->qrPayload(), 320),
-            'icon' => fn (string $name, string $color = '#8593aa', int $size = 18) => Icon::dataUri($name, $color, $size),
-            'headerImage' => 'data:image/png;base64,xxx',
         ])->render();
 
         $this->assertStringContainsString($ticket->code, $html);

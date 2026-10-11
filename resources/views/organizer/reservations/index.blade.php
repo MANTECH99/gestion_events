@@ -135,9 +135,13 @@
                                         </a>
 
                                         @if ($reservation->isPaid())
-                                            <a href="{{ route('organizer.reservations.tickets', $reservation) }}" class="btn-ghost btn-sm" title="Billets seulement (PDF)">
-                                                @icon('ticket', 'w-4 h-4')
-                                            </a>
+                                            <div x-data="ticketImage" class="inline-flex">
+                                                <button type="button" :disabled="busy"
+                                                        @click="captureFromUrl('{{ route('organizer.reservations.cards', $reservation) }}', '{{ $reservation->reference }}')"
+                                                        class="btn-ghost btn-sm disabled:opacity-60" title="Enregistrer les billets (image)">
+                                                    @icon('ticket', 'w-4 h-4')
+                                                </button>
+                                            </div>
                                         @endif
 
                                         @if ($reservation->isPaid())

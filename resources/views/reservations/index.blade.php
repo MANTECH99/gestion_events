@@ -58,9 +58,6 @@
                                 <a href="{{ route('reservations.show', $reservation->reference) }}" class="btn-primary btn-sm">
                                     @icon('qr-code', 'w-4 h-4') Voir mes billets
                                 </a>
-                                <a href="{{ route('reservations.download', $reservation->reference) }}" class="btn-outline btn-sm">
-                                    @icon('download', 'w-4 h-4') Télécharger
-                                </a>
                             @elseif ($reservation->isPending())
                                 <a href="{{ route('payment.show', $reservation->reference) }}" class="btn-primary btn-sm">
                                     @icon('credit-card', 'w-4 h-4') Finaliser le paiement

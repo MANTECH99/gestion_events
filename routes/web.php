@@ -130,6 +130,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/reservations', [OrganizerReservation::class, 'index'])->name('reservations.index');
         Route::get('/reservations/{reservation}/telecharger', [OrganizerReservation::class, 'download'])->name('reservations.pdf');
         Route::get('/reservations/{reservation}/billets', [OrganizerReservation::class, 'downloadTickets'])->name('reservations.tickets');
+        Route::get('/reservations/{reservation}/cartes', [OrganizerReservation::class, 'cards'])->name('reservations.cards');
         Route::post('/reservations/{reservation}/rembourser', [OrganizerReservation::class, 'refund'])->name('reservations.refund');
         Route::delete('/reservations/{reservation}', [OrganizerReservation::class, 'destroy'])->name('reservations.destroy');
 

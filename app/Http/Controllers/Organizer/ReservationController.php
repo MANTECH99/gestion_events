@@ -96,6 +96,19 @@ class ReservationController extends Controller
             ->header('Content-Disposition', 'attachment; filename="billets-'.$reservation->reference.'.pdf"');
     }
 
+    /** Renvoie le HTML des cartes de billets (capturées en image par le navigateur). */
+    public function cards(Request $request, Reservation $reservation): Response
+    {
+        $this->authorizeReservation($request, $reservation);
+
+        $reservation->load(['tickets.event.organizer', 'tickets.ticketType', 'tickets.reservation', 'tickets.validator']);
+
+        return response(view('organizer.reservations.cards', [
+            'tickets' => $reservation->tickets,
+            'qr' => fn (Ticket $ticket) => $this->qr->svg($ticket->qrPayload(), 360),
+        ])->render());
+    }
+
     public function destroy(Request $request, Reservation $reservation): RedirectResponse
     {
         $this->authorizeReservation($request, $reservation);
