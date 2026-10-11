@@ -98,8 +98,8 @@
                     </div>
 
                     <div class="border-t border-ink-100 pt-5">
-                        <label for="quantity" class="label">Quantité <span class="text-rose-500">*</span></label>
-                        <div x-data="{ quantity: {{ (int) old('quantity', 1) }} }" class="flex items-center gap-2">
+                        <label for="quantity" class="label text-center sm:text-left">Quantité <span class="text-rose-500">*</span></label>
+                        <div x-data="{ quantity: {{ (int) old('quantity', 1) }} }" class="flex items-center justify-center gap-2 sm:justify-start">
                             <button type="button" aria-label="Diminuer la quantité"
                                     @click="quantity = Math.max(1, quantity - 1)"
                                     class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-ink-200 bg-white text-ink-700 transition hover:border-brand-300 hover:text-brand-600">
@@ -113,7 +113,7 @@
                                 @icon('plus', 'w-4 h-4')
                             </button>
                         </div>
-                        <p class="hint">20 tickets maximum par réservation. Un QR code sera généré par billet.</p>
+                        <p class="hint text-center sm:text-left">20 tickets maximum par réservation. Un QR code sera généré par billet.</p>
                     </div>
 
                     <div class="flex flex-col-reverse gap-3 border-t border-ink-100 pt-5 sm:flex-row sm:justify-end">
