@@ -386,16 +386,16 @@ class PaymentOperatorSelectionTest extends TestCase
 
         $html = $this->get(route('payment.show', $reservation->reference))->getContent();
 
-        // wave_sn (1,5 % sur 5 000) : la ligne « Frais de service » est rendue
-        // et le détail opérateur/frais est transmis au JS pour mise à jour.
-        $this->assertStringContainsString('Frais de service', $html);
-        $this->assertStringContainsString('couverture des frais de retrait', $html);
+        // wave_sn (1,5 % sur 5 000) : les frais (service + encaissement) sont
+        // réunis sur une seule ligne « Frais DexPay », mise à jour par le JS.
         $this->assertStringContainsString('Frais DexPay', $html);
         $this->assertStringContainsString('encaissement, prélevés au paiement', $html);
+        $this->assertStringContainsString('x-show="totalFee > 0"', $html);
         $this->assertStringContainsString('\u0022fee\u0022:1.5', $html);
 
-        // om_sn n'a pas de frais : sa ligne doit rester masquée tant que fee = 0.
-        $this->assertStringContainsString('x-show="fee > 0"', $html);
+        // om_sn n'a pas de frais : la ligne est masquée tant que le total = 0.
+        $this->assertStringNotContainsString('Frais de service', $html);
+        $this->assertStringNotContainsString('couverture des frais de retrait', $html);
     }
 
     public function test_service_fee_helper_uses_the_operator_fee_when_known(): void

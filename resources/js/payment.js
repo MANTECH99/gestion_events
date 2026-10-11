@@ -26,10 +26,6 @@ function paymentPage(config) {
             return (this.config.operators ?? []).find((op) => op.value === this.operator);
         },
 
-        get operatorName() {
-            return this.currentOperator?.name ?? '';
-        },
-
         /** Surcharge de service (couverture du frais de retrait) selon l'opérateur. */
         get fee() {
             const op = this.currentOperator;
@@ -42,10 +38,6 @@ function paymentPage(config) {
                 : Math.round((base * Number(op.fee)) / 100);
         },
 
-        get feeLabel() {
-            return this.fee === 0 ? '' : moneyLabel(this.fee);
-        },
-
         /**
          * Frais d'encaissement DexPay, prélevés au moment du paiement
          * (client_support_fee=true) au même taux que la surcharge de retrait.
@@ -54,8 +46,13 @@ function paymentPage(config) {
             return this.fee;
         },
 
-        get dexpayFeeLabel() {
-            return this.dexpayFee === 0 ? '' : moneyLabel(this.dexpayFee);
+        /** Total des frais (service + encaissement) réunis sur une seule ligne. */
+        get totalFee() {
+            return this.fee + this.dexpayFee;
+        },
+
+        get totalFeeLabel() {
+            return this.totalFee === 0 ? '' : moneyLabel(this.totalFee);
         },
 
         get amountLabel() {

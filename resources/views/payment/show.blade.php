@@ -175,25 +175,15 @@
                                     <dt class="text-ink-600">Sous-total billets</dt>
                                     <dd class="text-right font-medium text-ink-900">{{ money($reservation->total_amount) }}</dd>
                                 </div>
-                                <div x-show="fee > 0" @class([
+                                <div x-show="totalFee > 0" @class([
                                         'flex justify-between gap-3',
-                                        'hidden' => $service_fee <= 0,
-                                    ])>
-                                    <dt class="text-ink-600">
-                                        Frais de service (<span x-text="operatorName"></span>)
-                                        <span class="block text-xs text-ink-400">couverture des frais de retrait</span>
-                                    </dt>
-                                    <dd class="text-right font-medium text-ink-900" x-text="feeLabel"></dd>
-                                </div>
-                                <div x-show="dexpayFee > 0" @class([
-                                        'flex justify-between gap-3',
-                                        'hidden' => $dexpay_fee <= 0,
+                                        'hidden' => ($service_fee + $dexpay_fee) <= 0,
                                     ])>
                                     <dt class="text-ink-600">
                                         Frais DexPay
                                         <span class="block text-xs text-ink-400">encaissement, prélevés au paiement</span>
                                     </dt>
-                                    <dd class="text-right font-medium text-ink-900" x-text="dexpayFeeLabel"></dd>
+                                    <dd class="text-right font-medium text-ink-900" x-text="totalFeeLabel"></dd>
                                 </div>
                                 <div class="flex justify-between gap-3">
                                     <dt class="text-ink-600">Titulaire</dt>
