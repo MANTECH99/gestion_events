@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div>
             <h1 class="text-2xl font-extrabold tracking-tight text-ink-950 sm:text-3xl">Vue d'ensemble</h1>
             <p class="mt-1 text-sm text-ink-600">
@@ -9,14 +9,16 @@
             </p>
         </div>
 
-        <div class="flex flex-wrap gap-2">
-            <a href="{{ route('admin.organizers.index') }}" class="btn-primary btn-sm">
-                @icon('users', 'w-4 h-4') Organisateurs
-            </a>
-            <a href="{{ route('admin.users.index') }}" class="btn-outline btn-sm">
-                @icon('user', 'w-4 h-4') Tous les utilisateurs
-            </a>
-            <form method="GET" class="flex items-center gap-2"
+        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <div class="flex flex-col gap-2 sm:flex-row">
+                <a href="{{ route('admin.organizers.index') }}" class="btn-primary btn-sm justify-center">
+                    @icon('users', 'w-4 h-4') Organisateurs
+                </a>
+                <a href="{{ route('admin.users.index') }}" class="btn-outline btn-sm justify-center">
+                    @icon('user', 'w-4 h-4') Tous les utilisateurs
+                </a>
+            </div>
+            <form method="GET" class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center"
                   x-data="{
                       organizers: @js($organizers->map(fn ($o) => ['id' => $o->id, 'name' => $o->full_name])->values()),
                       eventsByOrganizer: @js($filterEvents->groupBy('organizer_id')
@@ -28,22 +30,24 @@
                       },
                   }">
                 <select name="organizer_id" x-model="organizerId" @change="eventId = ''"
-                        class="input max-w-52 py-1.5 text-sm" aria-label="Organisateur">
+                        class="input w-full py-1.5 text-sm sm:w-auto sm:max-w-52" aria-label="Organisateur">
                     <option value="">Tous les organisateurs</option>
                     <template x-for="o in organizers" :key="o.id">
                         <option :value="o.id" x-text="o.name"></option>
                     </template>
                 </select>
                 <select name="event_id" x-model="eventId"
-                        class="input max-w-60 py-1.5 text-sm" aria-label="Événement">
+                        class="input w-full py-1.5 text-sm sm:w-auto sm:max-w-60" aria-label="Événement">
                     <option value="">Tous les événements</option>
                     <template x-for="e in events" :key="e.id">
                         <option :value="e.id" x-text="e.title"></option>
                     </template>
                 </select>
-                <input type="date" name="from" value="{{ $from->toDateString() }}" class="input py-1.5 text-sm" aria-label="Du">
-                <input type="date" name="to" value="{{ $to->toDateString() }}" class="input py-1.5 text-sm" aria-label="Au">
-                <button class="btn-outline btn-sm">Filtrer</button>
+                <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+                    <input type="date" name="from" value="{{ $from->toDateString() }}" class="input min-w-0 py-1.5 text-sm" aria-label="Du">
+                    <input type="date" name="to" value="{{ $to->toDateString() }}" class="input min-w-0 py-1.5 text-sm" aria-label="Au">
+                </div>
+                <button class="btn-outline btn-sm w-full justify-center sm:w-auto">Filtrer</button>
             </form>
         </div>
     </div>

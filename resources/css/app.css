@@ -94,6 +94,15 @@
         .app-header {
             padding-top: env(safe-area-inset-top, 0px);
         }
+
+        /*
+         * Le tiroir de gestion (colonne plein écran sous lg) part lui aussi du
+         * haut de la vue : on le décale sous la zone sûre pour que son titre et
+         * son bouton de fermeture restent visibles et tapables, comme le header.
+         */
+        #sidebar-gestion {
+            top: env(safe-area-inset-top, 0px);
+        }
     }
 }
 

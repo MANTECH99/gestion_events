@@ -8,7 +8,7 @@
                     @icon('user-plus', 'w-7 h-7')
                 </span>
                 <h1 class="mt-5 text-3xl font-extrabold tracking-tight text-ink-950">Créer mon compte</h1>
-                <p class="mt-2 text-ink-600">Pour gérer vos ventes au point de vente et suivre vos réservations.</p>
+                <p class="mt-2 text-ink-600">Pour réserver vos billets et suivre vos réservations.</p>
             </div>
 
             <form method="POST" action="{{ route('register.store') }}" class="card mt-8 space-y-5 p-6 sm:p-8">
@@ -34,7 +34,7 @@
                     <input id="username" name="username" value="{{ old('username') }}" required
                            autocomplete="username" placeholder="ex : aminata_diop"
                            class="input @error('username') input-error @enderror">
-                    <p class="mt-1.5 text-xs text-ink-500">Lettres, chiffres, tirets et soulignés uniquement.</p>
+                    <p class="mt-1.5 text-xs text-ink-500">Lettres, chiffres, espaces, tirets et soulignés.</p>
                     @error('username')<p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
 

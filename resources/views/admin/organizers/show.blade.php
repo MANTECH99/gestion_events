@@ -16,14 +16,14 @@
         </a>
         <h1 class="text-2xl font-extrabold tracking-tight text-ink-950">Organisateur</h1>
 
-        <form method="GET" class="ml-auto flex items-center gap-2">
-            <select name="event_id" class="input max-w-72 py-1.5 text-sm" aria-label="Événement">
+        <form method="GET" class="flex w-full flex-col gap-2 sm:ml-auto sm:w-auto sm:flex-row sm:items-center">
+            <select name="event_id" class="input w-full py-1.5 text-sm sm:max-w-72" aria-label="Événement">
                 <option value="">Tous les événements</option>
                 @foreach ($events as $event)
                     <option value="{{ $event->id }}" @selected($filterEventId === $event->id)>{{ $event->title }}</option>
                 @endforeach
             </select>
-            <button class="btn-outline btn-sm">Filtrer</button>
+            <button class="btn-outline btn-sm w-full justify-center sm:w-auto">Filtrer</button>
         </form>
     </div>
 

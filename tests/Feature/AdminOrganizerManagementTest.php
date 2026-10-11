@@ -47,6 +47,42 @@ class AdminOrganizerManagementTest extends TestCase
         $this->assertSame('moussa@test.sn', $organizer->fresh()->email);
     }
 
+    public function test_an_organizer_can_be_created_with_spaces_in_the_username(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->post(route('admin.organizers.store'), [
+            'first_name' => 'Galsen',
+            'last_name' => 'Events',
+            'username' => 'Galsen events',
+            'email' => 'galsen.events@test.sn',
+            'phone' => '+221770000000',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('users', ['username' => 'Galsen events']);
+    }
+
+    public function test_an_organizer_username_rejects_invalid_characters(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->post(route('admin.organizers.store'), [
+            'first_name' => 'Galsen',
+            'last_name' => 'Events',
+            'username' => 'Galsen@events',
+            'email' => 'galsen.events@test.sn',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertSessionHasErrors('username');
+        $this->assertDatabaseMissing('users', ['username' => 'Galsen@events']);
+    }
+
     public function test_admin_can_view_an_organizer_detail_page(): void
     {
         $admin = User::factory()->admin()->create();

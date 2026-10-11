@@ -31,12 +31,15 @@ class User extends Authenticatable
 
     public const ROLE_USER = 'user';
 
+    public const ROLE_CLIENT = 'client';
+
     /** Libellés des rôles. */
     public const ROLES = [
         self::ROLE_ADMIN => 'Administrateur',
         self::ROLE_ORGANIZER => 'Organisateur',
         self::ROLE_AGENT => 'Agent',
         self::ROLE_USER => 'Point de vente',
+        self::ROLE_CLIENT => 'Client',
     ];
 
     /** Rôles autorisés à être désignés comme agent de contrôle. */
@@ -52,7 +55,7 @@ class User extends Authenticatable
      * @var array<string, mixed>
      */
     protected $attributes = [
-        'role' => self::ROLE_USER,
+        'role' => self::ROLE_CLIENT,
         'is_active' => true,
     ];
 
@@ -159,6 +162,12 @@ class User extends Authenticatable
     public function isManagedPointOfSale(): bool
     {
         return $this->isPointOfSale() && $this->organizer_id !== null;
+    }
+
+    /** Un client, venu réserver ses billets (sans activité de vente). */
+    public function isClient(): bool
+    {
+        return $this->role === self::ROLE_CLIENT;
     }
 
     public function getRoleLabelAttribute(): string

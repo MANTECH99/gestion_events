@@ -24,8 +24,19 @@ class AuthTest extends TestCase
         $user = User::where('email', 'nouvelle@test.sn')->firstOrFail();
 
         $this->assertTrue($user->is_active);
-        $this->assertSame(User::ROLE_USER, $user->role);
+        $this->assertSame(User::ROLE_CLIENT, $user->role);
+        $this->assertFalse($user->isPointOfSale());
+        $this->assertSame('Client', $user->role_label);
         $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_a_client_cannot_access_the_point_of_sale_dashboard(): void
+    {
+        $client = User::factory()->create();
+
+        $this->actingAs($client)
+            ->get(route('pos.dashboard'))
+            ->assertRedirect(route('home'));
     }
 
     public function test_newly_registered_client_can_reach_their_reservations(): void

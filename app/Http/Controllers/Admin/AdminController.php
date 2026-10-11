@@ -123,7 +123,7 @@ class AdminController extends Controller
         $data = $request->validate([
             'first_name' => ['required', 'string', 'max:60'],
             'last_name' => ['required', 'string', 'max:60'],
-            'username' => ['required', 'string', 'min:3', 'max:40', 'alpha_dash', 'unique:users,username'],
+            'username' => ['required', 'string', 'min:3', 'max:40', 'regex:/^[\pL\pN _-]+$/u', 'unique:users,username'],
             'email' => ['required', 'email', 'max:150', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)],
             'phone' => ['nullable', 'string', 'max:30'],
@@ -146,7 +146,7 @@ class AdminController extends Controller
         $data = $request->validate([
             'first_name' => ['required', 'string', 'max:60'],
             'last_name' => ['required', 'string', 'max:60'],
-            'username' => ['required', 'string', 'min:3', 'max:40', 'alpha_dash', 'unique:users,username,'.$organizer->id],
+            'username' => ['required', 'string', 'min:3', 'max:40', 'regex:/^[\pL\pN _-]+$/u', 'unique:users,username,'.$organizer->id],
             'email' => ['required', 'email', 'max:150', 'unique:users,email,'.$organizer->id],
             'password' => ['nullable', 'confirmed', Password::min(8)],
             'phone' => ['nullable', 'string', 'max:30'],

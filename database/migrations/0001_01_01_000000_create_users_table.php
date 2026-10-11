@@ -20,8 +20,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
 
-            // admin | organizer | agent | user (point de vente)
-            $table->string('role')->default('user')->index();
+            // admin | organizer | agent | user (point de vente) | client
+            $table->string('role')->default('client')->index();
 
             // Un agent ou un point de vente est rattaché à un organisateur.
             $table->foreignId('organizer_id')->nullable()->constrained('users')->nullOnDelete();

@@ -108,6 +108,24 @@ class OrganizerPointOfSaleTest extends TestCase
         $this->assertStringNotContainsString('Moussa Diop', $content);
     }
 
+    public function test_the_index_never_lists_clients(): void
+    {
+        User::factory()->create([
+            'first_name' => 'Abdoul ahad', 'last_name' => 'Gueye',
+        ]);
+
+        $admin = User::factory()->admin()->create();
+
+        $content = $this->actingAs($admin)
+            ->get(route('organizer.pos.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertIsString($content);
+        $this->assertStringContainsString('Ibrahima Fall', $content);
+        $this->assertStringNotContainsString('Abdoul ahad Gueye', $content);
+    }
+
     public function test_the_show_displays_the_cards_and_sales_history(): void
     {
         $this->sale($this->vipCourse, 8, 80000, '2026-09-30 14:20:00');

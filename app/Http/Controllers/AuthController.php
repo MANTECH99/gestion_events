@@ -53,7 +53,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'first_name' => ['required', 'string', 'max:60'],
             'last_name' => ['required', 'string', 'max:60'],
-            'username' => ['required', 'string', 'min:3', 'max:40', 'alpha_dash', 'unique:users,username'],
+            'username' => ['required', 'string', 'min:3', 'max:40', 'regex:/^[\pL\pN _-]+$/u', 'unique:users,username'],
             'email' => ['required', 'email', 'max:150', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);
@@ -64,7 +64,7 @@ class AuthController extends Controller
             'username' => $data['username'],
             'email' => $data['email'],
             'password' => $data['password'],
-            'role' => User::ROLE_USER,
+            'role' => User::ROLE_CLIENT,
         ]);
 
         Auth::login($user);
