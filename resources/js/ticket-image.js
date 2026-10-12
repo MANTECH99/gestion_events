@@ -184,3 +184,117 @@ function ticketImage() {
 }
 
 window.ticketImage = ticketImage;
+
+/**
+ * Envoi automatique du billet par WhatsApp après paiement.
+ *
+ * Le client a déjà le billet affiché : on réutilise le même rendu DOM que le
+ * bouton « Enregistrer l'image » pour produire une image (fusion des cartes
+ * présentes sur la page) et on l'envoie au serveur, qui la transmet à l'API
+ * WhatsApp Cloud. Un seul envoi par réservation : indicateur `sent` renvoyé par
+ * le serveur + garde-fou côté base de données.
+ */
+function ticketWhatsApp(config = {}) {
+    return {
+        url: config.url || '',
+        sent: !!config.sent,
+        selector: config.selector || '.js-ticket-card',
+        running: false,
+
+        async init() {
+            if (this.sent || this.running || !this.url) return;
+
+            this.running = true;
+
+            try {
+                await this.ready();
+
+                const cards = Array.from(document.querySelectorAll(this.selector))
+                    .filter((el) => el.offsetParent !== null || el.getClientRects().length > 0);
+
+                if (!cards.length) return;
+
+                const ratio = Math.min(3, Math.max(2, window.devicePixelRatio || 1));
+                const parts = [];
+
+                for (const card of cards) {
+                    parts.push(await toPng(card, { pixelRatio: ratio, cacheBust: true }));
+                }
+
+                const image = await this.stitch(parts, ratio);
+                const csrf = document.querySelector('meta[name="csrf-token"]');
+
+                const response = await fetch(this.url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': csrf ? csrf.content : '',
+                    },
+                    body: JSON.stringify({ image }),
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok && data.sent) {
+                    toast('Votre billet vous a été envoyé sur WhatsApp', 'success');
+                }
+            } catch (e) {
+                /* envoi automatique en arrière-plan : on n'interrompt pas le client */
+            } finally {
+                this.running = false;
+            }
+        },
+
+        /** Empile les cartes dans une seule image (marge uniforme, fond uni). */
+        stitch(sources, ratio) {
+            const loaded = sources.map((src) => new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            }));
+
+            return Promise.all(loaded).then((images) => {
+                const margin = 28 * ratio;
+                const gap = 24 * ratio;
+                const width = Math.max(...images.map((i) => i.width)) + margin * 2;
+                const height = images.reduce((sum, i) => sum + i.height, 0) + gap * (images.length - 1) + margin * 2;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#eef1f6';
+                ctx.fillRect(0, 0, width, height);
+
+                let y = margin;
+
+                for (const img of images) {
+                    ctx.drawImage(img, (width - img.width) / 2, y);
+                    y += img.height + gap;
+                }
+
+                // PNG, marge uniforme, aucun redimensionnement : identique à
+                // l'image enregistrée manuellement depuis la page billet. Repli
+                // JPEG uniquement si le PNG dépasserait la limite WhatsApp (5 Mo).
+                const png = canvas.toDataURL('image/png');
+
+                return png.length * 0.75 > 4_500_000 ? canvas.toDataURL('image/jpeg', 0.92) : png;
+            });
+        },
+
+        async ready() {
+            if (document.fonts && document.fonts.ready) {
+                try {
+                    await document.fonts.ready;
+                } catch (e) {
+                    /* les polices sont un bonus, on continue */
+                }
+            }
+        },
+    };
+}
+
+window.ticketWhatsApp = ticketWhatsApp;

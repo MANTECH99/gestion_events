@@ -83,6 +83,48 @@ if (! function_exists('event_type_label')) {
     }
 }
 
+if (! function_exists('whatsapp_phone')) {
+    /**
+     * Normalise un numéro de téléphone pour l'API WhatsApp (chiffres seuls,
+     * sans « + »). Les formats internationaux (+221…, 00221…) sont conservés ;
+     * un zéro initial ou un numéro local court reçoit l'indicatif par défaut
+     * (`whatsapp.default_country_code`, ex. 221). Renvoie null si inexploitable.
+     */
+    function whatsapp_phone(?string $number): ?string
+    {
+        $raw = trim((string) $number);
+
+        if ($raw === '') {
+            return null;
+        }
+
+        $hasPlus = str_starts_with($raw, '+');
+        $digits = preg_replace('/\D+/', '', $raw) ?? '';
+
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+
+        if ($digits === '') {
+            return null;
+        }
+
+        $code = preg_replace('/\D+/', '', (string) config('whatsapp.default_country_code', '221')) ?: '221';
+
+        if ($hasPlus || str_starts_with($digits, $code)) {
+            return $digits;
+        }
+
+        if (str_starts_with($digits, '0')) {
+            $digits = ltrim($digits, '0');
+        } elseif (strlen($digits) > 9) {
+            return $digits;
+        }
+
+        return $digits === '' ? null : $code.$digits;
+    }
+}
+
 if (! function_exists('ticket_type_icon')) {
     function ticket_type_icon(?string $type): string
     {

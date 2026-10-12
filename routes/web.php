@@ -24,6 +24,7 @@ use App\Http\Controllers\PointOfSaleController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\WhatsAppTicketController;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +52,10 @@ Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('ticket
 Route::get('/tickets/{ticket}/telecharger', [TicketController::class, 'download'])->name('tickets.download');
 Route::get('/reservation/{reference}/tickets', [TicketController::class, 'reservationTickets'])->name('tickets.reservation');
 Route::get('/reservation/{reference}/telecharger', [TicketController::class, 'downloadReservation'])->name('reservations.download');
+
+Route::post('/reservation/{reference}/whatsapp', [WhatsAppTicketController::class, 'send'])
+    ->middleware('signed')
+    ->name('reservations.whatsapp');
 
 /* ------------------------------------------------------------------ */
 /*  Webhooks DEXCHANGE PAY */

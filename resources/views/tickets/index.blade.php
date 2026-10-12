@@ -19,7 +19,7 @@
             <div class="mt-8 flex flex-wrap justify-center gap-8">
                 @foreach ($tickets as $ticket)
                     <div class="w-full max-w-[24rem]" x-data="ticketImage">
-                        <div x-ref="card">
+                        <div x-ref="card" class="js-ticket-card">
                             @include('tickets.partials.card', ['ticket' => $ticket, 'qr' => $qr($ticket)])
                         </div>
 
@@ -39,6 +39,10 @@
                     </div>
                 @endforeach
             </div>
+
+            @if (config('whatsapp.enabled') && $reservation->isPaid() && ! $reservation->hasBeenSentToWhatsApp() && filled(whatsapp_phone($reservation->customer_phone)))
+                <div x-data="ticketWhatsApp(@js(['url' => URL::signedRoute('reservations.whatsapp', ['reference' => $reservation->reference]), 'sent' => false]))"></div>
+            @endif
         @endif
     </div>
 @endsection

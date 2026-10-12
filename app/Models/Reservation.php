@@ -52,6 +52,7 @@ class Reservation extends Model
             'unit_price' => 'integer',
             'total_amount' => 'integer',
             'paid_at' => 'datetime',
+            'whatsapp_sent_at' => 'datetime',
         ];
     }
 
@@ -145,6 +146,12 @@ class Reservation extends Model
     public function isPaid(): bool
     {
         return $this->payment_status === self::STATUS_PAID;
+    }
+
+    /** Le billet a-t-il déjà été envoyé automatiquement par WhatsApp ? */
+    public function hasBeenSentToWhatsApp(): bool
+    {
+        return $this->whatsapp_sent_at !== null;
     }
 
     public function isPending(): bool

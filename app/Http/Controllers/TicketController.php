@@ -84,7 +84,7 @@ class TicketController extends Controller
             return;
         }
 
-        if ($request->hasValidSignature()) {
+        if ($request->hasValidSignature() || $request->hasValidRelativeSignature()) {
             return;
         }
 
@@ -99,7 +99,7 @@ class TicketController extends Controller
             return;
         }
 
-        if ($request->hasValidSignature()) {
+        if ($request->hasValidSignature() || $request->hasValidRelativeSignature()) {
             return;
         }
 

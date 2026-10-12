@@ -19,7 +19,7 @@
             </div>
         </div>
 
-        <div x-ref="card">
+        <div x-ref="card" class="js-ticket-card">
             @include('tickets.partials.card', ['ticket' => $ticket, 'qr' => $qr])
         </div>
 
@@ -28,5 +28,9 @@
         </p>
 
         @include('tickets.partials.image-modal')
+
+        @if (config('whatsapp.enabled') && $ticket->reservation->isPaid() && ! $ticket->reservation->hasBeenSentToWhatsApp() && filled(whatsapp_phone($ticket->reservation->customer_phone)))
+            <div x-data="ticketWhatsApp(@js(['url' => URL::signedRoute('reservations.whatsapp', ['reference' => $ticket->reservation->reference]), 'sent' => false]))"></div>
+        @endif
     </div>
 @endsection
