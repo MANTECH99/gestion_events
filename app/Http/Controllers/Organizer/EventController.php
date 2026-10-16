@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Artist;
 use App\Models\Event;
+use App\Models\EventImage;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,6 +45,8 @@ class EventController extends Controller
             'event' => new Event(['total_tickets' => 100, 'event_type' => 'concert', 'status' => Event::STATUS_PUBLISHED]),
             'types' => Event::TYPES,
             'statuses' => $this->statuses(),
+            'artists' => $this->artistOptions(),
+            'gallery' => collect(),
         ]);
     }
 
@@ -70,6 +75,14 @@ class EventController extends Controller
             $this->storeImage($request, $event);
         }
 
+        if ($request->hasFile('venue_image')) {
+            $this->storeVenueImage($request, $event);
+        }
+
+        if ($request->hasFile('avatar')) {
+            $this->storeAvatar($request, $event->organizer);
+        }
+
         return redirect()->route('organizer.events.ticket-types', $event)
             ->with('success', "Événement « {$event->title} » créé. Ajoutez ses types de tickets.");
     }
@@ -82,6 +95,8 @@ class EventController extends Controller
             'event' => $event,
             'types' => Event::TYPES,
             'statuses' => $this->statuses(),
+            'artists' => $this->artistOptions(),
+            'gallery' => $event->images,
         ]);
     }
 
@@ -99,6 +114,15 @@ class EventController extends Controller
 
         if ($request->hasFile('image')) {
             $this->storeImage($request, $event);
+        }
+
+        if ($request->hasFile('venue_image')) {
+            $this->storeVenueImage($request, $event);
+        }
+
+        if ($request->hasFile('avatar')) {
+            $event->unsetRelation('organizer');
+            $this->storeAvatar($request, $event->organizer);
         }
 
         return redirect()->route('organizer.events.index')->with('success', 'Événement mis à jour.');
@@ -128,6 +152,11 @@ class EventController extends Controller
             'organizer_display_name' => ['nullable', 'string', 'max:120'],
             'organizer_id' => ['nullable', 'integer', 'exists:users,id'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'venue_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'artist_id' => ['nullable', 'integer', Rule::exists('artists', 'id')],
+            'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:4320'],
+            'tags' => ['nullable', 'string', 'max:250'],
             'online_sales_enabled' => ['nullable', 'boolean'],
         ], [], [
             'title' => 'titre',
@@ -138,6 +167,11 @@ class EventController extends Controller
             'status' => 'statut',
             'organizer_display_name' => 'nom de l\'organisateur affiché',
             'image' => 'image de couverture',
+            'venue_image' => 'photo du lieu',
+            'avatar' => 'photo de profil',
+            'artist_id' => 'artiste',
+            'duration_minutes' => 'durée (en minutes)',
+            'tags' => 'tags',
         ]);
     }
 
@@ -150,6 +184,104 @@ class EventController extends Controller
         }
 
         $event->update(['image_path' => $path]);
+    }
+
+    private function storeVenueImage(Request $request, Event $event): void
+    {
+        $path = $request->file('venue_image')->store('events/venue', 'public');
+
+        if ($event->venue_image_path) {
+            Storage::disk('public')->delete($event->venue_image_path);
+        }
+
+        $event->update(['venue_image_path' => $path]);
+    }
+
+    private function storeAvatar(Request $request, ?User $organizer): void
+    {
+        if (! $organizer) {
+            return;
+        }
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+
+        if ($organizer->avatar_path) {
+            Storage::disk('public')->delete($organizer->avatar_path);
+        }
+
+        $organizer->update(['avatar_path' => $path]);
+    }
+
+    /** @return \Illuminate\Support\Collection<int, Artist> */
+    private function artistOptions()
+    {
+        return Artist::orderBy('name')->get(['id', 'name', 'title']);
+    }
+
+    /* ---- Galerie photos de l'événement ---- */
+
+    public function storeImages(Request $request, Event $event): RedirectResponse
+    {
+        $this->authorizeEvent($request, $event);
+
+        $request->validate([
+            'images' => ['required', 'array', 'max:10'],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        ], [], [
+            'images' => 'photos',
+            'images.*' => 'photo',
+        ]);
+
+        $position = (int) $event->images()->max('position') + 1;
+
+        foreach ($request->file('images') as $file) {
+            EventImage::create([
+                'event_id' => $event->id,
+                'image_path' => $file->store('events/gallery', 'public'),
+                'position' => $position++,
+            ]);
+        }
+
+        return back()->with('success', count($request->file('images')).' photo(s) ajoutée(s) à la galerie.');
+    }
+
+    public function moveImage(Request $request, Event $event, EventImage $image): RedirectResponse
+    {
+        $this->authorizeEvent($request, $event);
+        abort_unless($image->event_id === $event->id, 404);
+
+        $direction = $request->validate([
+            'direction' => ['required', Rule::in(['up', 'down'])],
+        ], [], ['direction' => 'direction'])['direction'];
+
+        $images = $event->images()->get();
+        $index = $images->search(fn (EventImage $item) => $item->id === $image->id);
+        $swapIndex = $direction === 'up' ? $index - 1 : $index + 1;
+
+        if ($index === false || $swapIndex < 0 || $swapIndex >= $images->count()) {
+            return back();
+        }
+
+        $neighbor = $images[$swapIndex];
+
+        DB::transaction(function () use ($image, $neighbor) {
+            $imagePosition = $image->position;
+            $image->update(['position' => $neighbor->position]);
+            $neighbor->update(['position' => $imagePosition]);
+        });
+
+        return back()->with('success', 'Ordre des photos mis à jour.');
+    }
+
+    public function destroyImage(Request $request, Event $event, EventImage $image): RedirectResponse
+    {
+        $this->authorizeEvent($request, $event);
+        abort_unless($image->event_id === $event->id, 404);
+
+        Storage::disk('public')->delete($image->image_path);
+        $image->delete();
+
+        return back()->with('success', 'Photo supprimée de la galerie.');
     }
 
     private function uniqueSlug(string $title, ?int $ignoreId = null): string

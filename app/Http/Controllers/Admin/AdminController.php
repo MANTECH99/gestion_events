@@ -196,4 +196,16 @@ class AdminController extends Controller
             'filters' => $request->only(['role', 'q']),
         ]);
     }
+
+    public function verify(User $target): RedirectResponse
+    {
+        $target->update(['is_verified' => ! $target->is_verified]);
+
+        return back()->with(
+            'success',
+            $target->is_verified
+                ? "{$target->full_name} est maintenant vérifié."
+                : "Vérification retirée à {$target->full_name}."
+        );
+    }
 }

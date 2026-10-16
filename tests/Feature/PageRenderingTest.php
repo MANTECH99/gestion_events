@@ -275,7 +275,7 @@ class PageRenderingTest extends TestCase
         // ne doit jamais fuiter et la classe doit exister dans le CSS compilé.
         $this->get(route('events.show', $this->event))
             ->assertOk()
-            ->assertSee('bg-emerald-500', false)
+            ->assertSee('bg-orange-500', false)
             ->assertDontSee('bg-{{', false);
 
         $ticket = Ticket::where('reservation_id', $this->reservation->id)->firstOrFail();

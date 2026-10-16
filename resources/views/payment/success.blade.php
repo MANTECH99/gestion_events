@@ -9,7 +9,7 @@
 
         @if ($reservation->isPaid())
             <div class="text-center">
-                <span class="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+                <span class="mx-auto grid h-20 w-20 place-items-center rounded-full bg-orange-100 text-orange-600">
                     @icon('check-circle', 'w-11 h-11')
                 </span>
                 <h1 class="mt-6 text-3xl font-extrabold tracking-tight text-ink-950">Paiement confirmé !</h1>
@@ -30,7 +30,7 @@
                     </div>
                     <div class="sm:text-right">
                         <p class="text-xs font-medium uppercase tracking-wide text-ink-500">Montant payé</p>
-                        <p class="text-2xl font-extrabold text-emerald-600">{{ money($reservation->total_amount) }}</p>
+                        <p class="text-2xl font-extrabold text-orange-600">{{ money($reservation->total_amount) }}</p>
                     </div>
                 </div>
 
@@ -65,6 +65,49 @@
                     Découvrir l'événement
                 </a>
             </div>
+
+            @php
+                $otherRefs = collect(session('payment_refs', []))
+                    ->reject(fn ($ref) => $ref === $reservation->reference)
+                    ->values();
+                $otherPending = $otherRefs->isEmpty()
+                    ? collect()
+                    : \App\Models\Reservation::whereIn('reference', $otherRefs)->get()
+                        ->filter(fn ($r) => $r->payment_status === \App\Models\Reservation::STATUS_PENDING)
+                        ->values();
+            @endphp
+            @if ($otherPending->isNotEmpty())
+                <div class="card mt-6 border-amber-200 bg-amber-50/70 p-5">
+                    <div class="flex items-start gap-3">
+                        <span class="mt-0.5 text-amber-600">@icon('alert', 'w-5 h-5')</span>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="font-bold text-amber-900">
+                                {{ $otherPending->count() > 1 ? 'Autres réservations de votre commande en attente de paiement' : 'Une autre réservation de votre commande en attente de paiement' }}
+                            </h3>
+                            <p class="mt-1 text-sm text-amber-800">
+                                @if ($otherPending->count() > 1)
+                                    Vous pouvez régler chacune d'elles via le lien ci-dessous — chaque réservation est indépendante.
+                                @else
+                                    Vous pouvez la régler via le lien ci-dessous.
+                                @endif
+                            </p>
+                            <ul class="mt-3 space-y-2">
+                                @foreach ($otherPending as $pending)
+                                    <li class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-white/70 px-3 py-2 text-sm">
+                                        <span class="min-w-0">
+                                            <span class="font-mono font-semibold text-ink-900">{{ $pending->reference }}</span>
+                                            <span class="text-ink-600"> · {{ $pending->event->title }} · {{ money($pending->total_amount) }}</span>
+                                        </span>
+                                        <a href="{{ route('payment.show', $pending->reference) }}" class="btn-primary btn-sm">
+                                            Payer
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             @guest
                 <div class="card mt-8 flex items-start gap-3 border-brand-200 bg-brand-50/60 p-5">

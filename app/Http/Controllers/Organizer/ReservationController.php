@@ -53,7 +53,9 @@ class ReservationController extends Controller
                 $q->where(function ($sub) use ($term) {
                     $sub->where('reference', 'like', "%{$term}%")
                         ->orWhere('customer_name', 'like', "%{$term}%")
-                        ->orWhere('customer_email', 'like', "%{$term}%");
+                        ->orWhere('customer_email', 'like', "%{$term}%")
+                        ->orWhere('customer_phone', 'like', "%{$term}%")
+                        ->orWhere('customer_city', 'like', "%{$term}%");
                 });
             })
             // Tri déterministe : sans départage par id, des réservations créées

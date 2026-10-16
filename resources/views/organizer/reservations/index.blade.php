@@ -9,7 +9,7 @@
     </div>
 
     <form method="GET" class="card mb-5 grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6">
-        <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Référence, nom, e-mail…" class="input lg:col-span-2">
+        <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Référence, nom, e-mail, téléphone, ville…" class="input lg:col-span-2">
 
         <select name="event_id" class="input">
             <option value="">Tous les événements</option>
@@ -88,7 +88,8 @@
                             <th>Référence</th>
                             <th>Client</th>
                             <th>Événement / Type</th>
-                            <th>Canal</th>
+                                    <th>Canal</th>
+                                    <th>Paiement</th>
                             <th class="text-right">Quantité</th>
                             <th class="text-right">Montant</th>
                             <th>Statut</th>
@@ -108,6 +109,11 @@
                                     @if ($reservation->customer_phone)
                                         <p class="text-xs text-ink-500">{{ $reservation->customer_phone }}</p>
                                     @endif
+                                    @if ($reservation->customer_city || $reservation->customer_address)
+                                        <p class="text-xs text-ink-500">
+                                            {{ collect([$reservation->customer_city, $reservation->customer_address])->filter()->implode(' · ') }}
+                                        </p>
+                                    @endif
                                 </td>
                                 <td>
                                     <p class="max-w-[14rem] truncate text-sm text-ink-800">{{ $reservation->event->title }}</p>
@@ -119,6 +125,12 @@
                                     </span>
                                     @if ($reservation->soldBy)
                                         <p class="mt-0.5 text-xs text-ink-500">{{ $reservation->soldBy->full_name }}</p>
+                                    @endif
+                                </td>
+                                <td>
+                                    <p class="text-sm text-ink-800">{{ $reservation->payment_operator_label }}</p>
+                                    @if ($reservation->paid_at)
+                                        <p class="text-xs text-ink-500">{{ $reservation->paid_at->translatedFormat('d/m H:i') }}</p>
                                     @endif
                                 </td>
                                 <td class="text-right font-semibold text-ink-900">{{ $reservation->quantity }}</td>

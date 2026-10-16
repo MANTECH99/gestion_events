@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap');
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -171,6 +172,20 @@
         @apply btn cursor-not-allowed bg-ink-200 text-ink-500;
     }
 
+    .btn-hero-primary {
+        @apply btn rounded-full bg-orange-400 px-7 py-3.5 text-sm font-bold text-ink-950
+               shadow-lg shadow-orange-400/25 hover:bg-orange-300 active:bg-orange-500;
+    }
+
+    .btn-hero-ghost {
+        @apply btn rounded-full border border-white/25 px-6 py-3.5 text-sm font-semibold text-white
+               hover:bg-white/10 focus-visible:ring-white focus-visible:ring-offset-0;
+    }
+
+    .chip {
+        @apply inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 backdrop-blur;
+    }
+
     .card {
         @apply rounded-[var(--radius-card)] border border-ink-200/70 bg-white shadow-sm;
     }
@@ -182,6 +197,12 @@
 
     .input-error {
         @apply border-rose-400 focus:border-rose-500 focus:ring-rose-500/20;
+    }
+
+    /* Saisies sur fond sombre (pages thème ink). */
+    .input-dark {
+        @apply w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-white
+               placeholder:text-white/35 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/25;
     }
 
     .label {
@@ -239,5 +260,9 @@
     .text-gradient {
         @apply bg-clip-text text-transparent;
         background-image: linear-gradient(120deg, #1f41f0, #6d3bf5);
+    }
+
+    .font-handwritten {
+        font-family: 'Caveat', 'Segoe Script', cursive;
     }
 }

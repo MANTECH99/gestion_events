@@ -233,6 +233,7 @@ class DexPayAccount
             'orange', 'orange_money', 'orangemoney' => 'Orange Money',
             'free', 'free_money', 'freemoney' => 'Free Money',
             'yass' => 'Yass',
+            'mixx', 'mixx_by_yas' => 'Mixx By Yas',
             default => $code !== null && $code !== '' ? ucwords(str_replace('_', ' ', $code)) : '—',
         };
     }

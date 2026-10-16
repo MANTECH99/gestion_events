@@ -51,6 +51,12 @@
             <td>{{ $reservation->channel_label }}</td>
         </tr>
         <tr>
+            <td class="label">Ville</td>
+            <td>{{ $reservation->customer_city ?? '—' }}</td>
+            <td class="label">Adresse</td>
+            <td>{{ $reservation->customer_address ?? '—' }}</td>
+        </tr>
+        <tr>
             <td class="label">Type de ticket</td>
             <td>{{ $reservation->ticketType?->name }}</td>
             <td class="label">Quantité</td>
@@ -66,7 +72,7 @@
             <td class="label">Payé le</td>
             <td>{{ $reservation->paid_at?->translatedFormat('j F Y à H:i') ?? '—' }}</td>
             <td class="label">Moyen de paiement</td>
-            <td>{{ $reservation->payment_operator ?? '—' }}</td>
+            <td>{{ $reservation->payment_operator_label }}</td>
         </tr>
     </table>
 

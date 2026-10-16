@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 #[Fillable([
-    'organizer_id', 'title', 'slug', 'description', 'event_date', 'location',
-    'total_tickets', 'event_type', 'image_path', 'status', 'online_sales_enabled',
-    'organizer_display_name',
+    'organizer_id', 'artist_id', 'title', 'slug', 'description', 'event_date', 'duration_minutes',
+    'location', 'total_tickets', 'event_type', 'tags', 'image_path', 'venue_image_path',
+    'status', 'online_sales_enabled', 'organizer_display_name',
 ])]
 class Event extends Model
 {
@@ -42,6 +42,7 @@ class Event extends Model
     {
         return [
             'event_date' => 'datetime',
+            'duration_minutes' => 'integer',
             'online_sales_enabled' => 'boolean',
         ];
     }
@@ -58,6 +59,21 @@ class Event extends Model
     public function organizer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'organizer_id');
+    }
+
+    public function artist(): BelongsTo
+    {
+        return $this->belongsTo(Artist::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(EventImage::class)->orderBy('position');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(EventReview::class)->latest();
     }
 
     public function ticketTypes(): HasMany
@@ -162,6 +178,20 @@ class Event extends Model
         return Storage::disk('public')->url($this->image_path);
     }
 
+    /** Illustration du lieu : URL externe ou fichier local. */
+    public function getVenueImageUrlAttribute(): ?string
+    {
+        if (! $this->venue_image_path) {
+            return null;
+        }
+
+        if (str_starts_with($this->venue_image_path, 'http')) {
+            return $this->venue_image_path;
+        }
+
+        return Storage::disk('public')->url($this->venue_image_path);
+    }
+
     public function getTicketsSoldAttribute(): int
     {
         return (int) $this->tickets()->whereIn('status', ['valid', 'used'])->count();
@@ -205,6 +235,116 @@ class Event extends Model
     public function getMinPriceLabelAttribute(): string
     {
         return $this->min_price === null ? '—' : money($this->min_price);
+    }
+
+    public function getAvgRatingAttribute(): ?float
+    {
+        $avg = $this->reviews()->reorder()->avg('rating');
+
+        return $avg === null ? null : round((float) $avg, 1);
+    }
+
+    public function getReviewsCountAttribute(): int
+    {
+        return $this->reviews()->reorder()->count();
+    }
+
+    /** Répartition des notes (5 → 1) en pourcentages entiers. */
+    public function getRatingDistributionAttribute(): array
+    {
+        $counts = $this->reviews()
+            ->reorder()
+            ->selectRaw('rating, COUNT(*) as total')
+            ->groupBy('rating')
+            ->pluck('total', 'rating');
+
+        $total = (int) $counts->sum();
+
+        if ($total === 0) {
+            return [];
+        }
+
+        $distribution = [];
+
+        for ($stars = 5; $stars >= 1; $stars--) {
+            $distribution[$stars] = (int) round(((int) ($counts[$stars] ?? 0)) / $total * 100);
+        }
+
+        return $distribution;
+    }
+
+    public function getDurationLabelAttribute(): ?string
+    {
+        if (! $this->duration_minutes) {
+            return null;
+        }
+
+        $hours = intdiv((int) $this->duration_minutes, 60);
+        $minutes = (int) $this->duration_minutes % 60;
+
+        if ($minutes === 0) {
+            return $hours.'h';
+        }
+
+        return sprintf('%dh %02d', $hours, $minutes);
+    }
+
+    /** Liste nettoyée des tags séparés par des virgules. */
+    public function getTagsListAttribute(): array
+    {
+        if (! $this->tags) {
+            return [];
+        }
+
+        return collect(explode(',', $this->tags))
+            ->map(fn (string $tag) => trim($tag))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /** « 15K+ », « 2.4K+ », « 850 » — pour la barre de statistiques. */
+    public function getTicketsSoldShortAttribute(): string
+    {
+        $sold = $this->tickets_sold;
+
+        if ($sold < 1000) {
+            return (string) $sold;
+        }
+
+        if ($sold < 10000) {
+            return rtrim(rtrim(number_format($sold / 1000, 1, ',', ''), '0'), ',').'K+';
+        }
+
+        return round($sold / 1000).'K+';
+    }
+
+    /** Événements similaires : même type d'abord, puis complément parmi les à venir. */
+    public function similarEvents(int $limit = 3): \Illuminate\Support\Collection
+    {
+        $same = static::query()
+            ->published()
+            ->upcoming()
+            ->where('event_type', $this->event_type)
+            ->whereKeyNot($this->getKey())
+            ->orderBy('event_date')
+            ->limit($limit)
+            ->get();
+
+        if ($same->count() < $limit) {
+            $others = static::query()
+                ->published()
+                ->upcoming()
+                ->whereKeyNot($this->getKey())
+                ->whereNotIn('id', $same->pluck('id'))
+                ->orderBy('event_date')
+                ->limit($limit - $same->count())
+                ->get();
+
+            $same = $same->concat($others);
+        }
+
+        return $same->take($limit)->values();
     }
 
     public function isOnSale(): bool

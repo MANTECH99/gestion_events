@@ -50,6 +50,12 @@
                                                 <div class="min-w-0">
                                                     <p class="truncate font-semibold text-ink-900">{{ $target->full_name }}</p>
                                                     <p class="truncate text-xs text-ink-500">{{ $target->username }}</p>
+                                                    @if ($target->bio)
+                                                        <p class="mt-0.5 max-w-[12rem] truncate text-xs text-ink-400">{{ \Illuminate\Support\Str::limit($target->bio, 60) }}</p>
+                                                    @endif
+                                                    @if ($target->is_verified)
+                                                        <span class="badge mt-1 inline-flex bg-emerald-100 text-emerald-700">Vérifié</span>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </td>

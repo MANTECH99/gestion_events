@@ -1,24 +1,27 @@
 @php
     $user = auth()->user();
     $hasSidebar = $hasSidebar ?? false;
+    $onHome = request()->routeIs('home');
+    // Header transparent sur l'accueil, la page détail d'événement et la page de réservation (thèmes sombres).
+    $darkHeader = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register');
 @endphp
 
-<header class="app-header sticky top-0 z-50 border-b border-ink-200/60 bg-white/85 backdrop-blur-lg no-print">
+<header class="app-header no-print z-50 backdrop-blur-lg {{ $darkHeader ? 'absolute inset-x-0 top-0 bg-transparent' : 'sticky top-0 border-b border-ink-200/60 bg-white/85' }}">
     {{-- Sur les interfaces de gestion, la colonne fixe occupe la bande gauche du header. --}}
     <div class="{{ $hasSidebar ? 'lg:pl-64' : '' }}">
         <div x-data="{ open: false }" @click.outside="open = false" class="relative flex h-16 {{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} items-center gap-4 px-4 sm:px-6 lg:px-8">
             <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2.5">
                 <img src="{{ asset('images/icon.svg') }}" alt="" width="36" height="36"
-                     class="h-9 w-9 shrink-0 rounded-xl shadow-lg shadow-brand-600/30">
-                <span class="text-lg font-extrabold tracking-tight text-ink-950">
-                    Billeterie <span class="text-gradient">Express</span>
+                     class="h-9 w-9 shrink-0 rounded-xl shadow-lg {{ $darkHeader ? 'shadow-black/40' : 'shadow-orange-500/40' }}">
+                <span class="text-lg font-extrabold tracking-tight {{ $darkHeader ? 'text-white' : 'text-ink-950' }}">
+                    Billeterie <span class="{{ $darkHeader ? 'text-white' : 'text-gradient' }}">Express</span>
                 </span>
             </a>
 
             {{-- Menu mobile : la navigation principale est masquée sous lg --}}
             <div class="lg:hidden">
                 <button @click="open = !open"
-                        class="grid h-9 w-9 place-items-center rounded-xl border border-ink-200 bg-white text-ink-700 transition hover:border-ink-300"
+                        class="grid h-9 w-9 place-items-center rounded-xl border transition {{ $darkHeader ? 'border-white/25 bg-white/10 text-white hover:bg-white/20' : 'border-ink-200 bg-white text-ink-700 hover:border-ink-300' }}"
                         :aria-expanded="open ? 'true' : 'false'" aria-controls="menu-mobile" aria-label="Ouvrir le menu">
                     <span x-show="!open">@icon('menu', 'w-5 h-5')</span>
                     <span x-cloak x-show="open">@icon('close', 'w-5 h-5')</span>
@@ -74,6 +77,27 @@
                 </div>
             </div>
 
+            @if ($darkHeader)
+                @php $homeAnchor = $onHome ? '' : route('home'); @endphp
+                <nav class="ml-4 hidden items-center gap-1 lg:flex">
+                    <a href="{{ route('home') }}"
+                       class="{{ $onHome ? 'border-b-2 border-orange-400' : 'border-b-2 border-transparent' }} px-3 py-2 text-sm font-medium text-white transition">
+                        Accueil
+                    </a>
+                    <a href="{{ $homeAnchor }}#evenements"
+                       class="{{ request()->routeIs('events.show') ? 'border-b-2 border-orange-400' : 'border-b-2 border-transparent' }} rounded-lg px-3 py-2 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white">
+                        Événements
+                    </a>
+                    <a href="{{ $homeAnchor }}#evenements"
+                       class="border-b-2 border-transparent rounded-lg px-3 py-2 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white">
+                        Catégories
+                    </a>
+                    <a href="{{ $homeAnchor }}#apropos"
+                       class="border-b-2 border-transparent rounded-lg px-3 py-2 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white">
+                        À propos
+                    </a>
+                </nav>
+            @else
             <nav class="ml-4 hidden items-center gap-1 lg:flex">
                 <a href="{{ route('home') }}"
                    class="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 {{ request()->routeIs('home') ? 'bg-ink-100 text-ink-900' : '' }}">
@@ -101,6 +125,7 @@
                     @endif
                 @endauth
             </nav>
+            @endif
 
             <div class="ml-auto flex items-center gap-2">
                 @auth
@@ -164,8 +189,23 @@
                         </div>
                     </div>
                 @else
-                    <a href="{{ route('login') }}" class="btn-ghost btn-sm hidden sm:inline-flex">Connexion</a>
-                    <a href="{{ route('register') }}" class="btn-primary btn-sm">S'inscrire</a>
+                    @if ($darkHeader)
+                        <a href="{{ $homeAnchor }}#evenements" class="hidden h-9 w-9 place-items-center rounded-xl text-white/80 transition hover:bg-white/10 hover:text-white sm:grid"
+                           aria-label="Rechercher un événement">
+                            @icon('search', 'w-5 h-5')
+                        </a>
+                        <a href="{{ route('login') }}"
+                           class="btn btn-sm hidden border border-white/30 text-white hover:bg-white/10 focus-visible:ring-white focus-visible:ring-offset-0 sm:inline-flex">
+                            Se connecter
+                        </a>
+                        <a href="{{ route('register') }}"
+                           class="btn btn-sm bg-orange-400 text-ink-950 shadow-lg shadow-orange-400/25 hover:bg-orange-300">
+                            S'inscrire
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="btn-ghost btn-sm hidden sm:inline-flex">Connexion</a>
+                        <a href="{{ route('register') }}" class="btn-primary btn-sm">S'inscrire</a>
+                    @endif
                 @endauth
             </div>
         </div>

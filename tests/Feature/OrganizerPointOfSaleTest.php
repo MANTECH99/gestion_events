@@ -99,6 +99,10 @@ class OrganizerPointOfSaleTest extends TestCase
             'first_name' => 'Moussa', 'last_name' => 'Diop',
         ]);
 
+        // Le header affiche le nom du compte connecté : on le fixe pour que
+        // Faker ne puisse pas générer « Moussa Diop » et fausser l'assertion.
+        $this->organizer->update(['first_name' => 'Awa', 'last_name' => 'Ndiaye']);
+
         $content = $this->actingAs($this->organizer)
             ->get(route('organizer.pos.index'))
             ->assertOk()
@@ -115,6 +119,10 @@ class OrganizerPointOfSaleTest extends TestCase
         ]);
 
         $admin = User::factory()->admin()->create();
+
+        // Même garde-fou que le test ci-dessus : nom du connecté fixé pour
+        // éviter toute collision avec le client à ne pas afficher.
+        $admin->update(['first_name' => 'Cheikh', 'last_name' => 'Sarr']);
 
         $content = $this->actingAs($admin)
             ->get(route('organizer.pos.index'))

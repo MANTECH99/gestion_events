@@ -32,6 +32,7 @@
                             <th>Utilisateur</th>
                             <th>Contact</th>
                             <th>Rôle</th>
+                            <th>Vérification</th>
                             <th>Rattachement</th>
                             <th>Statut</th>
                             <th>Créé le</th>
@@ -48,6 +49,9 @@
                                         <div class="min-w-0">
                                             <p class="truncate font-semibold text-ink-900">{{ $user->full_name }}</p>
                                             <p class="truncate text-xs text-ink-500">{{ $user->username }}</p>
+                                            @if ($user->bio)
+                                                <p class="mt-0.5 max-w-[14rem] truncate text-xs text-ink-400">{{ \Illuminate\Support\Str::limit($user->bio, 80) }}</p>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
@@ -58,6 +62,18 @@
                                     @endif
                                 </td>
                                 <td><span class="badge bg-ink-100 text-ink-700">{{ $user->role_label }}</span></td>
+                                <td>
+                                    <span class="badge {{ $user->is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-ink-100 text-ink-600' }}">
+                                        {{ $user->is_verified ? 'Vérifié' : 'Non vérifié' }}
+                                    </span>
+                                    <form method="POST" action="{{ route('admin.users.verify', $user) }}" class="mt-1.5">
+                                        @csrf @method('PATCH')
+                                        <button class="btn-ghost btn-sm px-2" title="{{ $user->is_verified ? 'Retirer la vérification du profil' : 'Vérifier ce profil (badge public)' }}">
+                                            @icon($user->is_verified ? 'user-minus' : 'user-check', 'w-4 h-4')
+                                            {{ $user->is_verified ? 'Retirer' : 'Vérifier' }}
+                                        </button>
+                                    </form>
+                                </td>
                                 <td class="text-xs text-ink-600">{{ $user->organizer?->full_name ?? '—' }}</td>
                                 <td>
                                     <span class="badge {{ $user->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' }}">

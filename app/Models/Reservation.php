@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\DexPay\DexPayAccount;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,8 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'reference', 'event_id', 'ticket_type_id', 'user_id', 'customer_name',
-    'customer_email', 'customer_phone', 'quantity', 'unit_price', 'total_amount',
+    'customer_email', 'customer_phone', 'customer_city', 'customer_address',
+    'quantity', 'unit_price', 'total_amount',
     'payment_status', 'channel', 'sold_by', 'paid_at', 'payment_operator',
 ])]
 class Reservation extends Model
@@ -141,6 +143,16 @@ class Reservation extends Model
             self::STATUS_EXPIRED => 'Expirée',
             default => ucfirst((string) $this->payment_status),
         };
+    }
+
+    /** Moyen de paiement lisible (« Wave », « Orange Money »…) — guichet pour les ventes physiques. */
+    public function getPaymentOperatorLabelAttribute(): string
+    {
+        if ($this->payment_operator) {
+            return DexPayAccount::operatorLabel($this->payment_operator);
+        }
+
+        return $this->isPhysical() ? 'Guichet' : '—';
     }
 
     public function isPaid(): bool

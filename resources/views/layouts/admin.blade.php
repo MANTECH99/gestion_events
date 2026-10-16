@@ -17,6 +17,7 @@
                 'items' => [
                     ['label' => 'Organisateurs', 'route' => 'admin.organizers.index', 'icon' => 'building'],
                     ['label' => 'Utilisateurs', 'route' => 'admin.users.index', 'icon' => 'users'],
+                    ['label' => 'Réservations', 'route' => 'organizer.reservations.index', 'icon' => 'list'],
                 ],
             ],
         ],

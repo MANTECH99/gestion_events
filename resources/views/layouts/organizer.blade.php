@@ -16,6 +16,7 @@
                 'title' => 'Ventes',
                 'items' => [
                     ['label' => 'Événements', 'route' => 'organizer.events.index', 'icon' => 'calendar', 'pattern' => 'organizer.events.*'],
+                    ['label' => 'Artistes', 'route' => 'organizer.artists.index', 'icon' => 'star', 'pattern' => 'organizer.artists.*'],
                     ['label' => 'Réservations', 'route' => 'organizer.reservations.index', 'icon' => 'list'],
                     ['label' => 'Stock physique', 'route' => 'organizer.stocks.index', 'icon' => 'coins'],
                     ['label' => 'Point de vente', 'route' => 'organizer.pos.index', 'icon' => 'store', 'pattern' => 'organizer.pos.*'],
@@ -26,6 +27,7 @@
                 'items' => [
                     ['label' => 'Utilisateurs', 'route' => 'organizer.users.index', 'icon' => 'users'],
                     ['label' => 'Validations', 'route' => 'organizer.validations.index', 'icon' => 'scan', 'pattern' => 'organizer.validations.*'],
+                    ['label' => 'Avis', 'route' => 'organizer.reviews.index', 'icon' => 'inbox', 'pattern' => 'organizer.reviews.*'],
                 ],
             ],
             [

@@ -12,11 +12,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
-#[Fillable([
-    'first_name', 'last_name', 'username', 'email', 'password',
-    'role', 'organizer_id', 'phone', 'point_of_sale', 'is_active',
-])]
+    #[Fillable([
+        'first_name', 'last_name', 'username', 'email', 'password',
+        'role', 'organizer_id', 'phone', 'point_of_sale', 'is_active',
+        'bio', 'is_verified', 'avatar_path',
+    ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -65,6 +67,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_verified' => 'boolean',
         ];
     }
 
@@ -192,6 +195,19 @@ class User extends Authenticatable
     public function getInitialsAttribute(): string
     {
         return mb_strtoupper(mb_substr((string) $this->first_name, 0, 1).mb_substr((string) $this->last_name, 0, 1));
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (! $this->avatar_path) {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar_path, 'http')) {
+            return $this->avatar_path;
+        }
+
+        return Storage::disk('public')->url($this->avatar_path);
     }
 
     public function scopeSearch(Builder $query, ?string $term): Builder

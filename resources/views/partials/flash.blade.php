@@ -1,5 +1,5 @@
 @if (session('success') || session('error') || session('status'))
-    <div class="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8 no-print">
+    <div class="mx-auto max-w-7xl px-4 {{ request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register') ? 'pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 sm:pt-28' : 'pt-4' }} sm:px-6 lg:px-8 no-print">
         @if (session('success'))
             <div class="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
                  x-data="{ show: true }" x-show="show" x-transition>
@@ -28,7 +28,7 @@
 @endif
 
 @if ($errors->any())
-    <div class="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8 no-print">
+    <div class="mx-auto max-w-7xl px-4 {{ request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register') ? 'pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 sm:pt-28' : 'pt-4' }} sm:px-6 lg:px-8 no-print">
         <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
             <p class="flex items-center gap-2 font-semibold">@icon('alert', 'w-4 h-4') Merci de corriger les points suivants :</p>
             <ul class="mt-2 list-inside list-disc space-y-1 text-rose-800">

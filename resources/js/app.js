@@ -1,6 +1,8 @@
 import Alpine from 'alpinejs';
 
+import './booking';
 import './charts';
+import './event-detail';
 import './payment';
 import './scanner';
 import './pwa';

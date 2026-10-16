@@ -10,7 +10,7 @@
     "display": "standalone",
     "orientation": "portrait",
     "background_color": "#f6f7f9",
-    "theme_color": "#1f41f0",
+    "theme_color": "#f97316",
     "lang": "fr",
     "dir": "ltr",
     "categories": ["entertainment", "shopping", "business"],

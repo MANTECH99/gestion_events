@@ -8,6 +8,7 @@ use App\Http\Controllers\DexPayWebhookController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyReservationsController;
+use App\Http\Controllers\Organizer\ArtistController as OrganizerArtist;
 use App\Http\Controllers\Organizer\DashboardController as OrganizerDashboard;
 use App\Http\Controllers\Organizer\EventController as OrganizerEvent;
 use App\Http\Controllers\Organizer\PaymentSessionController as OrganizerPaymentSession;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Organizer\PayoutController as OrganizerPayout;
 use App\Http\Controllers\Organizer\PointOfSaleController as OrganizerPointOfSale;
 use App\Http\Controllers\Organizer\ReportController as OrganizerReport;
 use App\Http\Controllers\Organizer\ReservationController as OrganizerReservation;
+use App\Http\Controllers\Organizer\ReviewController as OrganizerReview;
 use App\Http\Controllers\Organizer\StockController as OrganizerStock;
 use App\Http\Controllers\Organizer\TicketTypeController as OrganizerTicketType;
 use App\Http\Controllers\Organizer\UserController as OrganizerUser;
@@ -118,6 +120,20 @@ Route::middleware('auth')->group(function () {
         Route::put('/evenements/{event}', [OrganizerEvent::class, 'update'])->name('events.update');
         Route::delete('/evenements/{event}', [OrganizerEvent::class, 'destroy'])->name('events.destroy');
 
+        Route::post('/evenements/{event}/photos', [OrganizerEvent::class, 'storeImages'])->name('events.images.store');
+        Route::post('/evenements/{event}/photos/{image}/deplacer', [OrganizerEvent::class, 'moveImage'])->name('events.images.move');
+        Route::delete('/evenements/{event}/photos/{image}', [OrganizerEvent::class, 'destroyImage'])->name('events.images.destroy');
+
+        Route::get('/artistes', [OrganizerArtist::class, 'index'])->name('artists.index');
+        Route::get('/artistes/creer', [OrganizerArtist::class, 'create'])->name('artists.create');
+        Route::post('/artistes', [OrganizerArtist::class, 'store'])->name('artists.store');
+        Route::get('/artistes/{artist}/modifier', [OrganizerArtist::class, 'edit'])->name('artists.edit');
+        Route::put('/artistes/{artist}', [OrganizerArtist::class, 'update'])->name('artists.update');
+        Route::delete('/artistes/{artist}', [OrganizerArtist::class, 'destroy'])->name('artists.destroy');
+
+        Route::get('/avis', [OrganizerReview::class, 'index'])->name('reviews.index');
+        Route::delete('/avis/{review}', [OrganizerReview::class, 'destroy'])->name('reviews.destroy');
+
         Route::get('/evenements/{event}/types-tickets', [OrganizerTicketType::class, 'index'])->name('events.ticket-types');
         Route::post('/evenements/{event}/types-tickets', [OrganizerTicketType::class, 'store'])->name('events.ticket-types.store');
         Route::put('/types-tickets/{ticketType}', [OrganizerTicketType::class, 'update'])->name('ticket-types.update');
@@ -174,6 +190,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/organisateurs/{organizer}', [AdminController::class, 'updateOrganizer'])->name('organizers.update');
         Route::delete('/organisateurs/{organizer}', [AdminController::class, 'destroyOrganizer'])->name('organizers.destroy');
         Route::get('/utilisateurs', [AdminController::class, 'users'])->name('users.index');
+        Route::patch('/utilisateurs/{target}/verifier', [AdminController::class, 'verify'])->name('users.verify');
     });
 });
 

@@ -11,7 +11,7 @@ class EventController extends Controller
     {
         abort_unless($event->status !== Event::STATUS_DRAFT || auth()->user()?->isAdmin() || auth()->user()?->id === $event->organizer_id, 404);
 
-        $event->load('organizer', 'ticketTypes');
+        $event->load('organizer', 'ticketTypes', 'artist', 'images', 'reviews');
 
         return view('events.show', [
             'event' => $event,
