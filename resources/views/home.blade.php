@@ -110,19 +110,6 @@
             </div>
         </div>
 
-        <div class="pointer-events-none absolute bottom-8 right-6 hidden rotate-[-8deg] lg:block xl:right-20">
-            <p class="font-handwritten text-3xl font-bold leading-none text-white/90">Le Sénégal<br>vit en grand !</p>
-            <svg class="mt-1.5 h-2.5 w-36" viewBox="0 0 144 10" fill="none" aria-hidden="true">
-                <path d="M2 6 C 40 2, 100 2, 142 5" stroke="url(#sn-trait)" stroke-width="4" stroke-linecap="round"/>
-                <defs>
-                    <linearGradient id="sn-trait" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0" stop-color="#34d399"/>
-                        <stop offset=".5" stop-color="#fdef42"/>
-                        <stop offset="1" stop-color="#e31b23"/>
-                    </linearGradient>
-                </defs>
-            </svg>
-        </div>
     </section>
 
     @php
@@ -385,6 +372,82 @@
                     </div>
                 </div>
             @endif
+
+            {{-- Pourquoi nous choisir --}}
+            <div class="mt-16 sm:mt-20">
+                <div class="grid items-center gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+                    {{-- Visuel --}}
+                    <div class="relative hidden lg:block">
+                        <img src="{{ asset('images/pourquoi-femme-v2.png') }}" alt="" loading="lazy"
+                             class="w-full">
+                        <div class="absolute left-[72%] top-[10%] rotate-[-6deg] text-white/90">
+                            <p class="font-handwritten text-xl font-bold leading-tight">Simple,<br>rapide,<br>sécurisé</p>
+                            <svg viewBox="0 0 24 24" class="ml-1 mt-0.5 h-4 w-4 text-orange-400" fill="currentColor" aria-hidden="true">
+                                <path d="M5 16 3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5Zm0 2h14v2H5v-2Z"/>
+                            </svg>
+                            <svg viewBox="0 0 32 24" class="ml-1 h-6 w-8 text-orange-400" fill="none" aria-hidden="true">
+                                <path d="M2 2c4 8 12 14 28 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M24 14l6 4-6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-orange-400">Pourquoi nous choisir ?</p>
+                        <h2 class="mt-3 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Une expérience simple<br>et sécurisée</h2>
+
+                        <div class="mt-8 grid gap-6 sm:grid-cols-2">
+                            @foreach ([
+                                ['icon' => 'zap', 'title' => 'Réservation en quelques clics', 'text' => 'Gagnez du temps et réservez facilement.'],
+                                ['icon' => 'smartphone', 'title' => 'Accès mobile', 'text' => "Réservez depuis n'importe où, à tout moment."],
+                                ['icon' => 'shield', 'title' => 'Paiement sécurisé', 'text' => 'Vos transactions sont protégées et fiables.'],
+                                ['icon' => 'headset', 'title' => 'Service client réactif', 'text' => 'Une équipe à votre écoute 24/7.'],
+                            ] as $f)
+                                <div class="flex gap-4">
+                                    <span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl border-2 border-orange-400/40 bg-orange-400/10 text-orange-400">
+                                        @icon($f['icon'], 'w-5 h-5')
+                                    </span>
+                                    <div class="min-w-0">
+                                        <h3 class="text-sm font-bold text-white">{{ $f['title'] }}</h3>
+                                        <p class="mt-1 text-sm text-white/60">{{ $f['text'] }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                {{-- CTA --}}
+                <div class="relative mt-12 overflow-hidden rounded-3xl border border-orange-500/25" style="background: #160d08;">
+                    <div class="absolute inset-y-0 right-0 hidden w-[55%] sm:block" aria-hidden="true">
+                        <img src="{{ asset('images/hero-fans-v2.jpg') }}" alt="" loading="lazy"
+                             class="h-full w-full object-cover"
+                             style="object-position: center 35%;
+                                    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 35%);
+                                    mask-image: linear-gradient(to right, transparent 0%, #000 35%);">
+                        <div class="absolute inset-0" style="background: linear-gradient(90deg, #160d08 0%, rgba(22,13,8,.85) 30%, rgba(234,88,12,.45) 70%, rgba(249,115,22,.55) 100%);"></div>
+                        <div class="absolute inset-0" style="background: radial-gradient(50% 80% at 70% 50%, rgba(249,115,22,.5), transparent 70%);"></div>
+                    </div>
+
+                    <div class="relative z-10 flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8 lg:p-10">
+                        <div class="flex items-start gap-4">
+                            <svg viewBox="0 0 64 64" class="mt-1 h-11 w-11 shrink-0" fill="none" aria-hidden="true">
+                                <g>
+                                    <path d="M16 20h34a5 5 0 0 1 5 5v3.5a6.5 6.5 0 0 0 0 13V45a5 5 0 0 1-5 5H16a5 5 0 0 1-5-5v-3.5a6.5 6.5 0 0 0 0-13V25a5 5 0 0 1 5-5Z" fill="#fb923c"/>
+                                    <path d="M36 24.5v3.5M36 32v3.5M36 39.5v3.5" stroke="#431407" stroke-width="3.2" stroke-linecap="round" stroke-dasharray=".5 7"/>
+                                </g>
+                            </svg>
+                            <div class="min-w-0">
+                                <h3 class="text-lg font-extrabold text-white sm:text-xl">Prêt à vivre des moments inoubliables ?</h3>
+                                <p class="mt-1 text-sm text-white/70">Rejoignez des milliers de fans et réservez dès maintenant vos billets !</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('home') }}#evenements" class="inline-flex shrink-0 items-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-400">
+                            Explorer les événements @icon('arrow-right', 'w-4 h-4')
+                        </a>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </section>

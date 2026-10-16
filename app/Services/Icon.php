@@ -84,6 +84,8 @@ class Icon
         'send' => '<path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-8-8-4z"/>',
         'wifi-off' => '<path d="M2 2l20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 3.5-2.3M19 13a10 10 0 0 0-6-2.8M2 9a15 15 0 0 1 4-2.6M16.5 6.5A15 15 0 0 1 22 9M8.5 20a1 1 0 0 1 .5-.8M12 20h.01"/>',
         'smartphone-check' => '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2M9.5 11l1.5 1.5L14 9.5"/>',
+        'zap' => '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+        'headset' => '<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>',
     ];
 
     public static function render(string $name, string $class = 'w-5 h-5'): string
