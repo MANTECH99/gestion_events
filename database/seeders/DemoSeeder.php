@@ -18,54 +18,72 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
+        if (User::where('username', 'admin')->exists()) {
+            $this->command?->info('Données démo déjà présentes —Seeder ignoré.');
+
+            return;
+        }
+
         $payments = app(ReservationPaymentManager::class);
 
         /* ---------------------------------------------------------------- */
         /* Comptes */
         /* ---------------------------------------------------------------- */
 
-        $admin = User::factory()->admin()->create([
-            'first_name' => 'Admin',
-            'last_name' => 'Plateforme',
-            'username' => 'admin',
-            'email' => 'admin@billeterie-express.sn',
-        ]);
+        $admin = User::factory()->admin()->firstOrCreate(
+            ['username' => 'admin'],
+            [
+                'first_name' => 'Admin',
+                'last_name' => 'Plateforme',
+                'email' => 'admin@billeterie-express.sn',
+            ]
+        );
 
-        $organizer = User::factory()->organizer()->create([
-            'first_name' => 'Ousmane',
-            'last_name' => 'Ndiaye',
-            'username' => 'organisateur',
-            'email' => 'organisateur@billeterie-express.sn',
-            'phone' => '+221771234567',
-        ]);
+        $organizer = User::factory()->organizer()->firstOrCreate(
+            ['username' => 'organisateur'],
+            [
+                'first_name' => 'Ousmane',
+                'last_name' => 'Ndiaye',
+                'email' => 'organisateur@billeterie-express.sn',
+                'phone' => '+221771234567',
+            ]
+        );
 
-        $secondOrganizer = User::factory()->organizer()->create([
-            'first_name' => 'Fatou',
-            'last_name' => 'Seck',
-            'username' => 'fatou.seck',
-            'email' => 'fatou.seck@billeterie-express.sn',
-        ]);
+        $secondOrganizer = User::factory()->organizer()->firstOrCreate(
+            ['username' => 'fatou.seck'],
+            [
+                'first_name' => 'Fatou',
+                'last_name' => 'Seck',
+                'email' => 'fatou.seck@billeterie-express.sn',
+            ]
+        );
 
-        $agent = User::factory()->agent($organizer)->create([
-            'first_name' => 'Moussa',
-            'last_name' => 'Fall',
-            'username' => 'agent.moussa',
-            'email' => 'agent@billeterie-express.sn',
-        ]);
+        $agent = User::factory()->agent($organizer)->firstOrCreate(
+            ['username' => 'agent.moussa'],
+            [
+                'first_name' => 'Moussa',
+                'last_name' => 'Fall',
+                'email' => 'agent@billeterie-express.sn',
+            ]
+        );
 
-        $seller = User::factory()->pointOfSale($organizer)->create([
-            'first_name' => 'Aminata',
-            'last_name' => 'Diop',
-            'username' => 'aminata.diop',
-            'email' => 'pos@billeterie-express.sn',
-        ]);
+        $seller = User::factory()->pointOfSale($organizer)->firstOrCreate(
+            ['username' => 'aminata.diop'],
+            [
+                'first_name' => 'Aminata',
+                'last_name' => 'Diop',
+                'email' => 'pos@billeterie-express.sn',
+            ]
+        );
 
-        $customer = User::factory()->create([
-            'first_name' => 'Khadija',
-            'last_name' => 'Mbaye',
-            'username' => 'khadija.mbaye',
-            'email' => 'client@billeterie-express.sn',
-        ]);
+        $customer = User::factory()->firstOrCreate(
+            ['username' => 'khadija.mbaye'],
+            [
+                'first_name' => 'Khadija',
+                'last_name' => 'Mbaye',
+                'email' => 'client@billeterie-express.sn',
+            ]
+        );
 
         /* ---------------------------------------------------------------- */
         /* Événements + types de tickets */
