@@ -20,8 +20,8 @@
         }
 
         .ticket-page:not(:last-child) {
-            break-after: page;
-            page-break-after: always;
+            break-after: page !important;
+            page-break-after: always !important;
         }
     </style>
     <style>{!! $css !!}</style>
@@ -32,21 +32,5 @@
             @include('tickets.partials.card', ['ticket' => $ticket, 'qr' => $qr($ticket)])
         </div>
     @endforeach
-
-    {{-- Ajuste la hauteur de page à la carte réelle (une page par billet). --}}
-    <script>
-        window.addEventListener('load', function () {
-            var max = 0;
-            document.querySelectorAll('.ticket-page').forEach(function (page) {
-                max = Math.max(max, Math.ceil(page.getBoundingClientRect().height));
-            });
-            if (max > 0) {
-                var mm = (max / 96 * 25.4) + 1;
-                var style = document.createElement('style');
-                style.textContent = '@page { size: 105mm ' + mm.toFixed(2) + 'mm; margin: 0; }';
-                document.head.appendChild(style);
-            }
-        });
-    </script>
 </body>
 </html>

@@ -86,6 +86,7 @@ class Icon
         'smartphone-check' => '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2M9.5 11l1.5 1.5L14 9.5"/>',
         'zap' => '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
         'headset' => '<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>',
+        'tag' => '<path d="M20.6 13.4 12 4.8H4.8V12l8.6 8.6a2 2 0 0 0 2.8 0l4.4-4.4a2 2 0 0 0 0-2.8z"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" stroke="none"/>',
     ];
 
     public static function render(string $name, string $class = 'w-5 h-5'): string

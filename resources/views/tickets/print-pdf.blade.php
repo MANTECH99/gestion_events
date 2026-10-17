@@ -12,11 +12,11 @@
 
         .card { border: 1px solid #e2e5ea; }
 
-        .head { background-color: #1f41f0; color: #ffffff; padding: 6mm; }
-        .kicker { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #d8defd; }
-        .official { font-size: 10px; color: #e5e9fe; margin-top: 2px; }
+        .head { background-color: #f97316; color: #ffffff; padding: 6mm; }
+        .kicker { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #ffffff; }
+        .official { font-size: 10px; color: #ffffff; margin-top: 2px; }
         .head h1 { font-size: 18px; margin: 8px 0 0; }
-        .badge { display: inline-block; padding: 2px 8px; font-size: 9px; font-weight: bold; background-color: #ffffff; color: #16803c; }
+        .badge { display: inline-block; padding: 2px 8px; font-size: 9px; font-weight: bold; background-color: #ffffff; color: #ea580c; }
 
         .info { background-color: #f5f6f8; padding: 5mm 6mm; border-bottom: 1px dashed #d7dbe3; }
         .info .row { margin-bottom: 4px; }
@@ -30,7 +30,7 @@
         .holder { border-top: 1px dashed #d7dbe3; padding: 5mm 6mm; }
         .holder .name { font-size: 14px; font-weight: bold; }
 
-        .foot { background-color: #0f172a; color: #b7bcc4; padding: 3mm 6mm; font-size: 9px; }
+        .foot { background-color: #ea580c; color: #ffffff; padding: 3mm 6mm; font-size: 9px; }
     </style>
 </head>
 <body>
