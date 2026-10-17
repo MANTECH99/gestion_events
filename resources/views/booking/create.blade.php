@@ -31,7 +31,8 @@
                 @endif
             </div>
 
-            <div class="relative mx-auto max-w-7xl px-4 pb-7 pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 sm:px-6 sm:pt-28 lg:px-8">
+            @php $hasFlash = $errors->any() || session('success') || session('error') || session('status'); @endphp
+            <div class="relative mx-auto max-w-7xl px-4 pb-7 {{ $hasFlash ? 'pt-6 sm:pt-8' : 'pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 sm:pt-28' }} sm:px-6 lg:px-8">
                 <a href="{{ route('events.show', $event) }}"
                    class="inline-flex items-center gap-2 text-sm font-medium text-white/70 transition hover:text-white">
                     <span class="grid h-8 w-8 place-items-center rounded-full border border-white/20 bg-white/10">

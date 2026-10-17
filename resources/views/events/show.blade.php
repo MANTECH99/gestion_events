@@ -49,7 +49,8 @@
             <div class="absolute inset-0 bg-gradient-to-t from-ink-950 via-transparent to-ink-950/60"></div>
         </div>
 
-        <div class="relative mx-auto max-w-7xl px-4 pb-12 pt-28 [@supports(-webkit-touch-callout:none)]:pt-36 sm:px-6 sm:pt-32 lg:px-8 lg:pb-16 lg:pt-40">
+        @php $hasFlash = $errors->any() || session('success') || session('error') || session('status'); @endphp
+        <div class="relative mx-auto max-w-7xl px-4 pb-12 {{ $hasFlash ? 'pt-6 sm:pt-8' : 'pt-28 [@supports(-webkit-touch-callout:none)]:pt-36 sm:pt-32' }} sm:px-6 lg:px-8 lg:pb-16 {{ $hasFlash ? 'lg:pt-10' : 'lg:pt-40' }}">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-3 py-1.5 text-xs font-bold text-white uppercase tracking-wide shadow-lg shadow-orange-500/25">
                     {{ ticket_type_icon($event->event_type) }} {{ $event->type_label }}

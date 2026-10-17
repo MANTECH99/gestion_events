@@ -3,7 +3,7 @@
     $hasSidebar = $hasSidebar ?? false;
     $onHome = request()->routeIs('home');
     // Header transparent sur l'accueil, la page détail d'événement et la page de réservation (thèmes sombres).
-    $darkHeader = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register');
+    $darkHeader = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'favoris.*', 'profil.*');
 @endphp
 
 <header class="app-header no-print z-50 backdrop-blur-lg {{ $darkHeader ? 'absolute inset-x-0 top-0 bg-transparent' : 'sticky top-0 border-b border-ink-200/60 bg-white/85' }}">
@@ -28,48 +28,48 @@
                 </button>
 
                 <div id="menu-mobile" x-cloak x-show="open" x-transition
-                     class="absolute left-4 top-full mt-px w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-xl">
+                     class="absolute left-4 top-full mt-px w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border shadow-xl {{ $darkHeader ? 'border-white/15 bg-ink-950/95 backdrop-blur-lg' : 'border-ink-200 bg-white' }}">
                     <div class="p-1.5 text-sm">
                         <a href="{{ route('home') }}"
-                           class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-ink-700 hover:bg-ink-50 {{ request()->routeIs('home') ? 'bg-brand-50 text-brand-700' : '' }}">
+                           class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }} {{ request()->routeIs('home') ? ($darkHeader ? 'bg-white/10 text-white' : 'bg-brand-50 text-brand-700') : '' }}">
                             @icon('ticket', 'w-4 h-4') Événements
                         </a>
 
                         @auth
                             <a href="{{ route('reservations.index') }}"
-                               class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-ink-700 hover:bg-ink-50 {{ request()->routeIs('reservations.*') ? 'bg-brand-50 text-brand-700' : '' }}">
+                               class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }} {{ request()->routeIs('reservations.*') ? ($darkHeader ? 'bg-white/10 text-white' : 'bg-brand-50 text-brand-700') : '' }}">
                                 @icon('calendar', 'w-4 h-4') Mes réservations
                             </a>
 
                             @if ($user->isAgent())
                                 <a href="{{ route('agent.index') }}"
-                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-ink-700 hover:bg-ink-50 {{ request()->routeIs('agent.*') ? 'bg-brand-50 text-brand-700' : '' }}">
+                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }} {{ request()->routeIs('agent.*') ? ($darkHeader ? 'bg-white/10 text-white' : 'bg-brand-50 text-brand-700') : '' }}">
                                     @icon('scan', 'w-4 h-4') Espace agent
                                 </a>
                             @endif
 
                             @if ($user->isOrganizer() || $user->isAdmin())
                                 <a href="{{ route('organizer.dashboard') }}"
-                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-ink-700 hover:bg-ink-50">
+                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                     @icon('chart-bar', 'w-4 h-4') Tableau de bord
                                 </a>
                             @endif
 
                             @if ($user->isManagedPointOfSale())
                                 <a href="{{ route('pos.dashboard') }}"
-                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-ink-700 hover:bg-ink-50">
+                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                     @icon('store', 'w-4 h-4') Point de vente
                                 </a>
                             @endif
 
                             @if ($user->isAdmin())
                                 <a href="{{ route('admin.dashboard') }}"
-                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-ink-700 hover:bg-ink-50">
+                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                     @icon('shield', 'w-4 h-4') Administration
                                 </a>
                             @endif
                         @else
-                            <a href="{{ route('login') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-ink-700 hover:bg-ink-50">
+                            <a href="{{ route('login') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                 @icon('user', 'w-4 h-4') Connexion
                             </a>
                         @endauth
@@ -130,58 +130,58 @@
             <div class="ml-auto flex items-center gap-2">
                 @auth
                     @if ($user->isOrganizer() || $user->isAdmin())
-                        <a href="{{ route('organizer.dashboard') }}" class="btn-primary btn-sm hidden sm:inline-flex">
+                        <a href="{{ route('organizer.dashboard') }}" class="btn btn-sm hidden sm:inline-flex {{ $darkHeader ? 'bg-orange-400 text-ink-950 shadow-lg shadow-orange-400/25 hover:bg-orange-300' : 'btn-primary' }}">
                             @icon('chart-bar', 'w-4 h-4') Tableau de bord
                         </a>
                     @endif
 
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" @click.outside="open = false"
-                                class="flex items-center gap-2 rounded-xl border border-ink-200 bg-white py-1.5 pl-1.5 pr-2.5 text-sm transition hover:border-ink-300">
-                            <span class="grid h-7 w-7 place-items-center rounded-lg bg-brand-100 text-xs font-bold text-brand-700">
+                                class="flex items-center gap-2 rounded-xl border py-1.5 pl-1.5 pr-2.5 text-sm transition {{ $darkHeader ? 'border-orange-400/50 bg-orange-400/15 text-white hover:bg-orange-400/25' : 'border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100' }}">
+                            <span class="grid h-7 w-7 place-items-center rounded-lg text-xs font-bold {{ $darkHeader ? 'bg-orange-500 text-white' : 'bg-orange-500 text-white' }}">
                                 {{ $user->initials }}
                             </span>
-                            <span class="hidden max-w-[9rem] truncate font-medium text-ink-800 sm:block">{{ $user->first_name }}</span>
-                            @icon('chevron-down', 'w-4 h-4 text-ink-400')
+                            <span class="hidden max-w-[9rem] truncate font-medium sm:block {{ $darkHeader ? 'text-white' : 'text-ink-800' }}">{{ $user->first_name }}</span>
+                            @icon('chevron-down', "w-4 h-4 " . ($darkHeader ? 'text-orange-300' : 'text-orange-500'))
                         </button>
 
                         <div x-cloak x-show="open" x-transition
-                             class="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-xl">
-                            <div class="border-b border-ink-100 px-4 py-3">
-                                <p class="truncate text-sm font-semibold text-ink-900">{{ $user->full_name }}</p>
-                                <p class="truncate text-xs text-ink-500">{{ $user->email }}</p>
-                                <span class="badge mt-2 bg-brand-50 text-brand-700">{{ $user->role_label }}</span>
+                             class="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border shadow-xl {{ $darkHeader ? 'border-white/15 bg-ink-950/95 backdrop-blur-lg' : 'border-ink-200 bg-white' }}">
+                            <div class="border-b px-4 py-3 {{ $darkHeader ? 'border-white/10' : 'border-ink-100' }}">
+                                <p class="truncate text-sm font-semibold {{ $darkHeader ? 'text-white' : 'text-ink-900' }}">{{ $user->full_name }}</p>
+                                <p class="truncate text-xs {{ $darkHeader ? 'text-white/50' : 'text-ink-500' }}">{{ $user->email }}</p>
+                                <span class="badge mt-2 {{ $darkHeader ? 'bg-orange-500/20 text-orange-300' : 'bg-brand-50 text-brand-700' }}">{{ $user->role_label }}</span>
                             </div>
                             <div class="p-1.5 text-sm">
-                                <a href="{{ route('reservations.index') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-ink-700 hover:bg-ink-50">
+                                <a href="{{ route('reservations.index') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                     @icon('ticket', 'w-4 h-4') Mes réservations
                                 </a>
                                 @if ($user->isManagedPointOfSale())
-                                    <a href="{{ route('pos.dashboard') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-ink-700 hover:bg-ink-50">
+                                    <a href="{{ route('pos.dashboard') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                         @icon('store', 'w-4 h-4') Point de vente
                                     </a>
                                 @endif
                                 @if ($user->isAgent())
-                                    <a href="{{ route('agent.scan') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-ink-700 hover:bg-ink-50">
+                                    <a href="{{ route('agent.scan') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                         @icon('scan', 'w-4 h-4') Scanner un ticket
                                     </a>
                                 @endif
                                 @if ($user->isOrganizer() || $user->isAdmin())
-                                    <a href="{{ route('organizer.events.index') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-ink-700 hover:bg-ink-50">
+                                    <a href="{{ route('organizer.events.index') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                         @icon('calendar', 'w-4 h-4') Mes événements
                                     </a>
-                                    <a href="{{ route('organizer.stocks.index') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-ink-700 hover:bg-ink-50">
+                                    <a href="{{ route('organizer.stocks.index') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                         @icon('coins', 'w-4 h-4') Stock physique
                                     </a>
                                 @endif
                                 @if ($user->isAdmin())
-                                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-ink-700 hover:bg-ink-50">
+                                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                         @icon('shield', 'w-4 h-4') Administration
                                     </a>
                                 @endif
-                                <form method="POST" action="{{ route('logout') }}" class="mt-1 border-t border-ink-100 pt-1">
+                                <form method="POST" action="{{ route('logout') }}" class="mt-1 border-t pt-1 {{ $darkHeader ? 'border-white/10' : 'border-ink-100' }}">
                                     @csrf
-                                    <button class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-rose-600 hover:bg-rose-50">
+                                    <button class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left {{ $darkHeader ? 'text-rose-400 hover:bg-rose-500/15' : 'text-rose-600 hover:bg-rose-50' }}">
                                         @icon('logout', 'w-4 h-4') Se déconnecter
                                     </button>
                                 </form>

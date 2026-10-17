@@ -20,7 +20,7 @@
                         mask-image: linear-gradient(to right, transparent 0%, #000 24%, #000 80%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 15%, #000 74%, transparent 97%);
                         -webkit-mask-composite: source-in;
                         mask-composite: intersect;">
-                <img src="{{ asset('images/hero-fans-v2.jpg') }}" alt=""
+                <img src="{{ asset('images/hero-fans-v3.jpg') }}" alt=""
                      class="h-full w-full object-cover" style="filter: brightness(1.14) saturate(1.05);">
                 <div class="absolute inset-0" style="background:
                     linear-gradient(180deg, rgba(6,18,44,.32) 0%, rgba(10,28,60,.14) 42%, rgba(8,12,28,.03) 78%);"></div>
@@ -30,7 +30,8 @@
             <div class="absolute inset-0 bg-gradient-to-t from-ink-950/70 via-transparent to-ink-950/35"></div>
         </div>
 
-        <div class="relative mx-auto max-w-7xl px-4 pb-14 pt-28 [@supports(-webkit-touch-callout:none)]:pt-36 sm:px-6 sm:pt-32 lg:px-8 lg:pb-20 lg:pt-40">
+        @php $hasFlash = $errors->any() || session('success') || session('error') || session('status'); @endphp
+        <div class="relative mx-auto max-w-7xl px-4 pb-14 {{ $hasFlash ? 'pt-6 sm:pt-8' : 'pt-28 [@supports(-webkit-touch-callout:none)]:pt-36 sm:pt-32' }} sm:px-6 lg:px-8 lg:pb-20 {{ $hasFlash ? 'lg:pt-10' : 'lg:pt-40' }}">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6">
                 {{-- Texte --}}
                 <div class="text-center lg:text-left">
@@ -78,14 +79,14 @@
                         <div class="flex items-start gap-3">
                             <span class="text-orange-400">@icon('ticket', 'w-7 h-7')</span>
                             <div>
-                                <p class="text-2xl font-extrabold text-white sm:text-3xl">+500</p>
+                                <p class="text-2xl font-extrabold text-white sm:text-3xl">+20</p>
                                 <p class="mt-1 text-sm leading-snug text-white/60">Événements<br>par an</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 border-l border-white/10 pl-10">
                             <span class="text-orange-400">@icon('users', 'w-7 h-7')</span>
                             <div>
-                                <p class="text-2xl font-extrabold text-white sm:text-3xl">+100K</p>
+                                <p class="text-2xl font-extrabold text-white sm:text-3xl">+50K</p>
                                 <p class="mt-1 text-sm leading-snug text-white/60">Billets vendus<br>au Sénégal</p>
                             </div>
                         </div>
@@ -99,12 +100,17 @@
                     </div>
 
                     {{-- Mobile : paiement sécurisé --}}
-                    <div class="mt-12 lg:hidden">
-                        <span class="flex items-center gap-2.5">
-                            <span class="text-orange-400">@icon('shield', 'w-6 h-6')</span>
-                            <p class="font-bold text-white">Paiement sécurisé</p>
-                        </span>
-                        <div class="mt-6">@include('partials.payment-methods', ['withLabels' => true])</div>
+                    <div class="mt-12 rounded-2xl border border-white/10 bg-white/5 p-5 text-center lg:hidden">
+                        <h2 class="flex items-center justify-center gap-2.5 text-base font-bold text-white">
+                            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-orange-500/15 text-orange-400">
+                                @icon('shield', 'w-5 h-5')
+                            </span>
+                            Paiement sécurisé
+                        </h2>
+                        <p class="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-white/60">
+                            Vos informations sont protégées par notre système de cryptage SSL.
+                        </p>
+                        <div class="mt-4 flex justify-center">@include('partials.payment-methods')</div>
                     </div>
                 </div>
             </div>
@@ -138,7 +144,7 @@
     @endphp
 
     {{-- Suite de la page : catégories, vedettes, newsletter, prochains événements --}}
-    <section class="bg-ink-950 pb-16 pt-7 sm:pt-14">
+    <section class="bg-ink-950 pb-16 pt-2 sm:pt-14">
         <div class="mx-auto max-w-7xl space-y-11 px-4 sm:px-6 lg:px-8">
 
             {{-- Explorer par catégorie --}}
@@ -249,7 +255,7 @@
                                         </span>
                                     </div>
                                     <div class="mt-0.5 flex items-center justify-between gap-3">
-                                        <p class="text-sm font-bold text-orange-400">
+                                    <p class="text-sm font-bold text-orange-400">
                                             À partir de {{ $event->min_price === null ? '—' : money($event->min_price) }}
                                         </p>
                                         <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/20 bg-white/10 text-white transition group-hover:border-orange-400 group-hover:bg-orange-400 group-hover:text-ink-950">
@@ -357,7 +363,7 @@
                                             <span class="truncate">{{ $event->location }}</span>
                                         </span>
                                     </div>
-                                    <p class="text-sm font-bold text-orange-400">
+                                    <p class="truncate text-sm font-bold text-orange-400 whitespace-nowrap">
                                         À partir de {{ $event->min_price === null ? '—' : money($event->min_price) }}
                                     </p>
                                 </div>

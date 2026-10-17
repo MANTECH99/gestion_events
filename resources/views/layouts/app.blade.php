@@ -28,8 +28,18 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Billeterie Express">
     <link rel="manifest" href="{{ route('pwa.manifest') }}">
-    <link rel="icon" type="image/svg+xml" href="{{ asset('images/icon.svg') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/icon.svg') }}?v={{ config('app.asset_version') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}?v={{ config('app.asset_version') }}">
+
+    {{-- Splash screens iOS --}}
+    @php $sv = config('app.asset_version'); @endphp
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="{{ asset('images/splash-iphone-x.png') }}?v={{ $sv }}">
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="{{ asset('images/splash-iphone-xr.png') }}?v={{ $sv }}">
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="{{ asset('images/splash-iphone-xsmax.png') }}?v={{ $sv }}">
+    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="{{ asset('images/splash-iphone-12.png') }}?v={{ $sv }}">
+    <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="{{ asset('images/splash-iphone-12promax.png') }}?v={{ $sv }}">
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="{{ asset('images/splash-iphone-se.png') }}?v={{ $sv }}">
+    <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="{{ asset('images/splash-iphone-old.png') }}?v={{ $sv }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
@@ -39,7 +49,7 @@
 <body class="flex min-h-full flex-col bg-ink-50">
     @include('partials.nav', ['hasSidebar' => $hasSidebar])
 
-    <main class="flex-1">
+    <main class="flex-1 {{ request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'favoris.*', 'profil.*') ? 'bg-ink-950' : '' }}">
         @include('partials.flash')
 
         @if ($hasSidebar)
@@ -72,7 +82,11 @@
         @include('partials.footer', ['hasSidebar' => $hasSidebar])
     @endif
 
-    <div id="toast-root" class="pointer-events-none fixed inset-x-0 bottom-4 z-[100] flex flex-col items-center gap-2 px-4"></div>
+    <div id="toast-root" class="pointer-events-none fixed inset-x-0 bottom-28 z-[100] flex flex-col items-center gap-2 px-4 lg:bottom-4"></div>
+
+    @unless ($hasSidebar)
+        @include('partials.mobile-nav')
+    @endunless
 
     @stack('scripts')
 </body>

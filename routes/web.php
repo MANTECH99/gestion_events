@@ -6,8 +6,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DexPayWebhookController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\FavorisController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyReservationsController;
+use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\Organizer\ArtistController as OrganizerArtist;
 use App\Http\Controllers\Organizer\DashboardController as OrganizerDashboard;
 use App\Http\Controllers\Organizer\EventController as OrganizerEvent;
@@ -36,6 +38,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/evenements/{event}', [EventController::class, 'show'])->name('events.show');
+Route::get('/favoris', [FavorisController::class, 'index'])->name('favoris.index');
 
 /* ------------------------------------------------------------------ */
 /*  Réservation + paiement (avec ou sans compte) */
@@ -108,6 +111,7 @@ Route::prefix('agent')->name('agent.')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/mes-reservations', [MyReservationsController::class, 'index'])->name('reservations.index');
     Route::get('/mes-reservations/{reference}', [MyReservationsController::class, 'show'])->name('reservations.show');
+    Route::get('/profil', [ProfilController::class, 'show'])->name('profil.show');
 
     /* ---- Espace organisateur ---- */
     Route::prefix('organisateur')->name('organizer.')->middleware('role:organizer,admin')->group(function () {

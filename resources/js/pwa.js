@@ -1,10 +1,25 @@
 /**
  * Installation de la PWA : manifeste + service worker + invite d'installation.
  */
+
+/** Capturé tôt, avant que Alpine n'ait chargé. */
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    document.dispatchEvent(new CustomEvent('pwa:caninstall'));
+});
+
+window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    document.dispatchEvent(new CustomEvent('pwa:installed'));
+});
+
 function pwa() {
     return {
-        canInstall: false,
-        deferredPrompt: null,
+        canInstall: !!deferredInstallPrompt,
+        deferredPrompt: deferredInstallPrompt,
         installed: window.matchMedia('(display-mode: standalone)').matches,
 
         init() {
@@ -16,24 +31,23 @@ function pwa() {
                 });
             }
 
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                this.deferredPrompt = e;
+            document.addEventListener('pwa:caninstall', () => {
                 this.canInstall = true;
+                this.deferredPrompt = deferredInstallPrompt;
             });
 
-            window.addEventListener('appinstalled', () => {
+            document.addEventListener('pwa:installed', () => {
                 this.canInstall = false;
                 this.installed = true;
             });
         },
 
         async install() {
-            if (!this.deferredPrompt) return;
+            if (!deferredInstallPrompt) return;
 
-            this.deferredPrompt.prompt();
-            await this.deferredPrompt.userChoice;
-            this.deferredPrompt = null;
+            deferredInstallPrompt.prompt();
+            await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
             this.canInstall = false;
         },
 

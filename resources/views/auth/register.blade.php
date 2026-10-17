@@ -1,6 +1,7 @@
 @extends('layouts.app', ['title' => 'Créer un compte'])
 
 @section('content')
+    @php $hasFlash = $errors->any() || session('success') || session('error') || session('status'); @endphp
     <div class="relative bg-ink-950 pb-16">
         <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
             <div class="absolute inset-x-0 top-0 h-[440px]" style="background:
@@ -8,7 +9,7 @@
                 radial-gradient(44% 42% at 28% 70%, rgba(56,160,220,.16), rgba(56,160,220,0) 72%);"></div>
         </div>
 
-        <div class="relative mx-auto max-w-lg px-4 pb-10 pt-36 sm:flex sm:min-h-[80vh] sm:items-center sm:px-6 sm:pt-28 lg:px-8">
+        <div class="relative mx-auto max-w-lg px-4 pb-10 {{ $hasFlash ? 'pt-8 sm:pt-10' : 'pt-36 sm:pt-28' }} sm:flex sm:min-h-[80vh] sm:items-center sm:px-6 lg:px-8">
             <div class="w-full">
                 <div class="text-center">
                     <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-orange-500/15 text-orange-400 ring-1 ring-orange-400/30">
