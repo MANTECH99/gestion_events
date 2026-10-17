@@ -11,7 +11,7 @@
     <div class="{{ $hasSidebar ? 'lg:pl-64' : '' }}">
         <div x-data="{ open: false }" @click.outside="open = false" class="relative flex h-16 {{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} items-center gap-4 px-4 sm:px-6 lg:px-8">
             <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2.5">
-                <img src="{{ asset('images/icon.svg') }}" alt="" width="36" height="36"
+                <img src="{{ asset('images/icon.svg') }}?v={{ config('app.asset_version') }}" alt="" width="36" height="36"
                      class="h-9 w-9 shrink-0 rounded-xl shadow-lg {{ $darkHeader ? 'shadow-black/40' : 'shadow-orange-500/40' }}">
                 <span class="text-lg font-extrabold tracking-tight {{ $darkHeader ? 'text-white' : 'text-ink-950' }}">
                     Billeterie <span class="{{ $darkHeader ? 'text-white' : 'text-gradient' }}">Express</span>

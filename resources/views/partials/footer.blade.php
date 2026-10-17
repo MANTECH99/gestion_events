@@ -3,7 +3,7 @@
         <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div class="lg:col-span-2">
                 <div class="flex items-center gap-2.5">
-                    <img src="{{ asset('images/icon.svg') }}" alt="" width="36" height="36"
+                    <img src="{{ asset('images/icon.svg') }}?v={{ config('app.asset_version') }}" alt="" width="36" height="36"
                          class="h-9 w-9 shrink-0 rounded-xl">
                     <span class="text-lg font-extrabold tracking-tight text-white">
                         Billeterie <span class="text-white">Express</span>
