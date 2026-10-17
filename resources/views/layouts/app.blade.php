@@ -27,7 +27,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Billeterie Express">
-    <link rel="manifest" href="{{ route('pwa.manifest') }}">
+    <link rel="manifest" href="{{ route('pwa.manifest') }}?v={{ config('app.asset_version') }}">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/icon.svg') }}?v={{ config('app.asset_version') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}?v={{ config('app.asset_version') }}">
 
