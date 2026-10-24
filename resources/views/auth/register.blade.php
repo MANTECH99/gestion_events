@@ -79,7 +79,7 @@
                         @error('password_confirmation')<p class="mt-1.5 text-sm text-rose-300">{{ $message }}</p>@enderror
                     </div>
 
-                    <button type="submit" class="btn-primary w-full justify-center">
+                    <button type="submit" class="btn-hero-primary w-full justify-center">
                         Créer mon compte @icon('arrow-right', 'w-4 h-4')
                     </button>
 

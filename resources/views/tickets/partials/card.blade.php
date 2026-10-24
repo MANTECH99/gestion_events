@@ -2,140 +2,179 @@
     /** Ticket portrait avec QR code — utilisé à l'écran et à l'impression. */
     $isUsed = $ticket->status === 'used';
     $isInvalid = in_array($ticket->status, ['refunded', 'cancelled'], true);
-    $tagline = $ticket->event->tags_list
-        ? implode(' • ', $ticket->event->tags_list)
-        : $ticket->event->type_label;
+    $tagline = $ticket->event->tags_list ? implode(' • ', $ticket->event->tags_list) : null;
+    $typeLabel = $ticket->event->type_label;
+    // En-tête : photo de l'artiste rattaché à l'événement (section Artistes),
+    // à défaut la couverture de l'événement.
+    $artistPhoto = $ticket->event->artist?->image_url ?: $ticket->event->image_url;
+    // Pied : photo de profil de l'organisateur, à défaut le logo.
+    $organizerAvatar = $ticket->event->organizer?->avatar_url;
 @endphp
 
-<div class="print-color relative mx-auto w-full max-w-[24rem] overflow-hidden rounded-3xl bg-white shadow-2xl shadow-ink-950/20 ring-1 ring-ink-200 print:shadow-none print:ring-0">
+<div class="print-color relative mx-auto w-full max-w-[24rem] overflow-hidden rounded-2xl bg-[#0c0c0f] text-white shadow-2xl shadow-black/40 print:shadow-none">
 
-    {{-- En-tête orange --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 px-6 pb-5 pt-4 text-white">
-        @if ($ticket->event->image_url)
-            <img src="{{ $ticket->event->image_url }}" alt="" aria-hidden="true"
-                 class="absolute inset-y-0 right-0 h-full w-1/2 object-cover opacity-40"
-                 style="-webkit-mask-image: linear-gradient(to left, #000 10%, transparent 90%); mask-image: linear-gradient(to left, #000 10%, transparent 90%);">
-        @endif
-        <div class="absolute inset-0" aria-hidden="true" style="background: linear-gradient(135deg, rgba(249,115,22,.25) 0%, rgba(234,88,12,.55) 100%);"></div>
+    {{-- Bord orange (premier enfant : les décors et encoches passent au-dessus) --}}
+    <div class="pointer-events-none absolute inset-0 rounded-2xl border-[1.5px] border-orange-500" aria-hidden="true"></div>
 
-        <div class="relative">
-            <div class="flex items-start justify-between gap-3">
-                <div class="flex items-center gap-2.5">
-                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white text-orange-600">
-                        @icon('zap', 'w-5 h-5')
-                    </span>
-                    <div>
-                        <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] leading-none">Billeterie Express</p>
-                        <p class="mt-1 text-xs text-white/85 leading-none">Billet officiel</p>
-                    </div>
-                </div>
+    {{-- En-tête : logo + statut --}}
+    <div class="relative px-5 pb-2.5 pt-3.5">
+        <div class="absolute inset-0 overflow-hidden" aria-hidden="true">
+            <div class="absolute inset-0" style="background: radial-gradient(65% 120% at 100% 0%, rgba(249,115,22,.38) 0%, rgba(249,115,22,.08) 55%, transparent 78%);"></div>
+            <span class="absolute -right-10 -top-14 h-36 w-36 rounded-full border-[6px] border-orange-500/25"></span>
+        </div>
 
-                <span class="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/95 px-3 py-1.5 text-xs font-bold {{ $isUsed ? 'text-ink-700' : ($isInvalid ? 'text-rose-600' : 'text-orange-600') }}">
-                    @icon($isInvalid ? 'close' : 'check-circle', 'w-4 h-4')
-                    {{ $ticket->status_label }}
+        <div class="relative flex items-center justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-2">
+                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-orange-500 text-[#0c0c0f]">
+                    @icon('ticket', 'w-[18px] h-[18px]')
                 </span>
+                <p class="truncate text-[19px] font-extrabold leading-none tracking-tight">Billeterie<span class="text-orange-500"> Express</span></p>
             </div>
 
-            <h1 class="mt-3 text-2xl font-extrabold leading-[1.1] drop-shadow-sm">{{ $ticket->event->title }}</h1>
-            <p class="mt-2 text-sm font-medium text-white/90">{{ $tagline }}</p>
+            <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-black/55 px-2.5 py-1 text-[11px] font-bold leading-none {{ $isInvalid ? 'text-rose-400' : ($isUsed ? 'text-amber-400' : 'text-green-400') }}">
+                @icon($isInvalid ? 'close' : ($isUsed ? 'clock' : 'check-circle'), 'w-3.5 h-3.5')
+                {{ $ticket->status_label }}
+            </span>
         </div>
     </div>
 
-    {{-- Infos événement --}}
-    <div class="space-y-2 px-6 py-4">
-        <div class="flex items-center gap-3">
-            <span class="grid h-6 w-6 shrink-0 place-items-center text-orange-500">@icon('calendar', 'w-5 h-5')</span>
-            <span class="text-sm font-semibold text-ink-800">{{ event_date_fr($ticket->event->event_date, 'l j F Y à H:i') }}</span>
-        </div>
-        <div class="flex items-center gap-3">
-            <span class="grid h-6 w-6 shrink-0 place-items-center text-orange-500">@icon('map-pin', 'w-5 h-5')</span>
-            <span class="text-sm font-semibold text-ink-800">{{ $ticket->event->location }}</span>
-        </div>
-        <div class="flex items-center gap-3">
-            <span class="grid h-6 w-6 shrink-0 place-items-center text-orange-500">@icon('ticket', 'w-5 h-5')</span>
-            <span class="text-sm font-semibold text-ink-800">{{ $ticket->ticketType->name }}</span>
+    {{-- Photo de l'artiste + signature de marque --}}
+    <div class="relative h-[132px]">
+        <div class="absolute inset-[1.5px] overflow-hidden" aria-hidden="true">
+            <div class="absolute inset-0" style="background: radial-gradient(70% 90% at 85% 0%, rgba(249,115,22,.32) 0%, rgba(249,115,22,.07) 45%, transparent 75%);"></div>
+            @if ($artistPhoto)
+                <img src="{{ $artistPhoto }}" alt="" aria-hidden="true" class="absolute inset-y-0 left-[calc(50%_+_48px)] h-full w-[76%] -translate-x-1/2 object-cover object-[center_30%]">
+            @endif
+            {{-- Fondu haut sous la barre logo, fondu bas dans le corps du billet, coin gauche assombri pour le slogan. --}}
+            <div class="absolute inset-x-0 top-0 h-16" style="background: linear-gradient(180deg, rgba(12,12,15,.7) 0%, rgba(12,12,15,0) 100%);"></div>
+            <div class="absolute inset-x-0 bottom-0 h-14" style="background: linear-gradient(0deg, rgba(12,12,15,.92) 0%, rgba(12,12,15,0) 100%);"></div>
+            <div class="absolute inset-y-0 left-0 w-[72%]" style="background: linear-gradient(90deg, rgba(12,12,15,.78) 0%, rgba(12,12,15,.30) 55%, rgba(12,12,15,0) 100%);"></div>
         </div>
 
-        <div class="border-t border-ink-100"></div>
+        {{-- Slogan manuscrit + trait orange (centré verticalement dans le cadre) --}}
+        <div class="absolute left-4 top-9 select-none">
+            <p class="font-handwritten text-[23px] font-semibold leading-[1.06] text-white"
+               style="text-shadow: 0 2px 6px rgba(12,12,15,.65);">
+                Le Sénégal<br>vit en grand !
+            </p>
+            <svg viewBox="0 0 132 12" class="-mt-0.5 h-3 w-[132px]" fill="none" aria-hidden="true">
+                <path d="M4 8.8C33 3.4 84 2.2 128 5.6" stroke="#fb923c" stroke-width="3.4" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
-    {{-- QR --}}
-    <div class="relative px-6 pb-4">
-        <div class="pointer-events-none absolute left-4 top-4 h-10 w-10 opacity-60" aria-hidden="true"
-             style="background-image: radial-gradient(#fdba74 1.5px, transparent 1.5px); background-size: 8px 8px;"></div>
-        <div class="pointer-events-none absolute bottom-6 right-6 h-10 w-10 opacity-60" aria-hidden="true"
-             style="background-image: radial-gradient(#fdba74 1.5px, transparent 1.5px); background-size: 8px 8px;"></div>
+    {{-- Type + titre + sous-titre --}}
+    <div class="relative px-5 pb-4 pt-3.5">
+        @if ($typeLabel)
+            <span class="inline-flex rounded-full bg-orange-500 px-2.5 py-1 text-[10px] font-extrabold uppercase leading-none tracking-wider text-white">{{ $typeLabel }}</span>
+        @endif
+        <h1 class="mt-2 text-[24px] font-extrabold leading-[1.08] tracking-tight text-white sm:text-[28px]">{{ $ticket->event->title }}</h1>
+        @if ($tagline)
+            <p class="mt-1.5 text-[11px] font-semibold uppercase leading-none tracking-[0.18em] text-white/70">{{ $tagline }}</p>
+        @endif
+    </div>
+
+    {{-- Infos événement (3 colonnes) --}}
+    <div class="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10 px-3 py-2.5">
+        <div class="flex items-start gap-1.5 px-2 py-0.5">
+            <span class="mt-px shrink-0 text-orange-500">@icon('calendar', 'w-[18px] h-[18px]')</span>
+            <span class="text-[11px] font-semibold leading-snug text-white">{{ event_date_fr($ticket->event->event_date, 'l j F Y à H:i') }}</span>
+        </div>
+        <div class="flex items-start gap-1.5 px-2 py-0.5">
+            <span class="mt-px shrink-0 text-orange-500">@icon('map-pin', 'w-[18px] h-[18px]')</span>
+            <span class="break-words text-[11px] font-semibold leading-snug text-white">{{ $ticket->event->location }}</span>
+        </div>
+        <div class="flex items-start gap-1.5 px-2 py-0.5">
+            <span class="mt-px shrink-0 text-orange-500">@icon('ticket', 'w-[18px] h-[18px]')</span>
+            <div class="min-w-0">
+                <p class="text-[9px] font-bold uppercase leading-none tracking-wider text-white/45">Catégorie</p>
+                <p class="mt-1 text-[11px] font-bold leading-snug text-white">{{ $ticket->ticketType->name }}</p>
+            </div>
+        </div>
+    </div>
+
+    {{-- QR + encoches de perforation --}}
+    <div class="relative border-t border-white/10 px-5 pb-3 pt-3">
+        <span class="absolute -left-[13px] -top-[13px] h-[26px] w-[26px] rounded-full border-2 border-orange-500 bg-[#12141c] print:bg-white" aria-hidden="true"></span>
+        <span class="absolute -right-[13px] -top-[13px] h-[26px] w-[26px] rounded-full border-2 border-orange-500 bg-[#12141c] print:bg-white" aria-hidden="true"></span>
+
+        <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+            <div class="absolute left-3 top-5 h-8 w-8 opacity-50" style="background-image: radial-gradient(#fdba74 1.5px, transparent 1.5px); background-size: 8px 8px;"></div>
+            <div class="absolute bottom-8 right-3 h-8 w-8 opacity-50" style="background-image: radial-gradient(#fdba74 1.5px, transparent 1.5px); background-size: 8px 8px;"></div>
+            <span class="absolute -bottom-16 -left-20 h-48 w-48 rounded-full border border-orange-500/25"></span>
+            <span class="absolute -bottom-20 -right-24 h-56 w-56 rounded-full border border-orange-500/15"></span>
+        </div>
 
         <div class="relative mx-auto w-fit">
-            <div class="rounded-2xl border-2 {{ $isUsed || $isInvalid ? 'border-ink-200 opacity-40' : 'border-orange-400' }} bg-white p-3">
-                <div class="relative">
-                    <div class="h-52 w-52 [&>svg]:h-full [&>svg]:w-full" role="img" aria-label="QR code du billet">
-                        {!! $qr !!}
-                    </div>
-                    {{-- Coins --}}
-                    <span class="absolute -left-2 -top-2 h-8 w-8 rounded-tl-xl border-l-[5px] border-t-[5px] border-orange-500" aria-hidden="true"></span>
-                    <span class="absolute -right-2 -top-2 h-8 w-8 rounded-tr-xl border-r-[5px] border-t-[5px] border-orange-500" aria-hidden="true"></span>
-                    <span class="absolute -bottom-2 -left-2 h-8 w-8 rounded-bl-xl border-b-[5px] border-l-[5px] border-orange-500" aria-hidden="true"></span>
-                    <span class="absolute -bottom-2 -right-2 h-8 w-8 rounded-br-xl border-b-[5px] border-r-[5px] border-orange-500" aria-hidden="true"></span>
+            <div class="rounded-xl bg-white p-2 {{ $isUsed || $isInvalid ? 'opacity-40' : '' }}">
+                <div class="h-[120px] w-[120px] [&>svg]:h-full [&>svg]:w-full" role="img" aria-label="QR code du billet">
+                    {!! $qr !!}
                 </div>
             </div>
         </div>
 
-        <p class="relative mx-auto mt-3 w-fit rounded-full bg-orange-100 px-6 py-1.5 text-center font-mono text-sm font-extrabold tracking-wider text-orange-600">
-            {{ $ticket->code }}
-        </p>
+        <div class="relative mx-auto mt-3 flex w-fit items-center justify-center gap-2">
+            <span class="text-orange-500">@icon('ticket', 'w-5 h-5')</span>
+            <p class="font-mono text-[15px] font-extrabold leading-none tracking-wide text-white">{{ $ticket->code }}</p>
+        </div>
 
         @if ($isUsed)
-            <p class="relative mt-3 rounded-xl bg-ink-100 px-3 py-2 text-center text-xs font-semibold text-ink-600">
+            <p class="relative mx-auto mt-3 w-fit rounded-xl bg-white/5 px-3 py-2 text-center text-[11px] font-semibold text-white/70">
                 Utilisé le {{ $ticket->used_at?->translatedFormat('d/m/Y à H:i') }}
                 @if ($ticket->validator) par {{ $ticket->validator->full_name }} @endif
             </p>
         @elseif ($isInvalid)
-            <p class="relative mt-3 rounded-xl bg-rose-50 px-3 py-2 text-center text-xs font-semibold text-rose-700">
+            <p class="relative mx-auto mt-3 w-fit rounded-xl bg-rose-500/10 px-3 py-2 text-center text-[11px] font-semibold text-rose-300">
                 Ce billet n'est plus valide.
             </p>
         @endif
     </div>
 
-    {{-- Titulaire + montants --}}
-    <div class="border-t border-ink-100 px-6 py-4">
+    {{-- Titulaire --}}
+    <div class="border-t border-white/10 px-5 py-3">
         <div class="flex items-start gap-3">
-            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-orange-500 text-white">@icon('user', 'w-4 h-4')</span>
+            <span class="mt-0.5 shrink-0 text-orange-500">@icon('user', 'w-5 h-5')</span>
             <div class="min-w-0">
-                <p class="text-[10px] font-extrabold uppercase tracking-wider text-orange-500">Titulaire</p>
-                <p class="mt-0.5 truncate text-base font-extrabold text-ink-950">{{ $ticket->holder_name }}</p>
+                <p class="text-[9px] font-bold uppercase leading-none tracking-[0.14em] text-white/45">Titulaire</p>
+                <p class="mt-1 truncate text-[15px] font-extrabold leading-tight text-white">{{ $ticket->holder_name }}</p>
                 @if ($ticket->holder_email)
-                    <p class="mt-1 flex items-center gap-1.5 text-xs text-ink-500">
-                        <span class="grid h-4 w-4 shrink-0 place-items-center rounded-[4px] bg-orange-500 text-white">@icon('mail', 'w-3 h-3')</span>
-                        <span class="truncate">{{ $ticket->holder_email }}</span>
-                    </p>
+                    <p class="mt-1 truncate text-[11px] leading-tight text-white/55">{{ $ticket->holder_email }}</p>
                 @endif
-            </div>
-        </div>
-
-        <div class="mt-3 grid grid-cols-2 gap-4 border-t border-ink-100 pt-3">
-            <div class="flex items-start gap-2.5">
-                <span class="text-orange-500">@icon('tag', 'w-5 h-5')</span>
-                <div class="min-w-0">
-                    <p class="text-[10px] font-extrabold uppercase tracking-wider text-orange-500">Prix</p>
-                    <p class="mt-0.5 truncate text-base font-extrabold text-ink-950">{{ money($ticket->price) }}</p>
-                </div>
-            </div>
-            <div class="flex items-start gap-2.5 border-l border-ink-100 pl-4">
-                <span class="text-orange-500">@icon('shield', 'w-5 h-5')</span>
-                <div class="min-w-0">
-                    <p class="text-[10px] font-extrabold uppercase tracking-wider text-orange-500">Réservation</p>
-                    <p class="mt-0.5 font-mono text-xs font-extrabold text-ink-950 break-all">{{ $ticket->reservation->reference }}</p>
-                </div>
             </div>
         </div>
     </div>
 
-    {{-- Pied orange --}}
-    <div class="bg-gradient-to-r from-orange-600 to-orange-500 px-6 py-3">
-        <div class="flex items-center justify-between text-xs font-bold text-white">
-            <span>{{ $ticket->event->organizer_display_name }}</span>
-            <span>{{ $ticket->event->event_date?->year ?? now()->year }}</span>
+    {{-- Prix + réservation --}}
+    <div class="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10">
+        <div class="flex items-start gap-2.5 px-5 py-2.5">
+            <span class="mt-0.5 shrink-0 text-orange-500">@icon('currency', 'w-5 h-5')</span>
+            <div class="min-w-0">
+                <p class="text-[9px] font-bold uppercase leading-none tracking-[0.14em] text-white/45">Prix</p>
+                <p class="mt-1 truncate text-[15px] font-extrabold leading-tight text-white">{{ money($ticket->price) }}</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-2.5 px-5 py-2.5">
+            <span class="mt-0.5 shrink-0 text-orange-500">@icon('ticket', 'w-5 h-5')</span>
+            <div class="min-w-0">
+                <p class="text-[9px] font-bold uppercase leading-none tracking-[0.14em] text-white/45">Réservation</p>
+                <p class="mt-1 break-all font-mono text-[13px] font-extrabold leading-tight text-white">{{ $ticket->reservation->reference }}</p>
+            </div>
+        </div>
+    </div>
+
+    {{-- Pied : organisateur + année --}}
+    <div class="relative border-t border-white/10 px-5 py-3.5">
+        <div class="absolute inset-[1.5px] overflow-hidden" aria-hidden="true" style="background: radial-gradient(55% 130% at 50% 155%, rgba(249,115,22,.30) 0%, rgba(249,115,22,.10) 45%, transparent 75%);"></div>
+        <div class="relative flex items-center justify-between gap-3">
+            <span class="flex min-w-0 items-center gap-2">
+                @if ($organizerAvatar)
+                    <img src="{{ $organizerAvatar }}" alt="" aria-hidden="true" class="h-4 w-4 shrink-0 rounded-full object-cover">
+                @else
+                    <img src="{{ asset('images/icon.svg') }}" alt="" class="h-4 w-4 shrink-0">
+                @endif
+                <span class="truncate text-[11px] font-semibold text-white/75">{{ $ticket->event->organizer_display_name }}</span>
+            </span>
+            <span class="shrink-0 text-[11px] font-semibold text-white/40">{{ $ticket->event->event_date?->year ?? now()->year }}</span>
         </div>
     </div>
 

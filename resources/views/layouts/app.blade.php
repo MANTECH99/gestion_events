@@ -8,8 +8,14 @@
     'schema' => [],
 ])
 
+@php
+    $hasSidebar = view()->hasSection('sidebar');
+    // Espaces de gestion sombres par défaut (cookie « theme » = « light » pour le clair).
+    $themeDark = request()->routeIs('organizer.*', 'admin.*') && request()->cookie('theme') !== 'light';
+@endphp
+
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="fr" class="h-full{{ $themeDark ? ' dark' : '' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -44,12 +50,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
-@php $hasSidebar = view()->hasSection('sidebar'); @endphp
-
 <body class="flex min-h-full flex-col bg-ink-50">
     @include('partials.nav', ['hasSidebar' => $hasSidebar])
 
-    <main class="flex-1 {{ request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'favoris.*', 'profil.*') ? 'bg-ink-950' : '' }}">
+    <main class="flex-1 {{ request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*') || $themeDark ? 'bg-ink-950' : '' }}">
         @include('partials.flash')
 
         @if ($hasSidebar)
@@ -57,7 +61,7 @@
                 @yield('sidebar')
 
                 <div class="lg:pl-64">
-                    <div class="{{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} px-4 py-8 sm:px-6 lg:px-8">
+                    <div class="{{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} px-4 {{ $themeDark ? 'pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 pb-8 sm:pt-28' : 'py-8' }} sm:px-6 lg:px-8">
                         <button type="button" @click="open = true" aria-controls="sidebar-gestion"
                                 class="btn-ghost btn-sm mb-4 lg:hidden"
                                 :aria-expanded="open ? 'true' : 'false'">
@@ -73,14 +77,10 @@
         @endif
     </main>
 
-    {{-- Sur les interfaces de gestion, le footer suit la colonne fixe. --}}
-    @if ($hasSidebar)
-        <div class="lg:pl-64">
-            @include('partials.footer', ['hasSidebar' => $hasSidebar])
-        </div>
-    @else
+    {{-- Pas de footer dans les espaces de gestion : admin, organisateur, agent, point de vente. --}}
+    @unless (request()->routeIs('organizer.*', 'admin.*', 'pos.*', 'agent.*'))
         @include('partials.footer', ['hasSidebar' => $hasSidebar])
-    @endif
+    @endunless
 
     <div id="toast-root" class="pointer-events-none fixed inset-x-0 bottom-28 z-[100] flex flex-col items-center gap-2 px-4 lg:bottom-4"></div>
 

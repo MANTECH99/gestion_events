@@ -177,6 +177,15 @@
                     @endif
                 </div>
 
+                <div>
+                    <label for="organizer_bio" class="label">Biographie de l'organisateur</label>
+                    <textarea id="organizer_bio" name="organizer_bio" rows="4" maxlength="2000"
+                              placeholder="Présentez l'organisateur : depuis quand, quels événements, quelle exigence…"
+                              class="input @error('organizer_bio') input-error @enderror">{{ old('organizer_bio', $event->exists ? $event->organizer?->bio : auth()->user()?->bio) }}</textarea>
+                    <p class="mt-1.5 text-xs text-ink-500">Affichée dans le bloc Organisateur de la page événement, 2000 caractères maximum. Laissez vide pour l'effacer.</p>
+                    @error('organizer_bio')<p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p>@enderror
+                </div>
+
                 <label class="flex items-start gap-3 rounded-xl bg-ink-50 p-3">
                     <input type="checkbox" name="online_sales_enabled" value="1" class="checkbox mt-0.5"
                            @checked(old('online_sales_enabled', $event->online_sales_enabled ?? true))>

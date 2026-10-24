@@ -2,8 +2,11 @@
     $user = auth()->user();
     $hasSidebar = $hasSidebar ?? false;
     $onHome = request()->routeIs('home');
+    // Espaces de gestion : sombre par défaut, basculable en clair via le cookie « theme ».
+    $backoffice = request()->routeIs('organizer.*', 'admin.*');
+    $themeDark = $backoffice && request()->cookie('theme') !== 'light';
     // Header transparent sur l'accueil, la page détail d'événement et la page de réservation (thèmes sombres).
-    $darkHeader = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'favoris.*', 'profil.*');
+    $darkHeader = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*') || $themeDark;
 @endphp
 
 <header class="app-header no-print z-50 backdrop-blur-lg {{ $darkHeader ? 'absolute inset-x-0 top-0 bg-transparent' : 'sticky top-0 border-b border-ink-200/60 bg-white/85' }}">
@@ -67,6 +70,15 @@
                                    class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                     @icon('shield', 'w-4 h-4') Administration
                                 </a>
+                            @endif
+
+                            @if ($backoffice)
+                                <form method="POST" action="{{ route('theme.update') }}" class="sm:hidden">
+                                    @csrf
+                                    <button type="submit" class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
+                                        @icon($darkHeader ? 'sun' : 'moon', 'w-4 h-4') {{ $darkHeader ? 'Mode clair' : 'Mode sombre' }}
+                                    </button>
+                                </form>
                             @endif
                         @else
                             <a href="{{ route('login') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
@@ -188,6 +200,18 @@
                             </div>
                         </div>
                     </div>
+
+                    @if ($backoffice)
+                        <form method="POST" action="{{ route('theme.update') }}">
+                            @csrf
+                            <button type="submit"
+                                    class="hidden h-9 w-9 place-items-center rounded-xl border transition sm:grid {{ $darkHeader ? 'border-white/25 bg-white/10 text-white hover:bg-white/20' : 'border-ink-200 bg-white text-ink-700 hover:border-ink-300' }}"
+                                    title="{{ $darkHeader ? 'Passer en mode clair' : 'Passer en mode sombre' }}"
+                                    aria-label="{{ $darkHeader ? 'Passer en mode clair' : 'Passer en mode sombre' }}">
+                                @icon($darkHeader ? 'sun' : 'moon', 'w-5 h-5')
+                            </button>
+                        </form>
+                    @endif
                 @else
                     @if ($darkHeader)
                         <a href="{{ $homeAnchor }}#evenements" class="hidden h-9 w-9 place-items-center rounded-xl text-white/80 transition hover:bg-white/10 hover:text-white sm:grid"

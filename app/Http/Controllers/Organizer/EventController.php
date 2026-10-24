@@ -83,6 +83,8 @@ class EventController extends Controller
             $this->storeAvatar($request, $event->organizer);
         }
 
+        $this->saveOrganizerBio($request, $event->organizer);
+
         return redirect()->route('organizer.events.ticket-types', $event)
             ->with('success', "Événement « {$event->title} » créé. Ajoutez ses types de tickets.");
     }
@@ -125,6 +127,8 @@ class EventController extends Controller
             $this->storeAvatar($request, $event->organizer);
         }
 
+        $this->saveOrganizerBio($request, $event->organizer);
+
         return redirect()->route('organizer.events.index')->with('success', 'Événement mis à jour.');
     }
 
@@ -150,6 +154,7 @@ class EventController extends Controller
             'event_type' => ['required', Rule::in(array_keys(Event::TYPES))],
             'status' => ['required', Rule::in(array_keys($this->statuses()))],
             'organizer_display_name' => ['nullable', 'string', 'max:120'],
+            'organizer_bio' => ['nullable', 'string', 'max:2000'],
             'organizer_id' => ['nullable', 'integer', 'exists:users,id'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'venue_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
@@ -166,6 +171,7 @@ class EventController extends Controller
             'event_type' => 'type d\'événement',
             'status' => 'statut',
             'organizer_display_name' => 'nom de l\'organisateur affiché',
+            'organizer_bio' => 'biographie de l\'organisateur',
             'image' => 'image de couverture',
             'venue_image' => 'photo du lieu',
             'avatar' => 'photo de profil',
@@ -210,6 +216,17 @@ class EventController extends Controller
         }
 
         $organizer->update(['avatar_path' => $path]);
+    }
+
+    private function saveOrganizerBio(Request $request, ?User $organizer): void
+    {
+        if (! $organizer || ! $request->has('organizer_bio')) {
+            return;
+        }
+
+        $bio = trim($request->input('organizer_bio', ''));
+
+        $organizer->update(['bio' => $bio === '' ? null : $bio]);
     }
 
     /** @return \Illuminate\Support\Collection<int, Artist> */

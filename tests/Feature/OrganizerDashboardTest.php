@@ -219,6 +219,27 @@ class OrganizerDashboardTest extends TestCase
             ->assertDontSee('"physical":', false);
     }
 
+    public function test_tickets_chart_labels_use_the_event_title(): void
+    {
+        Carbon::setTestNow('2026-06-15 10:00:00');
+
+        $this->reservation(2, 5000, Reservation::CHANNEL_ONLINE, now());
+
+        // StatsService::groupByEvent renvoie « title » : pluck('label') envoyait
+        // un tableau de null à Chart.js et le graphique restait vide.
+        $html = $this->actingAs($this->organizer)
+            ->get(route('organizer.dashboard', ['period' => 'all']))
+            ->assertOk()
+            ->getContent();
+
+        $pos = strpos($html, "getElementById('tickets-chart')");
+        $this->assertNotFalse($pos);
+
+        $segment = substr($html, $pos, 300);
+        $this->assertStringContainsString('Gala Dashboard', $segment);
+        $this->assertStringNotContainsString('null', $segment);
+    }
+
     public function test_validations_card_shows_accepted_and_refused(): void
     {
         Carbon::setTestNow('2026-06-15 10:00:00');

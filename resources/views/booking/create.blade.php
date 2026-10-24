@@ -100,7 +100,26 @@
         <div class="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:grid-cols-5 lg:px-8">
             {{-- Colonne principale --}}
             <div class="min-w-0 space-y-6 lg:col-span-3">
-                <form method="POST" action="{{ route('booking.store', $event) }}">
+                <form method="POST" action="{{ route('booking.store', $event) }}"
+                      @submit="sending = true"
+                      x-data="{
+                          sending: false,
+                          missing: {},
+                          check(e) {
+                              if (this.sending) { e.preventDefault(); return; }
+                              this.missing = {};
+                              const f = this.$root;
+                              ['customer_name', 'customer_email', 'customer_phone', 'customer_city'].forEach((n) => {
+                                  const el = f.elements[n];
+                                  if (!el || !String(el.value).trim()) this.missing[n] = true;
+                              });
+                              const first = Object.keys(this.missing)[0];
+                              if (first) {
+                                  e.preventDefault();
+                                  this.$nextTick(() => { const el = f.elements[first]; if (el) el.focus(); });
+                              }
+                          }
+                      }">
                     @csrf
 
                     {{-- Récapitulatif des billets --}}
@@ -212,7 +231,7 @@
                                 @endforeach
                             </select>
                             <button type="button"
-                                    class="shrink-0 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition enabled:hover:border-orange-400/60 enabled:hover:text-orange-300 disabled:opacity-40"
+                                    class="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition enabled:hover:border-orange-400/60 enabled:hover:text-orange-300 disabled:opacity-40"
                                     @click="add(Number(toAdd))" :disabled="!toAdd">
                                 @icon('plus', 'w-4 h-4') Ajouter
                             </button>
@@ -251,7 +270,10 @@
                                 </label>
                                 <input id="customer_name" name="customer_name" type="text" required
                                        value="{{ old('customer_name', auth()->user()?->full_name) }}"
+                                       @input="delete missing.customer_name"
+                                       :class="missing.customer_name ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''"
                                        class="input-dark" placeholder="Ex : Awa Diop">
+                                <p x-show="missing.customer_name" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
                             </div>
 
                             <div>
@@ -260,7 +282,10 @@
                                 </label>
                                 <input id="customer_email" name="customer_email" type="email" required
                                        value="{{ old('customer_email', auth()->user()?->email) }}"
-                                       class="input-dark" placeholder="awa@example.com">
+                                       class="input-dark" placeholder="awa@example.com"
+                                       @input="delete missing.customer_email"
+                                       :class="missing.customer_email ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''">
+                                <p x-show="missing.customer_email" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
                             </div>
 
                             <div>
@@ -269,7 +294,10 @@
                                 </label>
                                 <input id="customer_phone" name="customer_phone" type="tel" required
                                        value="{{ old('customer_phone', auth()->user()?->phone) }}"
-                                       class="input-dark" placeholder="+221 77 123 45 67">
+                                       class="input-dark" placeholder="+221 77 123 45 67"
+                                       @input="delete missing.customer_phone"
+                                       :class="missing.customer_phone ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''">
+                                <p x-show="missing.customer_phone" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
                             </div>
 
                             <div>
@@ -278,7 +306,10 @@
                                 </label>
                                 <input id="customer_city" name="customer_city" type="text" required
                                        value="{{ old('customer_city') }}"
-                                       class="input-dark" placeholder="Dakar">
+                                       class="input-dark" placeholder="Dakar"
+                                       @input="delete missing.customer_city"
+                                       :class="missing.customer_city ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''">
+                                <p x-show="missing.customer_city" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
                             </div>
 
                             <div class="sm:col-span-2">
@@ -295,10 +326,12 @@
                     {{-- Actions --}}
                     <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                         <a href="{{ route('events.show', $event) }}" class="btn-outline justify-center">Annuler</a>
-                        <button type="submit" class="btn-primary"
-                                :disabled="total() === 0"
+                        <button type="submit" @click="check($event)"
+                                class="btn-hero-primary whitespace-nowrap"
+                                :disabled="sending || total() === 0"
                                 :class="total() === 0 ? 'cursor-not-allowed opacity-50' : ''">
-                            Réserver @icon('arrow-right', 'w-4 h-4')
+                            <span x-show="!sending" class="inline-flex items-center gap-2">Réserver @icon('arrow-right', 'w-4 h-4')</span>
+                            <span x-show="sending" x-cloak>Réservation en cours…</span>
                         </button>
                     </div>
                 </form>
@@ -343,8 +376,9 @@
                                     @icon('clock', 'w-3.5 h-3.5') {{ $event->event_date->format('H\hi') }}
                                 </span>
                             </p>
-                            <p class="mt-0.5 truncate text-xs text-white/60">
-                                @icon('map-pin', 'w-3.5 h-3.5') {{ $event->location }}
+                            <p class="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-white/60">
+                                @icon('map-pin', 'w-3.5 h-3.5 shrink-0')
+                                <span class="min-w-0 truncate">{{ $event->location }}</span>
                             </p>
                         </div>
                     </div>
@@ -372,14 +406,14 @@
                     </div>
                 </section>
 
-                {{-- Billets par email --}}
+                {{-- Billets par WhatsApp --}}
                 <section class="rounded-2xl border border-orange-500/25 bg-orange-500/10 p-5">
                     <div class="flex items-start gap-3">
                         <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-orange-500 text-ink-950">
-                            @icon('mail', 'w-5 h-5')
+                            @icon('send', 'w-5 h-5')
                         </span>
                         <p class="text-sm font-bold leading-snug text-white">
-                            Vos billets seront envoyés par email juste après le paiement.
+                            Vos billets seront envoyés par WhatsApp juste après le paiement.
                         </p>
                     </div>
                     <ul class="mt-4 space-y-2.5 text-sm text-white/70">

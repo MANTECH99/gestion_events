@@ -2,12 +2,112 @@ import { toPng } from 'html-to-image';
 import { toast } from './utils';
 
 /**
+ * Fond de la maquette : noir chaud + halos orange derrière le billet.
+ * Partagé par « Enregistrer l'image » (ticketImage) et l'envoi automatique
+ * WhatsApp (ticketWhatsApp) — les deux rendus restent identiques.
+ */
+function paintBackdrop(ctx, w, h) {
+    ctx.fillStyle = '#0a0705';
+    ctx.fillRect(0, 0, w, h);
+
+    const halos = [
+        {
+            x: w * 0.95,
+            y: h * 1.02,
+            r: Math.max(w, h) * 0.5,
+            stops: [
+                [0, 'rgba(234,88,12,0.30)'],
+                [0.5, 'rgba(234,88,12,0.10)'],
+                [1, 'rgba(234,88,12,0)'],
+            ],
+        },
+        {
+            x: w * 0.05,
+            y: h * 1.02,
+            r: Math.max(w, h) * 0.5,
+            stops: [
+                [0, 'rgba(234,88,12,0.30)'],
+                [0.5, 'rgba(234,88,12,0.10)'],
+                [1, 'rgba(234,88,12,0)'],
+            ],
+        },
+        {
+            x: w * 0.7,
+            y: -h * 0.05,
+            r: Math.max(w, h) * 0.35,
+            stops: [
+                [0, 'rgba(249,115,22,0.12)'],
+                [0.5, 'rgba(249,115,22,0.04)'],
+                [1, 'rgba(249,115,22,0)'],
+            ],
+        },
+    ];
+
+    for (const halo of halos) {
+        const grad = ctx.createRadialGradient(halo.x, halo.y, 0, halo.x, halo.y, halo.r);
+        for (const [offset, color] of halo.stops) {
+            grad.addColorStop(offset, color);
+        }
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+    }
+}
+
+/**
+ * Attend que toutes les images de l'élément soient chargées (load ou erreur),
+ * avec un garde-fou de 2,5 s. html-to-image décode les images raster au
+ * moment du rendu : un lancer avant le chargement les produit transparentes.
+ */
+function waitForImages(root) {
+    if (!root || !root.querySelectorAll) return Promise.resolve();
+
+    return Promise.all(Array.from(root.querySelectorAll('img')).map((img) => {
+        // Chargée ou cassée : on n'attend pas (l'image de repli reste visible).
+        if (img.complete) return null;
+
+        return new Promise((resolve) => {
+            const done = () => resolve();
+            img.addEventListener('load', done, { once: true });
+            img.addEventListener('error', done, { once: true });
+            setTimeout(done, 2500);
+        });
+    }));
+}
+
+/**
+ * Capture fiable : bug connu de html-to-image — le PREMIER rendu
+ * (foreignObject SVG) peut rater les images raster alors que le second
+ * les inclut. On re-tant tant que le résultat grossit (les photos
+ * apparaissent), plafonné à 3 essais.
+ *
+ * @see https://github.com/bubkoo/html-to-image/issues/488
+ */
+async function renderToPng(el, options) {
+    let best = await toPng(el, options);
+
+    for (let attempt = 1; attempt < 3; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 120));
+
+        const next = await toPng(el, options);
+
+        if (next.length > best.length) {
+            best = next;
+        } else {
+            break;
+        }
+    }
+
+    return best;
+}
+
+/**
  * Enregistre le billet affiché sous forme d'image (PNG), fidèle à l'écran.
  *
  * On capture directement l'élément DOM du billet : le navigateur le rend
  * lui-même (dégradé, icônes, QR code, police), donc le résultat est identique
- * à ce que l'utilisateur voit. On dessine ensuite ce rendu sur un fond uni
- * avec une marge identique sur les quatre côtés. Sur mobile, le bouton
+ * à ce que l'utilisateur voit. On dessine ensuite ce rendu sur le fond de la
+ * maquette (noir chaud + halo orange) avec une marge identique sur les quatre
+ * côtés. Sur mobile, le bouton
  * « Enregistrer » ouvre le partage natif pour ranger l'image dans la galerie.
  */
 function ticketImage() {
@@ -26,14 +126,15 @@ function ticketImage() {
 
             try {
                 await this.ready();
+                await waitForImages(el);
 
                 const ratio = Math.min(3, Math.max(2, window.devicePixelRatio || 1));
 
                 // Rendu du billet, fond transparent (les coins arrondis restent nets).
-                const raw = await toPng(el, { pixelRatio: ratio, cacheBust: true });
+                const raw = await renderToPng(el, { pixelRatio: ratio, cacheBust: true });
 
-                // Recadrage : marge identique sur les 4 côtés + fond uni.
-                this.dataUrl = await this.withBackground(raw, 28 * ratio, '#eef1f6');
+                // Recadrage : marge identique sur les 4 côtés + fond de la maquette.
+                this.dataUrl = await this.withBackground(raw, 28 * ratio);
 
                 this.canShare = typeof navigator !== 'undefined' && !!navigator.canShare;
                 this.open = true;
@@ -69,6 +170,7 @@ function ticketImage() {
                 document.body.appendChild(holder);
 
                 await this.ready();
+                await waitForImages(holder);
 
                 const ratio = Math.min(3, Math.max(2, window.devicePixelRatio || 1));
 
@@ -81,8 +183,8 @@ function ticketImage() {
 
                 for (let i = 0; i < targets.length; i++) {
                     const target = targets[i];
-                    const raw = await toPng(target, { pixelRatio: ratio, cacheBust: true, style });
-                    const image = await this.withBackground(raw, 28 * ratio, '#eef1f6');
+                    const raw = await renderToPng(target, { pixelRatio: ratio, cacheBust: true, style });
+                    const image = await this.withBackground(raw, 28 * ratio);
 
                     const suffix = (target.dataset && target.dataset.code)
                         || (targets.length > 1 ? String(i + 1) : (code || 'reservation'));
@@ -103,8 +205,8 @@ function ticketImage() {
             }
         },
 
-        /** Dessine l'image sur un canevas avec une marge uniforme. */
-        withBackground(src, margin, color) {
+        /** Dessine l'image sur un canevas avec une marge + fond de la maquette. */
+        withBackground(src, margin) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
 
@@ -115,8 +217,7 @@ function ticketImage() {
                         canvas.height = img.height + margin * 2;
 
                         const ctx = canvas.getContext('2d');
-                        ctx.fillStyle = color;
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        paintBackdrop(ctx, canvas.width, canvas.height);
                         ctx.drawImage(img, margin, margin);
 
                         resolve(canvas.toDataURL('image/png'));
@@ -218,7 +319,8 @@ function ticketWhatsApp(config = {}) {
                 const parts = [];
 
                 for (const card of cards) {
-                    parts.push(await toPng(card, { pixelRatio: ratio, cacheBust: true }));
+                    await waitForImages(card);
+                    parts.push(await renderToPng(card, { pixelRatio: ratio, cacheBust: true }));
                 }
 
                 const image = await this.stitch(parts, ratio);
@@ -238,15 +340,20 @@ function ticketWhatsApp(config = {}) {
 
                 if (response.ok && data.sent) {
                     toast('Votre billet vous a été envoyé sur WhatsApp', 'success');
+                } else if (!response.ok) {
+                    console.warn('Envoi WhatsApp du billet refusé', response.status, data);
+                    toast('Envoi WhatsApp du billet impossible', 'error');
                 }
             } catch (e) {
-                /* envoi automatique en arrière-plan : on n'interrompt pas le client */
+                /* envoi automatique en arrière-plan : on n'interrompt pas le
+                   client, mais on laisse une trace pour diagnostiquer. */
+                console.warn('Envoi automatique WhatsApp impossible', e);
             } finally {
                 this.running = false;
             }
         },
 
-        /** Empile les cartes dans une seule image (marge uniforme, fond uni). */
+        /** Empile les cartes dans une seule image (marge uniforme, fond maquette). */
         stitch(sources, ratio) {
             const loaded = sources.map((src) => new Promise((resolve, reject) => {
                 const img = new Image();
@@ -266,8 +373,7 @@ function ticketWhatsApp(config = {}) {
                 canvas.height = height;
 
                 const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#eef1f6';
-                ctx.fillRect(0, 0, width, height);
+                paintBackdrop(ctx, width, height);
 
                 let y = margin;
 

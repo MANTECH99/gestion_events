@@ -40,7 +40,7 @@
                             </div>
                         @endif
 
-                        <span class="badge absolute left-3 top-3 bg-white/95 text-ink-800">
+                        <span class="badge absolute left-3 top-3 bg-white/95 text-slate-800">
                             {{ $statuses[$event->status] ?? $event->status }}
                         </span>
                     </div>

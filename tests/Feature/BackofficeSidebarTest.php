@@ -116,18 +116,28 @@ class BackofficeSidebarTest extends TestCase
         $this->assertStringNotContainsString('<div class="lg:pl-64">', $html);
     }
 
-    public function test_the_footer_follows_the_sidebar_gutter(): void
+    public function test_management_pages_have_no_footer(): void
     {
-        $html = $this->actingAs(User::factory()->organizer()->create())
-            ->get(route('organizer.dashboard'))
-            ->assertOk()
-            ->getContent();
-
-        // Le footer doit être décalé comme le contenu, sinon la colonne fixe le recouvre.
-        $this->assertMatchesRegularExpression(
-            '#<div class="lg:pl-64">\s*<footer#s',
-            $html
+        // Les pages publiques gardent leur footer.
+        $this->assertStringContainsString(
+            '<footer',
+            $this->get(route('home'))->assertOk()->getContent()
         );
+
+        $organizer = User::factory()->organizer()->create();
+        $admin = User::factory()->admin()->create();
+        $pos = User::factory()->pointOfSale($organizer)->create();
+
+        $managementPages = [
+            $this->get(route('agent.index'))->assertOk()->getContent(),
+            $this->actingAs($organizer)->get(route('organizer.dashboard'))->assertOk()->getContent(),
+            $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk()->getContent(),
+            $this->actingAs($pos)->get(route('pos.dashboard'))->assertOk()->getContent(),
+        ];
+
+        foreach ($managementPages as $html) {
+            $this->assertStringNotContainsString('<footer', $html);
+        }
     }
 
     public function test_the_sidebar_title_sits_on_the_header_band(): void

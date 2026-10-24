@@ -57,7 +57,7 @@
                         Se souvenir de moi
                     </label>
 
-                    <button type="submit" class="btn-primary w-full justify-center">
+                    <button type="submit" class="btn-hero-primary w-full justify-center">
                         Se connecter @icon('arrow-right', 'w-4 h-4')
                     </button>
 

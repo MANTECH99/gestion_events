@@ -32,10 +32,32 @@ Chart.register(
 Chart.defaults.font.family = "'Instrument Sans', ui-sans-serif, system-ui, sans-serif";
 Chart.defaults.color = '#667490';
 
-const BRAND = '#1f41f0';
-const BRAND_SOFT = 'rgba(31, 65, 240, 0.12)';
-const ACCENT = '#f98c1b';
-const PALETTE = ['#1f41f0', '#f98c1b', '#12b981', '#8b5cf6', '#0ea5e9', '#f43f5e', '#14b8a6', '#eab308'];
+const LIGHT_THEME = {
+    brand: '#1f41f0',
+    brandSoft: 'rgba(31, 65, 240, 0.12)',
+    accent: '#f98c1b',
+    tick: '#667490',
+    palette: ['#1f41f0', '#f98c1b', '#12b981', '#8b5cf6', '#0ea5e9', '#f43f5e', '#14b8a6', '#eab308'],
+};
+
+const DARK_THEME = {
+    brand: '#60a5fa',
+    brandSoft: 'rgba(96, 165, 250, 0.16)',
+    accent: '#f98c1b',
+    tick: '#94a3b8',
+    palette: ['#60a5fa', '#f98c1b', '#34d399', '#a78bfa', '#38bdf8', '#fb7185', '#2dd4bf', '#facc15'],
+};
+
+let THEME = LIGHT_THEME;
+
+/**
+ * Adapte couleurs, graduations et légendes au thème de la page.
+ * À appeler avant la création des graphiques (défaut : clair).
+ */
+function setChartTheme(dark) {
+    THEME = dark ? DARK_THEME : LIGHT_THEME;
+    Chart.defaults.color = THEME.tick;
+}
 
 /**
  * Graphique d'évolution des ventes (ligne).
@@ -51,28 +73,28 @@ function salesEvolutionChart(canvas, labels, revenue, tickets) {
                     type: 'line',
                     label: 'Revenu',
                     data: revenue,
-                    borderColor: BRAND,
-                    backgroundColor: BRAND_SOFT,
+                    borderColor: THEME.brand,
+                    backgroundColor: THEME.brandSoft,
                     fill: true,
                     tension: 0.35,
                     borderWidth: 2.5,
                     pointRadius: 0,
                     pointHoverRadius: 5,
-                    pointBackgroundColor: BRAND,
+                    pointBackgroundColor: THEME.brand,
                     yAxisID: 'y',
                 },
                 {
                     type: 'line',
                     label: 'Tickets vendus',
                     data: tickets,
-                    borderColor: ACCENT,
+                    borderColor: THEME.accent,
                     backgroundColor: 'transparent',
                     borderWidth: 2,
                     borderDash: [5, 4],
                     tension: 0.35,
                     pointRadius: 0,
                     pointHoverRadius: 5,
-                    pointBackgroundColor: ACCENT,
+                    pointBackgroundColor: THEME.accent,
                     yAxisID: 'y1',
                 },
             ],
@@ -106,7 +128,7 @@ function salesEvolutionChart(canvas, labels, revenue, tickets) {
                 y1: {
                     position: 'right',
                     grid: { display: false },
-                    ticks: { precision: 0, color: ACCENT },
+                    ticks: { precision: 0, color: THEME.accent },
                 },
             },
         },
@@ -124,7 +146,7 @@ function horizontalBarChart(canvas, labels, values, color) {
             datasets: [
                 {
                     data: values,
-                    backgroundColor: color || PALETTE,
+                    backgroundColor: color || THEME.palette,
                     borderRadius: 6,
                     borderSkipped: false,
                     barThickness: 18,
@@ -165,7 +187,7 @@ function groupedBarChart(canvas, labels, datasets) {
             datasets: datasets.map((d, i) => ({
                 label: d.label,
                 data: d.data,
-                backgroundColor: d.color || PALETTE[i % PALETTE.length],
+                backgroundColor: d.color || THEME.palette[i % THEME.palette.length],
                 borderRadius: 6,
                 borderSkipped: false,
                 maxBarThickness: 34,
@@ -195,7 +217,8 @@ function shortNumber(value) {
 }
 
 window.shortNumber = shortNumber;
+window.setChartTheme = setChartTheme;
 window.salesEvolutionChart = salesEvolutionChart;
 window.horizontalBarChart = horizontalBarChart;
 window.groupedBarChart = groupedBarChart;
-window.CHART_PALETTE = PALETTE;
+window.CHART_PALETTE = LIGHT_THEME.palette;

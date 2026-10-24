@@ -34,8 +34,8 @@
         $mapsQuery = $event->location;
     @endphp
 
-    {{-- Héro --}}
-    <section class="relative overflow-hidden bg-ink-950">
+    {{-- Héro (desktop) --}}
+    <section class="relative hidden overflow-hidden bg-ink-950 lg:block">
         <div class="absolute inset-0" aria-hidden="true">
             @if ($event->image_url)
                 <img src="{{ $event->image_url }}" alt="" class="absolute inset-0 h-full w-full object-cover object-center">
@@ -128,8 +128,152 @@
         </div>
     </section>
 
+    {{-- Héro mobile (maquette) --}}
+    <section class="relative overflow-hidden bg-ink-950 lg:hidden"
+             x-data="eventDetailActions(@js([
+                 'slug' => $event->slug,
+                 'title' => $event->title,
+                 'url' => route('events.show', $event),
+             ]))">
+        <div class="absolute inset-0" aria-hidden="true">
+            @if ($event->image_url)
+                <img src="{{ $event->image_url }}" alt="" class="absolute inset-0 h-full w-full object-cover object-center">
+                <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(10,14,23,.35) 0%, rgba(10,14,23,.05) 30%, rgba(10,14,23,.70) 74%, #0a0e17 100%);"></div>
+            @else
+                <div class="absolute inset-0" style="background:
+                    radial-gradient(48% 46% at 72% 30%, rgba(249,115,22,.28), rgba(249,115,22,0) 70%),
+                    radial-gradient(44% 42% at 28% 70%, rgba(56,160,220,.22), rgba(56,160,220,0) 72%),
+                    #0a0e17;"></div>
+            @endif
+        </div>
+
+        <div class="relative px-4 pb-8 pt-28 [@supports(-webkit-touch-callout:none)]:pt-32 sm:pt-32">
+            <div class="flex items-center justify-between">
+                <button type="button" @click="history.length > 1 ? history.back() : window.location.href = @js(route('home'))"
+                        aria-label="Retour"
+                        class="grid h-10 w-10 place-items-center rounded-full bg-black/45 text-white backdrop-blur transition hover:bg-black/60">
+                    @icon('arrow-left', 'w-5 h-5')
+                </button>
+                <div class="flex items-center gap-2.5">
+                    <button type="button" @click="share()" aria-label="Partager"
+                            class="grid h-10 w-10 place-items-center rounded-full bg-black/45 text-white backdrop-blur transition hover:bg-black/60">
+                        @icon('share', 'w-5 h-5')
+                    </button>
+                    <button type="button" @click="toggleFav()"
+                            :aria-label="fav ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+                            :title="fav ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+                            class="grid h-10 w-10 place-items-center rounded-full bg-black/45 backdrop-blur transition hover:bg-black/60"
+                            :class="fav ? 'text-rose-400' : 'text-white'">
+                        @icon('heart', 'w-5 h-5')
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-10 flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-bold text-white shadow-lg shadow-emerald-500/25">
+                    {{ $event->type_label }}
+                </span>
+                @if (! $event->isPublished())
+                    @if ($event->status === 'draft')
+                        <span class="rounded-full bg-amber-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">Brouillon</span>
+                    @else
+                        <span class="rounded-full bg-slate-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">{{ $event->status_label }}</span>
+                    @endif
+                @endif
+            </div>
+
+            <h1 class="mt-2.5 text-[27px] font-extrabold leading-[1.08] tracking-tight text-white">
+                {{ $event->title }}
+            </h1>
+
+            <div class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-medium text-white/90">
+                <span class="inline-flex items-center gap-1.5">
+                    @icon('calendar', 'w-4 h-4 text-white/80') {{ event_date_fr($event->event_date, 'j F Y') }}
+                </span>
+                <span class="text-white/40" aria-hidden="true">·</span>
+                <span>{{ str_replace(':', 'h ', $event->event_date->format('H:i')) }}</span>
+                <span class="text-white/40" aria-hidden="true">·</span>
+                <span class="inline-flex min-w-0 items-center gap-1.5">
+                    @icon('map-pin', 'w-4 h-4 text-white/80')
+                    <span class="min-w-0 truncate">{{ $event->location }}</span>
+                </span>
+            </div>
+        </div>
+    </section>
+
+    {{-- Statistiques mobile (maquette) --}}
+    <section class="bg-ink-950 lg:hidden">
+        <div class="px-4">
+            <div class="grid grid-cols-3 divide-x divide-white/10 rounded-2xl bg-white/5 py-4">
+                <div class="flex items-center justify-center gap-2.5 px-2">
+                    <span class="shrink-0 text-amber-400">@icon('star', 'w-5 h-5')</span>
+                    <div class="min-w-0">
+                        <p class="text-[15px] font-extrabold leading-tight text-white">
+                            {{ $avgRating !== null ? number_format($avgRating, 1, ',', '') : '—' }}<span class="text-[11px] font-bold text-white/50">/5</span>
+                        </p>
+                        <p class="mt-0.5 text-[10px] font-medium text-white/45">({{ $reviewsCount }} avis)</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center gap-2.5 px-2">
+                    <span class="shrink-0 text-white/90">@icon('users', 'w-5 h-5')</span>
+                    <div class="min-w-0">
+                        <p class="text-[15px] font-extrabold leading-tight text-white">{{ $event->tickets_sold_short }}</p>
+                        <p class="mt-0.5 text-[10px] font-medium text-white/45">Billets vendus</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center gap-2.5 px-2">
+                    <span class="shrink-0 text-white/90">@icon('clock', 'w-5 h-5')</span>
+                    <div class="min-w-0">
+                        <p class="text-[15px] font-extrabold leading-tight text-white">{{ $event->duration_label ?? '—' }}</p>
+                        <p class="mt-0.5 text-[10px] font-medium text-white/45">Durée</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- À propos mobile (maquette) + CTA --}}
+    <section class="bg-ink-950 lg:hidden">
+        <div class="px-4 pt-3">
+            @if ($event->description || $event->tags_list !== [])
+                <div class="rounded-2xl bg-white/5 p-4">
+                    <p class="text-[15px] font-bold text-white">À propos</p>
+                    @if ($event->description)
+                        <p class="mt-2 text-[13px] leading-relaxed text-white/65">{{ \Illuminate\Support\Str::limit($event->description, 260) }}</p>
+                    @endif
+                    @if ($event->tags_list !== [])
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            @foreach ($event->tags_list as $i => $tag)
+                                <span class="rounded-full border px-3 py-1 text-xs font-semibold {{ $i === 0 ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-300' : 'border-white/15 bg-white/5 text-white/65' }}">{{ $tag }}</span>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            <div class="mt-4 flex items-center gap-2.5">
+                <a href="#billets" class="btn-hero-primary min-w-0 flex-1 whitespace-nowrap px-3 py-3 text-xs">
+                    @icon('ticket', 'w-4 h-4')
+                    @if ($event->isOnSale())
+                        Choisir mes billets
+                    @elseif ($event->isSoldOut())
+                        Billets épuisés
+                    @elseif (! $event->online_sales_enabled)
+                        Voir les tarifs
+                    @else
+                        Voir l'événement
+                    @endif
+                </a>
+                <p class="shrink-0 text-right text-[11px] font-medium leading-tight text-white/60">
+                    À partir de
+                    <span class="block text-[15px] font-extrabold text-orange-400">{{ $event->min_price === null ? '—' : money($event->min_price) }}</span>
+                </p>
+            </div>
+        </div>
+    </section>
+
     {{-- Barre de statistiques --}}
-    <section class="bg-ink-950">
+    <section class="hidden bg-ink-950 lg:block">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 lg:grid-cols-4">
                 <div class="bg-ink-950 p-5 text-center sm:p-6">
@@ -249,6 +393,10 @@
                             <p class="mt-4 text-sm leading-relaxed text-white/65">{{ $event->organizer->bio }}</p>
                         @endif
                     </section>
+
+                    <div class="hidden lg:block">
+                        @include('events.partials.review-form', ['reviewId' => 'col1'])
+                    </div>
                 </div>
 
                 {{-- Colonne 2 : galerie, lieu, avis --}}
@@ -320,6 +468,10 @@
                                 Avis
                                 <span class="text-sm font-medium text-white/45">({{ $reviewsCount }})</span>
                             </h2>
+                        </div>
+
+                        <div class="lg:hidden">
+                            @include('events.partials.review-form', ['reviewId' => 'avis'])
                         </div>
 
                         @if ($reviewsCount === 0)

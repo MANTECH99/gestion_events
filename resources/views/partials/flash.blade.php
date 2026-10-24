@@ -1,5 +1,6 @@
 @php
-    $darkTheme = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'favoris.*', 'profil.*');
+    $darkTheme = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*')
+        || (request()->routeIs('organizer.*', 'admin.*') && request()->cookie('theme') !== 'light');
     $pad = $darkTheme
         ? 'pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 sm:pt-28'
         : 'pt-4';

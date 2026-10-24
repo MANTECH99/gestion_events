@@ -1,4 +1,4 @@
-<footer class="{{ request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'favoris.*', 'profil.*') ? '' : 'mt-20' }} border-t border-white/10 bg-ink-950 no-print {{ ($hasSidebar ?? false) ? '' : 'pb-24 lg:pb-0' }}">
+<footer class="{{ request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*') || (request()->routeIs('organizer.*', 'admin.*') && request()->cookie('theme') !== 'light') ? '' : 'mt-20' }} border-t border-white/10 bg-ink-950 no-print {{ ($hasSidebar ?? false) ? '' : 'pb-24 lg:pb-0' }}">
     <div class="{{ ($hasSidebar ?? false) ? 'w-full' : 'mx-auto max-w-7xl' }} px-4 py-12 sm:px-6 lg:px-8">
         <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div class="lg:col-span-2">
