@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -320,7 +321,7 @@ class Event extends Model
     }
 
     /** Événements similaires : même type d'abord, puis complément parmi les à venir. */
-    public function similarEvents(int $limit = 3): \Illuminate\Support\Collection
+    public function similarEvents(int $limit = 3): Collection
     {
         $same = static::query()
             ->published()

@@ -109,7 +109,7 @@
                               if (this.sending) { e.preventDefault(); return; }
                               this.missing = {};
                               const f = this.$root;
-                              ['customer_name', 'customer_email', 'customer_phone', 'customer_city'].forEach((n) => {
+                              ['customer_name', 'customer_phone'].forEach((n) => {
                                   const el = f.elements[n];
                                   if (!el || !String(el.value).trim()) this.missing[n] = true;
                               });
@@ -277,18 +277,6 @@
                             </div>
 
                             <div>
-                                <label for="customer_email" class="mb-1.5 block text-sm font-medium text-white/70">
-                                    Email <span class="text-rose-400">*</span>
-                                </label>
-                                <input id="customer_email" name="customer_email" type="email" required
-                                       value="{{ old('customer_email', auth()->user()?->email) }}"
-                                       class="input-dark" placeholder="awa@example.com"
-                                       @input="delete missing.customer_email"
-                                       :class="missing.customer_email ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''">
-                                <p x-show="missing.customer_email" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
-                            </div>
-
-                            <div>
                                 <label for="customer_phone" class="mb-1.5 block text-sm font-medium text-white/70">
                                     Téléphone <span class="text-rose-400">*</span>
                                 </label>
@@ -298,27 +286,6 @@
                                        @input="delete missing.customer_phone"
                                        :class="missing.customer_phone ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''">
                                 <p x-show="missing.customer_phone" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
-                            </div>
-
-                            <div>
-                                <label for="customer_city" class="mb-1.5 block text-sm font-medium text-white/70">
-                                    Ville <span class="text-rose-400">*</span>
-                                </label>
-                                <input id="customer_city" name="customer_city" type="text" required
-                                       value="{{ old('customer_city') }}"
-                                       class="input-dark" placeholder="Dakar"
-                                       @input="delete missing.customer_city"
-                                       :class="missing.customer_city ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''">
-                                <p x-show="missing.customer_city" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
-                            </div>
-
-                            <div class="sm:col-span-2">
-                                <label for="customer_address" class="mb-1.5 block text-sm font-medium text-white/70">
-                                    Adresse <span class="text-white/40">(optionnel)</span>
-                                </label>
-                                <input id="customer_address" name="customer_address" type="text"
-                                       value="{{ old('customer_address') }}"
-                                       class="input-dark" placeholder="Ex : Sacré-Cœur, Dakar">
                             </div>
                         </div>
                     </section>

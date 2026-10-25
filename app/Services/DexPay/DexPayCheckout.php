@@ -146,7 +146,7 @@ class DexPayCheckout
         array $operator,
         string $customerName,
         string $customerPhone,
-        string $customerEmail,
+        ?string $customerEmail = null,
     ): array {
         $payload = [
             'payment_method' => $operator['payment_method'] ?? 'mobile_money',

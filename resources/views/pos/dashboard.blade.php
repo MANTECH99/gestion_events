@@ -136,18 +136,10 @@
                         @error('buyer_name')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
                     </div>
 
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="buyer_phone" class="mb-1.5 block text-sm font-medium text-white/70">Téléphone</label>
-                            <input id="buyer_phone" name="buyer_phone" value="{{ old('buyer_phone') }}"
-                                   placeholder="+221 77 000 00 00" class="input-dark">
-                        </div>
-                        <div>
-                            <label for="buyer_email" class="mb-1.5 block text-sm font-medium text-white/70">E-mail</label>
-                            <input id="buyer_email" name="buyer_email" type="email" value="{{ old('buyer_email') }}"
-                                   class="input-dark @error('buyer_email') border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25 @enderror">
-                            @error('buyer_email')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
-                        </div>
+                    <div>
+                        <label for="buyer_phone" class="mb-1.5 block text-sm font-medium text-white/70">Téléphone</label>
+                        <input id="buyer_phone" name="buyer_phone" value="{{ old('buyer_phone') }}"
+                               placeholder="+221 77 000 00 00" class="input-dark">
                     </div>
 
                     <div>
@@ -158,8 +150,7 @@
 
                     <button class="btn-hero-primary w-full justify-center !px-3 text-xs sm:!px-7 sm:text-sm">
                         @icon('check', 'w-4 h-4')
-                        <span class="sm:hidden">Enregistrer et générer les billets</span>
-                        <span class="hidden sm:inline">Enregistrer la vente et générer les billets</span>
+                        <span>Enregistrer la vente</span>
                     </button>
                 @endif
             </form>

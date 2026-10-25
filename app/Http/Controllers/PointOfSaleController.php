@@ -6,7 +6,6 @@ use App\Exceptions\InsufficientStockException;
 use App\Models\PosSale;
 use App\Models\Reservation;
 use App\Models\StockAllocation;
-use App\Services\ReservationPaymentManager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,7 +48,6 @@ class PointOfSaleController extends Controller
             'quantity' => ['required', 'integer', 'min:1', 'max:100000'],
             'buyer_name' => ['required', 'string', 'max:120'],
             'buyer_phone' => ['nullable', 'string', 'max:30'],
-            'buyer_email' => ['nullable', 'email', 'max:150'],
             'note' => ['nullable', 'string', 'max:255'],
         ], [], [
             'quantity' => 'quantité',
@@ -87,7 +85,7 @@ class PointOfSaleController extends Controller
                     'ticket_type_id' => $ticketType->id,
                     'user_id' => $user->id,
                     'customer_name' => $data['buyer_name'],
-                    'customer_email' => ($data['buyer_email'] ?? null) ?: $user->email,
+                    'customer_email' => null,
                     'customer_phone' => $data['buyer_phone'] ?? null,
                     'quantity' => $data['quantity'],
                     'unit_price' => $unitPrice,
@@ -107,11 +105,9 @@ class PointOfSaleController extends Controller
                     'total_amount' => $total,
                     'buyer_name' => $data['buyer_name'],
                     'buyer_phone' => $data['buyer_phone'] ?? null,
-                    'buyer_email' => $data['buyer_email'] ?? null,
+                    'buyer_email' => null,
                     'note' => $data['note'] ?? null,
                 ]);
-
-                app(ReservationPaymentManager::class)->generateTickets($reservation);
 
                 return $reservation;
             });

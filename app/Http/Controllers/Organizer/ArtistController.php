@@ -20,7 +20,7 @@ class ArtistController extends Controller
 
     public function create(): View
     {
-        return view('organizer.artists.form', ['artist' => new Artist()]);
+        return view('organizer.artists.form', ['artist' => new Artist]);
     }
 
     public function store(Request $request): RedirectResponse

@@ -63,10 +63,7 @@ class BookingController extends Controller
         if ($useRecap) {
             $data = $request->validate([
                 'customer_name' => ['required', 'string', 'min:3', 'max:120'],
-                'customer_email' => ['required', 'email', 'max:150'],
                 'customer_phone' => ['nullable', 'string', 'max:30'],
-                'customer_city' => ['nullable', 'string', 'max:80'],
-                'customer_address' => ['nullable', 'string', 'max:190'],
                 'qty' => ['required', 'array', 'min:1'],
                 'qty.*' => ['required', 'integer', 'min:1', 'max:20'],
             ], [
@@ -75,10 +72,7 @@ class BookingController extends Controller
                 'qty.*.max' => '20 tickets maximum par type de billet.',
             ], [
                 'customer_name' => 'nom',
-                'customer_email' => 'adresse email',
                 'customer_phone' => 'téléphone',
-                'customer_city' => 'ville',
-                'customer_address' => 'adresse',
                 'qty' => 'sélection de billets',
                 'qty.*' => 'quantité',
             ]);
@@ -104,13 +98,11 @@ class BookingController extends Controller
             // Format historique : un seul type de billet.
             $data = $request->validate([
                 'customer_name' => ['required', 'string', 'min:3', 'max:120'],
-                'customer_email' => ['required', 'email', 'max:150'],
                 'customer_phone' => ['nullable', 'string', 'max:30'],
                 'ticket_type_id' => ['required', Rule::exists('ticket_types', 'id')->where('event_id', $event->id)],
                 'quantity' => ['required', 'integer', 'min:1', 'max:20'],
             ], [], [
                 'customer_name' => 'nom',
-                'customer_email' => 'adresse email',
                 'ticket_type_id' => 'type de ticket',
                 'quantity' => 'quantité',
             ]);
@@ -154,10 +146,10 @@ class BookingController extends Controller
                     'ticket_type_id' => $ticketType->id,
                     'user_id' => auth()->id(),
                     'customer_name' => $data['customer_name'],
-                    'customer_email' => $data['customer_email'],
+                    'customer_email' => null,
                     'customer_phone' => $data['customer_phone'] ?? null,
-                    'customer_city' => $data['customer_city'] ?? null,
-                    'customer_address' => $data['customer_address'] ?? null,
+                    'customer_city' => null,
+                    'customer_address' => null,
                     'quantity' => $line['qty'],
                     'unit_price' => $ticketType->price,
                     'total_amount' => $ticketType->price * $line['qty'],

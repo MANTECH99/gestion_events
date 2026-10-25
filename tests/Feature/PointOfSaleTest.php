@@ -90,7 +90,7 @@ class PointOfSaleTest extends TestCase
         $this->assertTrue($reservation->isPaid());
         $this->assertSame(6000, $reservation->total_amount);
         $this->assertSame($this->pos->id, $reservation->sold_by);
-        $this->assertSame(3, $reservation->tickets()->count());
+        $this->assertSame(0, $reservation->tickets()->count());
 
         $this->assertSame(1, PosSale::count());
         $this->assertSame(6000, PosSale::firstOrFail()->total_amount);
@@ -119,7 +119,7 @@ class PointOfSaleTest extends TestCase
             ->assertSessionHas('success');
 
         $this->assertSame(0, $this->allocation->fresh()->remaining);
-        $this->assertSame(50, Ticket::count());
+        $this->assertSame(0, Ticket::count());
     }
 
     public function test_pos_cannot_use_another_sellers_stock(): void

@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -229,7 +230,7 @@ class EventController extends Controller
         $organizer->update(['bio' => $bio === '' ? null : $bio]);
     }
 
-    /** @return \Illuminate\Support\Collection<int, Artist> */
+    /** @return Collection<int, Artist> */
     private function artistOptions()
     {
         return Artist::orderBy('name')->get(['id', 'name', 'title']);

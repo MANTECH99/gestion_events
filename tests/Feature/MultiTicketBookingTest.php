@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\Reservation;
+use App\Models\TicketType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -12,7 +13,7 @@ class MultiTicketBookingTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @return array{0: Event, 1: \App\Models\TicketType, 2: \App\Models\TicketType} */
+    /** @return array{0: Event, 1: TicketType, 2: TicketType} */
     private function eventWithTypes(): array
     {
         $organizer = User::factory()->organizer()->create();
