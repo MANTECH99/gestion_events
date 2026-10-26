@@ -67,7 +67,7 @@
             'icon' => 'currency',
             'tone' => 'brand',
             'hint' => $summary['paid_reservations'].' ticket(s) payé(s)',
-            'breakdown' => money($summary['revenue_online'], false).' F en ligne · '.money($summary['revenue_physical'], false).' F en physique',
+          //  'breakdown' => money($summary['revenue_online'], false).' F en ligne · '.money($summary['revenue_physical'], false).' F en physique',
             'dark' => $dark,
         ])
         @include('partials.stat', [
@@ -76,7 +76,7 @@
             'icon' => 'ticket',
             'tone' => 'violet',
             'hint' => $summary['reservations'].' réservation(s) au total',
-            'breakdown' => $summary['tickets_online'].' en ligne / '.$summary['tickets_physical'].' en physique',
+          //  'breakdown' => $summary['tickets_online'].' en ligne / '.$summary['tickets_physical'].' en physique',
             'dark' => $dark,
         ])
         @include('partials.stat', [
