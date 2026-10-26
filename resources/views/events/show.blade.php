@@ -581,7 +581,7 @@
                                                     @if ($available === null)
                                                         Stock illimité
                                                     @elseif ($available > 0)
-                                                        {{ $available }} ticket(s) disponible(s) en ligne
+                                                        {{ $available }} ticket(s) disponible(s)
                                                     @else
                                                         Rupture de stock
                                                     @endif
