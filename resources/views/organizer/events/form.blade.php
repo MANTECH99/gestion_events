@@ -186,6 +186,8 @@
                     @error('organizer_bio')<p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
 
+<input type="hidden" name="online_sales_enabled" value="0">
+
                 <label class="flex items-start gap-3 rounded-xl bg-ink-50 p-3">
                     <input type="checkbox" name="online_sales_enabled" value="1" class="checkbox mt-0.5"
                            @checked(old('online_sales_enabled', $event->online_sales_enabled ?? true))>

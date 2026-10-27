@@ -129,74 +129,71 @@
     </section>
 
     {{-- Héro mobile (maquette) --}}
-    <section class="relative overflow-hidden bg-ink-950 lg:hidden"
+    <section class="relative bg-ink-950 lg:hidden"
              x-data="eventDetailActions(@js([
                  'slug' => $event->slug,
                  'title' => $event->title,
                  'url' => route('events.show', $event),
              ]))">
-        <div class="absolute inset-0" aria-hidden="true">
-            @if ($event->image_url)
-                <img src="{{ $event->image_url }}" alt="" class="absolute inset-0 h-full w-full object-cover object-center">
-                <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(10,14,23,.35) 0%, rgba(10,14,23,.05) 30%, rgba(10,14,23,.70) 74%, #0a0e17 100%);"></div>
-            @else
-                <div class="absolute inset-0" style="background:
-                    radial-gradient(48% 46% at 72% 30%, rgba(249,115,22,.28), rgba(249,115,22,0) 70%),
-                    radial-gradient(44% 42% at 28% 70%, rgba(56,160,220,.22), rgba(56,160,220,0) 72%),
-                    #0a0e17;"></div>
-            @endif
-        </div>
+        <div style="padding-top: calc(4.5rem + env(safe-area-inset-top));">
+            <div class="group relative block aspect-[16/9] overflow-hidden">
+                @if ($event->image_url)
+                    <img src="{{ $event->image_url }}" alt="" class="absolute inset-0 h-full w-full object-cover object-center transition duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(10,13,20,0) 26%, rgba(10,13,20,.82) 68%, rgba(10,13,20,.97) 100%);"></div>
+                @else
+                    <div class="absolute inset-0" style="background:
+                        radial-gradient(48% 46% at 72% 30%, rgba(249,115,22,.28), rgba(249,115,22,0) 70%),
+                        radial-gradient(44% 42% at 28% 70%, rgba(56,160,220,.22), rgba(56,160,220,0) 72%),
+                        #0a0e17;"></div>
+                @endif
 
-        <div class="relative px-4 pb-8 pt-28 [@supports(-webkit-touch-callout:none)]:pt-32 sm:pt-32">
-            <div class="flex items-center justify-between">
-                <button type="button" @click="history.length > 1 ? history.back() : window.location.href = @js(route('home'))"
-                        aria-label="Retour"
-                        class="grid h-10 w-10 place-items-center rounded-full bg-black/45 text-white backdrop-blur transition hover:bg-black/60">
-                    @icon('arrow-left', 'w-5 h-5')
-                </button>
-                <div class="flex items-center gap-2.5">
-                    <button type="button" @click="share()" aria-label="Partager"
-                            class="grid h-10 w-10 place-items-center rounded-full bg-black/45 text-white backdrop-blur transition hover:bg-black/60">
-                        @icon('share', 'w-5 h-5')
-                    </button>
-                    <button type="button" @click="toggleFav()"
-                            :aria-label="fav ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-                            :title="fav ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-                            class="grid h-10 w-10 place-items-center rounded-full bg-black/45 backdrop-blur transition hover:bg-black/60"
-                            :class="fav ? 'text-rose-400' : 'text-white'">
-                        @icon('heart', 'w-5 h-5')
-                    </button>
-                </div>
-            </div>
-
-            <div class="mt-10 flex flex-wrap items-center gap-2">
-                <span class="inline-flex items-center rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-bold text-white shadow-lg shadow-emerald-500/25">
+                <span class="absolute left-3 top-3 rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-bold text-white shadow-lg shadow-emerald-500/25">
                     {{ $event->type_label }}
                 </span>
                 @if (! $event->isPublished())
                     @if ($event->status === 'draft')
-                        <span class="rounded-full bg-amber-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">Brouillon</span>
+                        <span class="absolute left-3 top-11 rounded-full bg-amber-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">Brouillon</span>
                     @else
-                        <span class="rounded-full bg-slate-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">{{ $event->status_label }}</span>
+                        <span class="absolute left-3 top-11 rounded-full bg-slate-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">{{ $event->status_label }}</span>
                     @endif
                 @endif
-            </div>
 
-            <h1 class="mt-2.5 text-[27px] font-extrabold leading-[1.08] tracking-tight text-white">
-                {{ $event->title }}
-            </h1>
+                <div class="absolute right-3 top-3 flex items-center gap-2.5">
+                    <button type="button" @click="history.length > 1 ? history.back() : window.location.href = @js(route('home'))"
+                            aria-label="Retour"
+                            class="grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white backdrop-blur transition hover:bg-black/60">
+                        @icon('arrow-left', 'w-4 h-4')
+                    </button>
+                    <button type="button" @click="share()" aria-label="Partager"
+                            class="grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white backdrop-blur transition hover:bg-black/60">
+                        @icon('share', 'w-4 h-4')
+                    </button>
+                    <button type="button" @click="toggleFav()"
+                            :aria-label="fav ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+                            :title="fav ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+                            class="grid h-9 w-9 place-items-center rounded-full bg-black/45 backdrop-blur transition hover:bg-black/60"
+                            :class="fav ? 'text-rose-400' : 'text-white'">
+                        @icon('heart', 'w-4 h-4')
+                    </button>
+                </div>
 
-            <div class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-medium text-white/90">
-                <span class="inline-flex items-center gap-1.5">
-                    @icon('calendar', 'w-4 h-4 text-white/80') {{ event_date_fr($event->event_date, 'j F Y') }}
-                </span>
-                <span class="text-white/40" aria-hidden="true">·</span>
-                <span>{{ str_replace(':', 'h ', $event->event_date->format('H:i')) }}</span>
-                <span class="text-white/40" aria-hidden="true">·</span>
-                <span class="inline-flex min-w-0 items-center gap-1.5">
-                    @icon('map-pin', 'w-4 h-4 text-white/80')
-                    <span class="min-w-0 truncate">{{ $event->location }}</span>
-                </span>
+                <div class="absolute inset-x-0 bottom-0 p-4">
+                    <h1 class="text-[27px] font-extrabold leading-[1.08] tracking-tight text-white">
+                        {{ $event->title }}
+                    </h1>
+                    <div class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-medium text-white/90">
+                        <span class="inline-flex items-center gap-1.5">
+                            @icon('calendar', 'w-4 h-4 text-white/80') {{ event_date_fr($event->event_date, 'j F Y') }}
+                        </span>
+                        <span class="text-white/40" aria-hidden="true">·</span>
+                        <span>{{ str_replace(':', 'h ', $event->event_date->format('H:i')) }}</span>
+                        <span class="text-white/40" aria-hidden="true">·</span>
+                        <span class="inline-flex min-w-0 items-center gap-1.5">
+                            @icon('map-pin', 'w-4 h-4 text-white/80')
+                            <span class="min-w-0 truncate">{{ $event->location }}</span>
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -638,13 +635,13 @@
                             @endif
                         @endif
 
-                        <div class="mt-5 flex items-start gap-2 rounded-xl border border-white/10 bg-white/[.03] p-3.5 text-[11px] leading-relaxed text-white/50">
-                            <span class="mt-0.5 shrink-0 text-orange-400">@icon('shield', 'w-4 h-4')</span>
-                            <span>
-                                Paiement traité par <strong class="font-semibold text-white/80">DexPay (DEXCHANGE PAY)</strong>.
-                                Aucun ticket n'est généré avant confirmation du paiement.
-                            </span>
-                        </div>
+                        @if ($event->isOnSale())
+                            <a href="{{ route('booking.create', $event) }}" :href="reserveUrl()"
+                               class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-ink-950 transition hover:bg-orange-100">
+                                @icon('ticket', 'w-4 h-4') Réserver maintenant
+                            </a>
+                            <p class="mt-2 text-center text-[11px] text-white/45">Places limitées — paiement sécurisé.</p>
+                        @endif
                     </section>
 
                     <section class="rounded-2xl border border-orange-500/25 bg-gradient-to-b from-orange-500/10 to-transparent p-5 sm:p-6"
@@ -683,13 +680,13 @@
                             </p>
                         </div>
 
-                        @if ($event->isOnSale())
-                            <a href="{{ route('booking.create', $event) }}" :href="reserveUrl()"
-                               class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-ink-950 transition hover:bg-orange-100">
-                                @icon('ticket', 'w-4 h-4') Réserver maintenant
-                            </a>
-                            <p class="mt-2 text-center text-[11px] text-white/45">Places limitées — paiement sécurisé.</p>
-                        @endif
+                        <div class="mt-5 flex items-start gap-2 rounded-xl border border-white/10 bg-white/[.03] p-3.5 text-[11px] leading-relaxed text-white/50">
+                            <span class="mt-0.5 shrink-0 text-orange-400">@icon('shield', 'w-4 h-4')</span>
+                            <span>
+                                Paiement traité par <strong class="font-semibold text-white/80">DexPay (DEXCHANGE PAY)</strong>.
+                                Aucun ticket n'est généré avant confirmation du paiement.
+                            </span>
+                        </div>
                     </section>
                 </div>
             </div>
