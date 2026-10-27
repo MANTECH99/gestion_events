@@ -139,6 +139,19 @@
                              class="mt-4 h-40 w-full rounded-2xl object-cover">
                     @endif
                 </div>
+
+                <div class="mt-5 border-t border-ink-100 pt-5">
+                    <label for="ticket_header_image" class="label">Image d'en-tête du billet</label>
+                    <input id="ticket_header_image" name="ticket_header_image" type="file" accept="image/jpeg,image/png,image/webp"
+                           class="input @error('ticket_header_image') input-error @enderror">
+                    <p class="mt-1.5 text-xs text-ink-500">Affichée en haut du billet — à défaut, la photo de l'artiste est utilisée. JPG, PNG ou WebP, 4 Mo maximum.</p>
+                    @error('ticket_header_image')<p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p>@enderror
+
+                    @if ($event->ticket_header_image_url)
+                        <img src="{{ $event->ticket_header_image_url }}" alt="En-tête du billet actuel"
+                             class="mt-4 h-40 w-full rounded-2xl object-cover">
+                    @endif
+                </div>
             </div>
         </div>
 

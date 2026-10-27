@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 #[Fillable([
     'organizer_id', 'artist_id', 'title', 'slug', 'description', 'event_date', 'duration_minutes',
     'location', 'total_tickets', 'event_type', 'tags', 'image_path', 'venue_image_path',
-    'status', 'online_sales_enabled', 'organizer_display_name',
+    'ticket_header_image_path', 'status', 'online_sales_enabled', 'organizer_display_name',
 ])]
 class Event extends Model
 {
@@ -191,6 +191,20 @@ class Event extends Model
         }
 
         return Storage::disk('public')->url($this->venue_image_path);
+    }
+
+    /** Image d'en-tête du billet : URL externe ou fichier local. */
+    public function getTicketHeaderImageUrlAttribute(): ?string
+    {
+        if (! $this->ticket_header_image_path) {
+            return null;
+        }
+
+        if (str_starts_with($this->ticket_header_image_path, 'http')) {
+            return $this->ticket_header_image_path;
+        }
+
+        return Storage::disk('public')->url($this->ticket_header_image_path);
     }
 
     public function getTicketsSoldAttribute(): int

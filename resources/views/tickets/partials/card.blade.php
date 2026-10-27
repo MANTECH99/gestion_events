@@ -4,9 +4,11 @@
     $isInvalid = in_array($ticket->status, ['refunded', 'cancelled'], true);
     $tagline = $ticket->event->tags_list ? implode(' • ', $ticket->event->tags_list) : null;
     $typeLabel = $ticket->event->type_label;
-    // En-tête : photo de l'artiste rattaché à l'événement (section Artistes),
-    // à défaut la couverture de l'événement.
-    $artistPhoto = $ticket->event->artist?->image_url ?: $ticket->event->image_url;
+    // En-tête : image dédiée au billet (formulaire événement), à défaut la
+    // photo de l'artiste rattaché à l'événement, à défaut la couverture.
+    $headerImage = $ticket->event->ticket_header_image_url
+        ?: $ticket->event->artist?->image_url
+        ?: $ticket->event->image_url;
     // Pied : photo de profil de l'organisateur, à défaut le logo.
     $organizerAvatar = $ticket->event->organizer?->avatar_url;
 @endphp
@@ -46,12 +48,12 @@
         </div>
     </div>
 
-    {{-- Photo de l'artiste + signature de marque --}}
+    {{-- Image d'en-tête (billet) + signature de marque --}}
     <div class="relative h-[132px]">
         <div class="absolute inset-[1.5px] overflow-hidden" aria-hidden="true">
             <div class="absolute inset-0" style="background: radial-gradient(70% 90% at 85% 0%, rgba(249,115,22,.32) 0%, rgba(249,115,22,.07) 45%, transparent 75%);"></div>
-            @if ($artistPhoto)
-                <img src="{{ $artistPhoto }}" alt="" aria-hidden="true" class="absolute inset-y-0 left-[calc(50%_+_48px)] h-full w-[76%] -translate-x-1/2 object-cover object-[center_30%]">
+            @if ($headerImage)
+                <img src="{{ $headerImage }}" alt="" aria-hidden="true" class="absolute inset-y-0 left-[calc(50%_+_48px)] h-full w-[76%] -translate-x-1/2 object-cover object-[center_30%]">
             @endif
             {{-- Fondu haut sous la barre logo, fondu bas dans le corps du billet, coin gauche assombri pour le slogan. --}}
             <div class="absolute inset-x-0 top-0 h-16" style="background: linear-gradient(180deg, rgba(12,12,15,.7) 0%, rgba(12,12,15,0) 100%);"></div>

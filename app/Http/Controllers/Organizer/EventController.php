@@ -80,6 +80,10 @@ class EventController extends Controller
             $this->storeVenueImage($request, $event);
         }
 
+        if ($request->hasFile('ticket_header_image')) {
+            $this->storeTicketHeaderImage($request, $event);
+        }
+
         if ($request->hasFile('avatar')) {
             $this->storeAvatar($request, $event->organizer);
         }
@@ -123,6 +127,10 @@ class EventController extends Controller
             $this->storeVenueImage($request, $event);
         }
 
+        if ($request->hasFile('ticket_header_image')) {
+            $this->storeTicketHeaderImage($request, $event);
+        }
+
         if ($request->hasFile('avatar')) {
             $event->unsetRelation('organizer');
             $this->storeAvatar($request, $event->organizer);
@@ -159,6 +167,7 @@ class EventController extends Controller
             'organizer_id' => ['nullable', 'integer', 'exists:users,id'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'venue_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'ticket_header_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'artist_id' => ['nullable', 'integer', Rule::exists('artists', 'id')],
             'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:4320'],
@@ -175,6 +184,7 @@ class EventController extends Controller
             'organizer_bio' => 'biographie de l\'organisateur',
             'image' => 'image de couverture',
             'venue_image' => 'photo du lieu',
+            'ticket_header_image' => 'image d\'en-tête du billet',
             'avatar' => 'photo de profil',
             'artist_id' => 'artiste',
             'duration_minutes' => 'durée (en minutes)',
@@ -202,6 +212,17 @@ class EventController extends Controller
         }
 
         $event->update(['venue_image_path' => $path]);
+    }
+
+    private function storeTicketHeaderImage(Request $request, Event $event): void
+    {
+        $path = $request->file('ticket_header_image')->store('events/ticket-header', 'public');
+
+        if ($event->ticket_header_image_path) {
+            Storage::disk('public')->delete($event->ticket_header_image_path);
+        }
+
+        $event->update(['ticket_header_image_path' => $path]);
     }
 
     private function storeAvatar(Request $request, ?User $organizer): void
