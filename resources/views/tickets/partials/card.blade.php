@@ -25,10 +25,18 @@
 
         <div class="relative flex items-center justify-between gap-3">
             <div class="flex min-w-0 items-center gap-2">
-                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-orange-500 text-[#0c0c0f]">
-                    @icon('ticket', 'w-[18px] h-[18px]')
-                </span>
-                <p class="truncate text-[19px] font-extrabold leading-none tracking-tight">Billeterie<span class="text-orange-500"> Express</span></p>
+                @if ($organizerAvatar)
+                    <img src="{{ $organizerAvatar }}" alt="" aria-hidden="true" class="h-8 w-8 shrink-0 rounded-xl object-cover">
+                @else
+                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-orange-500 text-[#0c0c0f]">
+                        @icon('ticket', 'w-[18px] h-[18px]')
+                    </span>
+                @endif
+                @php
+                    $orgName = $ticket->event->organizer_display_name;
+                    $orgParts = explode(' ', $orgName, 2);
+                @endphp
+                <p class="truncate text-[19px] font-extrabold leading-none tracking-tight">{{ $orgParts[0] }}@if (isset($orgParts[1]))<span class="text-orange-500"> {{ $orgParts[1] }}</span>@endif</p>
             </div>
 
             <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-black/55 px-2.5 py-1 text-[11px] font-bold leading-none {{ $isInvalid ? 'text-rose-400' : ($isUsed ? 'text-amber-400' : 'text-green-400') }}">
@@ -107,7 +115,7 @@
 
         <div class="relative mx-auto w-fit">
             <div class="rounded-xl bg-white p-2 {{ $isUsed || $isInvalid ? 'opacity-40' : '' }}">
-                <div class="h-[120px] w-[120px] [&>svg]:h-full [&>svg]:w-full" role="img" aria-label="QR code du billet">
+                <div class="h-[150px] w-[150px] [&>svg]:h-full [&>svg]:w-full" role="img" aria-label="QR code du billet">
                     {!! $qr !!}
                 </div>
             </div>
@@ -167,12 +175,10 @@
         <div class="absolute inset-[1.5px] overflow-hidden" aria-hidden="true" style="background: radial-gradient(55% 130% at 50% 155%, rgba(249,115,22,.30) 0%, rgba(249,115,22,.10) 45%, transparent 75%);"></div>
         <div class="relative flex items-center justify-between gap-3">
             <span class="flex min-w-0 items-center gap-2">
-                @if ($organizerAvatar)
-                    <img src="{{ $organizerAvatar }}" alt="" aria-hidden="true" class="h-4 w-4 shrink-0 rounded-full object-cover">
-                @else
-                    <img src="{{ asset('images/icon.svg') }}" alt="" class="h-4 w-4 shrink-0">
-                @endif
-                <span class="truncate text-[11px] font-semibold text-white/75">{{ $ticket->event->organizer_display_name }}</span>
+                <span class="grid h-4 w-4 shrink-0 place-items-center rounded bg-orange-500 text-[#0c0c0f]">
+                    @icon('ticket', 'w-2.5 h-2.5')
+                </span>
+                <span class="truncate text-[11px] font-semibold text-white/75">Billeterie<span class="text-orange-500"> Express</span></span>
             </span>
             <span class="shrink-0 text-[11px] font-semibold text-white/40">{{ $ticket->event->event_date?->year ?? now()->year }}</span>
         </div>
