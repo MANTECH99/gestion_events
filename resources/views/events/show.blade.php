@@ -382,7 +382,7 @@
                                         @icon('check-circle', 'w-3.5 h-3.5') Organisateur vérifié
                                     </p>
                                 @endif
-                                <p class="mt-1.5 text-xs text-white/50">Réservations sécurisées sur Billeterie Express</p>
+                                <p class="mt-1.5 text-xs text-white/50">Réservations sécurisées en ligne </p>
                             </div>
                         </div>
 
@@ -630,7 +630,7 @@
                                 </p>
                             @elseif (! $event->online_sales_enabled)
                                 <p class="mt-4 rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2.5 text-center text-xs font-semibold text-amber-300">
-                                    Vente en boutique uniquement — billets disponibles en point de vente.
+                                    ⏳ Envie d'y être ? Les billets ne sont pas encore en vente… mais ça ne saurait tarder !
                                 </p>
                             @endif
                         @endif
