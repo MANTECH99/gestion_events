@@ -58,8 +58,6 @@ class PointOfSaleTest extends TestCase
         return [
             'stock_allocation_id' => $this->allocation->id,
             'quantity' => 2,
-            'buyer_name' => 'Acheteur Test',
-            'buyer_phone' => '+221771111111',
             ...$overrides,
         ];
     }
@@ -135,13 +133,15 @@ class PointOfSaleTest extends TestCase
         $this->assertSame(0, Ticket::count());
     }
 
-    public function test_sale_requires_a_buyer_name(): void
+    public function test_sale_records_a_generic_buyer_name(): void
     {
         $this->actingAs($this->pos)
-            ->post(route('pos.sales.store'), $this->salePayload(['buyer_name' => '']))
-            ->assertSessionHasErrors('buyer_name');
+            ->from(route('pos.dashboard'))
+            ->post(route('pos.sales.store'), $this->salePayload(['quantity' => 1]))
+            ->assertSessionHas('success');
 
-        $this->assertSame(0, $this->allocation->fresh()->sold);
+        $this->assertSame('Vente comptoir', PosSale::firstOrFail()->buyer_name);
+        $this->assertSame('Vente comptoir', Reservation::firstOrFail()->customer_name);
     }
 
     public function test_sale_rejects_zero_quantity(): void

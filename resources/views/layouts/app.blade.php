@@ -12,6 +12,8 @@
     $hasSidebar = view()->hasSection('sidebar');
     // Espaces de gestion sombres par défaut (cookie « theme » = « light » pour le clair).
     $themeDark = request()->routeIs('organizer.*', 'admin.*') && request()->cookie('theme') !== 'light';
+    // Bandeau flash déjà affiché en haut : le contenu se compacte pour ne pas cumuler les paddings.
+    $hasFlash = $errors->any() || session('success') || session('error') || session('status');
 @endphp
 
 <!DOCTYPE html>
@@ -61,7 +63,7 @@
                 @yield('sidebar')
 
                 <div class="lg:pl-64">
-                    <div class="{{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} px-4 {{ $themeDark ? 'pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 pb-8 sm:pt-28' : 'py-8' }} sm:px-6 lg:px-8">
+                    <div class="{{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} px-4 {{ $themeDark ? ($hasFlash ? 'pt-6 pb-8 sm:pt-8' : 'pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 pb-8 sm:pt-28') : 'py-8' }} sm:px-6 lg:px-8">
                         <button type="button" @click="open = true" aria-controls="sidebar-gestion"
                                 class="btn-ghost btn-sm mb-4 lg:hidden"
                                 :aria-expanded="open ? 'true' : 'false'">

@@ -11,6 +11,7 @@ use App\Services\StatsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 class PayoutController extends Controller
@@ -86,11 +87,33 @@ class PayoutController extends Controller
             'destination_phone' => ['required', 'string', 'max:30', 'regex:/^[0-9+\s\-()]+$/'],
             'operator' => ['required', 'string', 'max:40'],
             'recipient_name' => ['nullable', 'string', 'max:120'],
+            'payout_pin' => ['required', 'string'],
         ], [], [
             'amount' => 'montant',
             'destination_phone' => 'numéro de téléphone',
             'operator' => 'opérateur',
+            'payout_pin' => 'code de retrait',
         ]);
+
+        // 2FA retrait : code PIN défini dans le profil, vérifié avant tout appel DexPay.
+        if (! $user->hasPayoutPin()) {
+            return back()->withInput()->with('error', 'Définissez d\'abord votre code de retrait dans votre profil.');
+        }
+
+        // Limitation : 5 tentatives par minute (anti-force brute du code).
+        $throttleKey = 'payout-pin:'.$user->id;
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            return back()->withInput()->with('error', 'Trop de tentatives. Réessayez dans '.RateLimiter::availableIn($throttleKey).' secondes.');
+        }
+
+        if (! $user->verifyPayoutPin($data['payout_pin'])) {
+            RateLimiter::hit($throttleKey, 60);
+
+            return back()->withInput()->withErrors(['payout_pin' => 'Code de retrait incorrect.']);
+        }
+
+        RateLimiter::clear($throttleKey);
 
         $phone = $this->normalizePhone($data['destination_phone']);
 

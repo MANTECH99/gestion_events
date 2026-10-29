@@ -202,6 +202,23 @@
                            class="input">
                 </div>
 
+                <div>
+                    <label for="payout_pin" class="label">Code de retrait</label>
+                    <input id="payout_pin" name="payout_pin" type="password" inputmode="numeric"
+                           autocomplete="off" maxlength="6" required
+                           value="{{ old('payout_pin') }}"
+                           placeholder="••••"
+                           class="input @error('payout_pin') input-error @enderror">
+                    <p class="mt-1.5 text-xs text-ink-500">
+                        @if (auth()->user()->hasPayoutPin())
+                            Code défini dans votre profil (4 à 6 chiffres).
+                        @else
+                            <a href="{{ route('profil.show') }}" class="font-semibold text-rose-600 underline">Définissez d'abord votre code de retrait</a> dans votre profil.
+                        @endif
+                    </p>
+                    @error('payout_pin')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                </div>
+
                 <button class="btn-primary w-full justify-center">@icon('arrow-up-right', 'w-4 h-4') Demander le retrait</button>
 
                 @unless ($configured)

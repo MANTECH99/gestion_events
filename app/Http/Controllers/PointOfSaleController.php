@@ -46,12 +46,8 @@ class PointOfSaleController extends Controller
         $data = $request->validate([
             'stock_allocation_id' => ['required', 'integer'],
             'quantity' => ['required', 'integer', 'min:1', 'max:100000'],
-            'buyer_name' => ['required', 'string', 'max:120'],
-            'buyer_phone' => ['nullable', 'string', 'max:30'],
-            'note' => ['nullable', 'string', 'max:255'],
         ], [], [
             'quantity' => 'quantité',
-            'buyer_name' => 'nom de l\'acheteur',
         ]);
 
         abort_unless(
@@ -76,6 +72,10 @@ class PointOfSaleController extends Controller
                 $unitPrice = $ticketType->price;
                 $total = $unitPrice * $data['quantity'];
 
+                // Vente comptoir : plus de saisie de l'acheteur, nom générique
+                // (colonnes NOT NULL qui alimentent aussi la réservation et le billet).
+                $buyerName = 'Vente comptoir';
+
                 $allocation->increment('sold', $data['quantity']);
                 $ticketType->increment('sold_physical', $data['quantity']);
 
@@ -84,9 +84,9 @@ class PointOfSaleController extends Controller
                     'event_id' => $ticketType->event_id,
                     'ticket_type_id' => $ticketType->id,
                     'user_id' => $user->id,
-                    'customer_name' => $data['buyer_name'],
+                    'customer_name' => $buyerName,
                     'customer_email' => null,
-                    'customer_phone' => $data['buyer_phone'] ?? null,
+                    'customer_phone' => null,
                     'quantity' => $data['quantity'],
                     'unit_price' => $unitPrice,
                     'total_amount' => $total,
@@ -103,10 +103,10 @@ class PointOfSaleController extends Controller
                     'quantity' => $data['quantity'],
                     'unit_price' => $unitPrice,
                     'total_amount' => $total,
-                    'buyer_name' => $data['buyer_name'],
-                    'buyer_phone' => $data['buyer_phone'] ?? null,
+                    'buyer_name' => $buyerName,
+                    'buyer_phone' => null,
                     'buyer_email' => null,
-                    'note' => $data['note'] ?? null,
+                    'note' => null,
                 ]);
 
                 return $reservation;

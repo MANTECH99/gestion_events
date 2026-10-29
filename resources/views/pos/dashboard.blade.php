@@ -128,26 +128,6 @@
                         @error('quantity')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
                     </div>
 
-                    <div>
-                        <label for="buyer_name" class="mb-1.5 block text-sm font-medium text-white/70">Nom de l'acheteur</label>
-                        <input id="buyer_name" name="buyer_name" value="{{ old('buyer_name') }}" required
-                               placeholder="Nom du porteur du billet"
-                               class="input-dark @error('buyer_name') border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25 @enderror">
-                        @error('buyer_name')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
-                    </div>
-
-                    <div>
-                        <label for="buyer_phone" class="mb-1.5 block text-sm font-medium text-white/70">Téléphone</label>
-                        <input id="buyer_phone" name="buyer_phone" value="{{ old('buyer_phone') }}"
-                               placeholder="+221 77 000 00 00" class="input-dark">
-                    </div>
-
-                    <div>
-                        <label for="note" class="mb-1.5 block text-sm font-medium text-white/70">Note (facultatif)</label>
-                        <input id="note" name="note" value="{{ old('note') }}" class="input-dark"
-                               placeholder="ex : payé en espèces, série 12">
-                    </div>
-
                     <button class="btn-hero-primary w-full justify-center !px-3 text-xs sm:!px-7 sm:text-sm">
                         @icon('check', 'w-4 h-4')
                         <span>Enregistrer la vente</span>

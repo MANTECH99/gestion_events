@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\Storage;
     'role', 'organizer_id', 'phone', 'point_of_sale', 'is_active',
     'bio', 'is_verified', 'avatar_path',
 ])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'payout_pin'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -139,6 +140,38 @@ class User extends Authenticatable
     /* ------------------------------------------------------------------ */
     /* Rôles */
     /* ------------------------------------------------------------------ */
+
+    /* ------------------------------------------------------------------ */
+    /* Code PIN de retrait (2FA sur les payouts) */
+    /* ------------------------------------------------------------------ */
+
+    /** L'utilisateur a déjà défini un code de retrait. */
+    public function hasPayoutPin(): bool
+    {
+        return $this->payout_pin !== null;
+    }
+
+    /**
+     * Définit (ou change) le code de retrait — 4 à 6 chiffres, stocké haché.
+     *
+     * @param  string  $currentPin  Code actuel requis uniquement si déjà défini.
+     */
+    public function setPayoutPin(string $pin, ?string $currentPin = null): bool
+    {
+        if ($this->hasPayoutPin() && (! $currentPin || ! $this->verifyPayoutPin($currentPin))) {
+            return false;
+        }
+
+        $this->forceFill(['payout_pin' => Hash::make($pin)])->save();
+
+        return true;
+    }
+
+    /** Vérifie saisi vs haché (sans fuite de timing). */
+    public function verifyPayoutPin(string $pin): bool
+    {
+        return $this->payout_pin !== null && Hash::check($pin, $this->payout_pin);
+    }
 
     public function isAdmin(): bool
     {

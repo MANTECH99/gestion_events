@@ -120,6 +120,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/mes-reservations', [MyReservationsController::class, 'index'])->name('reservations.index');
     Route::get('/mes-reservations/{reference}', [MyReservationsController::class, 'show'])->name('reservations.show');
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil.show');
+    Route::put('/profil/code-retrait', [ProfilController::class, 'updatePayoutPin'])->name('profil.payout-pin.update');
 
     /* ---- Espace organisateur ---- */
     Route::prefix('organisateur')->name('organizer.')->middleware('role:organizer,admin')->group(function () {
