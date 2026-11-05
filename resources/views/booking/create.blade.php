@@ -386,7 +386,7 @@
                                        x-model="phone"
                                        @input="delete missing.customer_phone"
                                        :class="missing.customer_phone ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''"
-                                       class="input-dark" placeholder="772607977"
+                                       class="input-dark" placeholder="ex. 774567890"
                                        autocomplete="tel">
                                 <p class="mt-1 text-xs text-white/45">
                                     Ce numéro recevra la demande de confirmation de paiement.
