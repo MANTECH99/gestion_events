@@ -30,9 +30,44 @@ class Payout extends Model
         return $this->belongsTo(User::class, 'organizer_id');
     }
 
+    /**
+     * Statut canonique du payout.
+     *
+     * Le webhook DexPay écrit « COMPLETED » (majuscules) mais l'API REST
+     * renvoie « completed » (minuscules, parfois « success ») : sans
+     * normalisation, la synchronisation écrasait un statut final et le label
+     * retombait dans le cas défaut — « En attente » — alors que le retrait
+     * était bien effectué.
+     */
+    public static function normalizeStatus(mixed $status): string
+    {
+        return match (strtoupper(trim((string) $status))) {
+            'COMPLETED', 'SUCCESS', 'PAID' => 'COMPLETED',
+            'FAILED', 'FAILURE' => 'FAILED',
+            'CANCELLED', 'CANCELED' => 'CANCELLED',
+            'PROCESSING' => 'PROCESSING',
+            'PENDING', 'INITIATED', '' => 'PENDING',
+            default => strtoupper(trim((string) $status)),
+        };
+    }
+
+    /**
+     * Passe toutes les écritures (store, sync, webhook) par la normalisation.
+     *
+     * Retourne `$this` : HasAttributes::setAttribute() propage la valeur de
+     * retour du mutateur, et les appels enchaînés type
+     * `(new Payout)->setAttribute('status', …)->status_color` en dépendent.
+     */
+    protected function setStatusAttribute(mixed $value): static
+    {
+        $this->attributes['status'] = static::normalizeStatus($value);
+
+        return $this;
+    }
+
     public function getStatusLabelAttribute(): string
     {
-        return match ($this->status) {
+        return match (strtoupper((string) $this->status)) {
             'COMPLETED' => 'Effectué',
             'FAILED' => 'Échec',
             'CANCELLED' => 'Annulé',
@@ -43,7 +78,7 @@ class Payout extends Model
 
     public function getStatusColorAttribute(): string
     {
-        return match ($this->status) {
+        return match (strtoupper((string) $this->status)) {
             'COMPLETED' => 'emerald',
             'FAILED', 'CANCELLED' => 'rose',
             'PROCESSING' => 'sky',

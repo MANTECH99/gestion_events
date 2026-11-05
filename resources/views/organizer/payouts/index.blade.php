@@ -136,7 +136,7 @@
                                             @endif
                                         </td>
                                         <td class="text-right">
-                                            @if (! in_array($payout->status, ['COMPLETED', 'FAILED', 'CANCELLED'], true))
+                                            @if (! in_array(strtoupper((string) $payout->status), ['COMPLETED', 'FAILED', 'CANCELLED'], true))
                                                 <form method="POST" action="{{ route('organizer.payouts.sync', $payout) }}">
                                                     @csrf
                                                     <button class="btn-ghost btn-sm" title="Actualiser le statut">

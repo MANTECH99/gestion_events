@@ -146,4 +146,37 @@ class PayoutReconciliationTest extends TestCase
         $this->assertSame('dexpayout_1', $payout->dexpay_id);
         $this->assertSame('txn_sync', $payout->provider_tx_id);
     }
+
+    /**
+     * L'API REST renvoie les statuts en minuscules (« completed ») alors que
+     * le webhook utilise les majuscules. Sans normalisation, la synchro
+     * manuelle écrasait un statut final et le label affichait « En attente »
+     * alors que le retrait était bien effectué.
+     */
+    public function test_sync_normalizes_the_lowercase_status_returned_by_the_api(): void
+    {
+        $organizer = User::factory()->organizer()->create();
+        $payout = $this->payout($organizer);
+        $payout->update(['dexpay_id' => 'dexpayout_lc']);
+
+        Http::fake([
+            'api-sandbox.dexpay.africa/api/v1/payouts/dexpayout_lc' => Http::response([
+                'id' => 'dexpayout_lc',
+                'status' => 'completed',
+                'fee_amount' => 4,
+                'provider_tx_id' => 'txn_lc',
+                'completed_at' => '2026-11-05T14:46:46.991Z',
+            ]),
+        ]);
+
+        $this->actingAs($organizer)
+            ->post(route('organizer.payouts.sync', $payout))
+            ->assertRedirect();
+
+        $payout->refresh();
+
+        $this->assertSame('COMPLETED', $payout->status);
+        $this->assertSame('Effectué', $payout->status_label);
+        $this->assertSame('emerald', $payout->status_color);
+    }
 }
