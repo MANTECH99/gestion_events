@@ -98,14 +98,28 @@
     }
 
     /*
-     * En mode standalone (PWA installée), la vue s'étend sous la barre de
-     * statut et le notch : le header doit redescendre sous la zone sûre
-     * pour que le logo et les liens restent visibles et tapables.
+     * En PWA standalone, la vue s'étend sous la barre de statut et le notch
+     * (viewport-fit=cover) : la zone sûre en haut vaut ~59 px sur iPhone.
+     * env() vaut 0 dans le navigateur et sur Android : ces deux règles sont
+     * donc sans effet hors PWA iPhone.
+     *
+     * 1. le header — souvent `absolute`, donc hors du flux — redescend sous
+     *    la zone sûre pour que le logo et les liens restent visibles ;
+     * 2. le contenu en flux (main des pages à header sombre) est décalé
+     *    d'autant : sans ça, il démarre 59 px trop haut et vient « coller »
+     *    au header en PWA iPhone alors qu'il est parfait dans le navigateur.
+     *
+     * Les deux doivent bouger ensemble pour préserver l'écart navigateur.
+     * Sélecteur sur la classe émise par layouts/app (même liste de routes
+     * que partials/nav) : aucune page claire (header sticky, en flux) n'est
+     * décalée — son header compense déjà seul via padding-top.
      */
-    @media (display-mode: standalone) {
-        .app-header {
-            padding-top: env(safe-area-inset-top, 0px);
-        }
+    .app-header {
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    main.bg-ink-950 {
+        padding-top: env(safe-area-inset-top, 0px);
     }
 }
 

@@ -63,7 +63,7 @@
                 @yield('sidebar')
 
                 <div class="lg:pl-64">
-                    <div class="{{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} px-4 {{ $themeDark ? ($hasFlash ? 'pt-6 pb-8 sm:pt-8' : 'pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 pb-8 sm:pt-28') : 'py-8' }} sm:px-6 lg:px-8">
+                    <div class="{{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} px-4 {{ $themeDark ? ($hasFlash ? 'pt-6 pb-8 sm:pt-8' : 'pt-24 pb-8 sm:pt-28') : 'py-8' }} sm:px-6 lg:px-8">
                         <button type="button" @click="open = true" aria-controls="sidebar-gestion"
                                 class="btn-ghost btn-sm mb-4 lg:hidden"
                                 :aria-expanded="open ? 'true' : 'false'">

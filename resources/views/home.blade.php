@@ -31,7 +31,7 @@
         </div>
 
         @php $hasFlash = $errors->any() || session('success') || session('error') || session('status'); @endphp
-        <div class="relative mx-auto max-w-7xl px-4 pb-14 {{ $hasFlash ? 'pt-6 sm:pt-8' : 'pt-28 [@supports(-webkit-touch-callout:none)]:pt-36 sm:pt-32' }} sm:px-6 lg:px-8 lg:pb-20 {{ $hasFlash ? 'lg:pt-10' : 'lg:pt-40' }}">
+        <div class="relative mx-auto max-w-7xl px-4 pb-14 {{ $hasFlash ? 'pt-6 sm:pt-8' : 'pt-28 sm:pt-32' }} sm:px-6 lg:px-8 lg:pb-20 {{ $hasFlash ? 'lg:pt-10' : 'lg:pt-40' }}">
             <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6">
                 {{-- Texte --}}
                 <div class="text-center lg:text-left">

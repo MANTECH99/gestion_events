@@ -2,7 +2,7 @@
 
 @section('content')
     @php $hasFlash = $errors->any() || session('success') || session('error') || session('status'); @endphp
-    <div class="mx-auto max-w-7xl px-4 {{ $hasFlash ? 'pt-8 sm:pt-10' : 'pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 sm:pt-28' }} sm:px-6 lg:px-8 pb-28 lg:pb-8">
+    <div class="mx-auto max-w-7xl px-4 {{ $hasFlash ? 'pt-8 sm:pt-10' : 'pt-24 sm:pt-28' }} sm:px-6 lg:px-8 pb-28 lg:pb-8">
 
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>

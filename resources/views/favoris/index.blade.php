@@ -2,7 +2,7 @@
 
 @section('content')
     @php $hasFlash = $errors->any() || session('success') || session('error') || session('status'); @endphp
-    <div class="mx-auto max-w-5xl px-4 {{ $hasFlash ? 'pt-8 sm:pt-10' : 'pt-24 [@supports(-webkit-touch-callout:none)]:pt-36 sm:pt-28' }} sm:px-6 lg:px-8 pb-28 lg:pb-8">
+    <div class="mx-auto max-w-5xl px-4 {{ $hasFlash ? 'pt-8 sm:pt-10' : 'pt-24 sm:pt-28' }} sm:px-6 lg:px-8 pb-28 lg:pb-8">
         <div class="mb-6">
             <h1 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Mes favoris</h1>
             <p class="mt-1 text-sm text-white/60">Les événements que vous avez enregistrés sur cet appareil.</p>

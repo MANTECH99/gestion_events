@@ -50,7 +50,7 @@
         </div>
 
         @php $hasFlash = $errors->any() || session('success') || session('error') || session('status'); @endphp
-        <div class="relative mx-auto max-w-7xl px-4 pb-12 {{ $hasFlash ? 'pt-6 sm:pt-8' : 'pt-28 [@supports(-webkit-touch-callout:none)]:pt-36 sm:pt-32' }} sm:px-6 lg:px-8 lg:pb-16 {{ $hasFlash ? 'lg:pt-10' : 'lg:pt-40' }}">
+        <div class="relative mx-auto max-w-7xl px-4 pb-12 {{ $hasFlash ? 'pt-6 sm:pt-8' : 'pt-28 sm:pt-32' }} sm:px-6 lg:px-8 lg:pb-16 {{ $hasFlash ? 'lg:pt-10' : 'lg:pt-40' }}">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-3 py-1.5 text-xs font-bold text-white uppercase tracking-wide shadow-lg shadow-orange-500/25">
                     {{ ticket_type_icon($event->event_type) }} {{ $event->type_label }}
@@ -135,7 +135,8 @@
                  'title' => $event->title,
                  'url' => route('events.show', $event),
              ]))">
-        <div style="padding-top: calc(4.5rem + env(safe-area-inset-top));">
+        {{-- L'inset notch est porté par main.bg-ink-950 (cf. app.css) : ne pas le compenser ici, sinon double décalage. --}}
+        <div style="padding-top: 4.5rem;">
             <div class="group relative block aspect-[16/9] overflow-hidden">
                 @if ($event->image_url)
                     <img src="{{ $event->image_url }}" alt="" class="absolute inset-0 h-full w-full object-cover object-center transition duration-500 group-hover:scale-105">
