@@ -7,6 +7,7 @@ use App\Models\Reservation;
 use App\Models\TicketType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class MultiTicketBookingTest extends TestCase
@@ -130,6 +131,12 @@ class MultiTicketBookingTest extends TestCase
 
     public function test_recap_page_reads_quantities_from_the_query_string(): void
     {
+        // La page de réservation affiche aussi les moyens de paiement DexPay :
+        // on fake l'API pour ne jamais dépendre du réseau en test.
+        Http::fake([
+            'api-sandbox.dexpay.africa/api/v1/payment-providers*' => Http::response(['data' => []]),
+        ]);
+
         [$event, $normal] = $this->eventWithTypes();
 
         $this->get(route('booking.create', $event).'?qty['.$normal->id.']=3')

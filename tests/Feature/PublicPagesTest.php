@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class PublicPagesTest extends TestCase
@@ -70,6 +71,12 @@ class PublicPagesTest extends TestCase
 
     public function test_booking_form_renders_for_published_event(): void
     {
+        // La page de réservation affiche aussi les moyens de paiement DexPay :
+        // on fake l'API pour ne jamais dépendre du réseau en test.
+        Http::fake([
+            'api-sandbox.dexpay.africa/api/v1/payment-providers*' => Http::response(['data' => []]),
+        ]);
+
         $event = $this->event(['title' => 'Soiree Test']);
         $event->ticketTypes()->create(['name' => 'Standard', 'price' => 5000, 'quantity' => 100]);
 

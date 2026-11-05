@@ -15,6 +15,15 @@
              prices: @js($prices),
              limits: @js($limits),
              selected: @js($qtys),
+             operators: @js(collect($operators)->map(fn ($op) => [
+                 'value' => $op['code'],
+                 'name' => $op['name'],
+                 'fee' => $op['fee'] ?? null,
+                 'fee_type' => $op['fee_type'] ?? 'percentage',
+             ])->values()->all()),
+             operator: @js($operators[0]['code'] ?? ''),
+             phone: @js(old('customer_phone', '')),
+             dexpayFeeEnabled: @js((bool) config('dexpay.client_support_fee')),
          })">
 
         {{-- Bandeau événement --}}
@@ -225,7 +234,10 @@
                                 <option value="">Choisir un type de billet…</option>
                                 @foreach ($types as $type)
                                     <option value="{{ $type->id }}"
-                                            @disabled(($type->available_online !== null && $type->available_online < 1) || isset($qtys[$type->id]))>
+                                            @disabled($type->available_online !== null && $type->available_online < 1)
+                                            {{-- Désactivé tant que le type est au panier (et s'il est épuisé) :
+                                                 la suppression depuis le panier rend l'option réajoutable sans recharger. --}}
+                                            :disabled="{{ $type->available_online !== null && $type->available_online < 1 ? 'true' : 'false' }} || isSel({{ $type->id }})">
                                         {{ $type->name }} — {{ money($type->price) }}
                                     </option>
                                 @endforeach
@@ -263,42 +275,173 @@
                             Informations de l'acheteur
                         </h2>
 
-                        <div class="mt-5 grid gap-4 sm:grid-cols-2">
-                            <div>
-                                <label for="customer_name" class="mb-1.5 block text-sm font-medium text-white/70">
-                                    Nom complet <span class="text-rose-400">*</span>
-                                </label>
-                                <input id="customer_name" name="customer_name" type="text" required
-                                       value="{{ old('customer_name', auth()->user()?->full_name) }}"
-                                       @input="delete missing.customer_name"
-                                       :class="missing.customer_name ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''"
-                                       class="input-dark" placeholder="Ex : Awa Diop">
-                                <p x-show="missing.customer_name" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
+                        <div class="mt-5">
+                            <label for="customer_name" class="mb-1.5 block text-sm font-medium text-white/70">
+                                Nom complet <span class="text-rose-400">*</span>
+                            </label>
+                            <input id="customer_name" name="customer_name" type="text" required
+                                   value="{{ old('customer_name', auth()->user()?->full_name) }}"
+                                   @input="delete missing.customer_name"
+                                   :class="missing.customer_name ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''"
+                                   class="input-dark" placeholder="Ex : Awa Diop">
+                            <p x-show="missing.customer_name" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
+                        </div>
+                    </section>
+
+                    {{-- Réglez votre commande (paiement DexPay fusionné) --}}
+                    <section class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
+                        <h2 class="flex items-center gap-2.5 text-lg font-bold text-white">
+                            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-orange-500/15 text-orange-400">
+                                @icon('wallet', 'w-5 h-5')
+                            </span>
+                            Réglez votre commande
+                        </h2>
+                        <p class="mt-1.5 text-sm text-white/60">
+                            Réservation <span class="font-semibold text-white">{{ $reference }}</span>
+                        </p>
+
+                        @if (! $configured)
+                            {{-- DexPay non configuré : la réservation est créée, la page de
+                                 paiement reste le repli pour finaliser (voir PaymentController). --}}
+                            <div class="mt-4 flex items-start gap-3 rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4">
+                                <span class="mt-0.5 shrink-0 text-amber-400">@icon('info', 'w-5 h-5')</span>
+                                <div class="text-sm">
+                                    <p class="font-semibold text-amber-300">Paiement non configuré</p>
+                                    <p class="mt-0.5 text-amber-200/80">
+                                        Le paiement en ligne sera finalisé à l'étape suivante, sur la page sécurisée DexPay.
+                                    </p>
+                                </div>
                             </div>
 
-                            <div>
+                            <div class="mt-5 border-t border-white/10 pt-5">
                                 <label for="customer_phone" class="mb-1.5 block text-sm font-medium text-white/70">
                                     Téléphone <span class="text-rose-400">*</span>
                                 </label>
                                 <input id="customer_phone" name="customer_phone" type="tel" required
-                                       value="{{ old('customer_phone', auth()->user()?->phone) }}"
-                                       class="input-dark" placeholder="+221 77 123 45 67"
+                                       value="{{ old('customer_phone') }}"
                                        @input="delete missing.customer_phone"
-                                       :class="missing.customer_phone ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''">
+                                       :class="missing.customer_phone ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''"
+                                       class="input-dark" placeholder="+221 77 123 45 67"
+                                       autocomplete="tel">
                                 <p x-show="missing.customer_phone" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
                             </div>
-                        </div>
+                        @elseif (filled($operators))
+                            @if ($sandbox)
+                                <div class="mt-4 flex items-start gap-3 rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4">
+                                    <span class="mt-0.5 text-amber-400">@icon('info', 'w-5 h-5')</span>
+                                    <div class="text-sm">
+                                        <p class="font-semibold text-amber-300">Mode test (sandbox)</p>
+                                        <p class="mt-0.5 text-amber-200/80">
+                                            Aucun paiement réel n'est effectué. Vous pouvez finaliser la commande sans débit.
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+                            <p class="mt-5 text-sm font-semibold text-white/80">Choisissez votre moyen de paiement</p>
+                            <p class="mt-1 text-sm text-white/60">
+                                Vous serez redirigé vers la page sécurisée DexPay pour finaliser la transaction.
+                            </p>
+
+                            <fieldset class="mt-4">
+                                <legend class="mb-2 block text-sm font-medium text-white/70">Moyen de paiement</legend>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    @foreach ($operators as $operator)
+                                        <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-white/15 bg-white/[.04] p-4
+                                                      transition hover:border-orange-400/50
+                                                      has-[:checked]:border-orange-400 has-[:checked]:bg-orange-500/10">
+                                            <input type="radio" name="operator" value="{{ $operator['code'] }}"
+                                                   x-model="operator" class="radio accent-orange-400">
+                                            @if ($operator['logo'])
+                                                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white p-1.5 ring-1 ring-white/10">
+                                                    <img src="{{ $operator['logo'] }}" alt="{{ $operator['name'] }}"
+                                                         class="max-h-full max-w-full object-contain" loading="lazy"
+                                                         onerror="this.style.display='none'">
+                                                </span>
+                                            @else
+                                                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-orange-500/15 text-orange-400">
+                                                    @icon('smartphone', 'w-5 h-5')
+                                                </span>
+                                            @endif
+                                            <span class="min-w-0 flex-1">
+                                                <span class="block font-semibold text-white">{{ $operator['name'] }}</span>
+                                                <span class="block text-xs text-white/50">
+                                                    {{ $operator['payment_method'] === 'card' ? 'Carte bancaire' : 'Mobile Money' }}
+                                                    · {{ $operator['country'] }}
+                                                </span>
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </fieldset>
+
+                            @error('operator')
+                                <p class="mt-3 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{{ $message }}</p>
+                            @enderror
+
+                            <div class="mt-5 border-t border-white/10 pt-5">
+                                <label for="customer_phone" class="mb-1.5 block text-sm font-medium text-white/70">
+                                    Numéro de téléphone (mobile money) <span class="text-rose-400">*</span>
+                                </label>
+                                <input id="customer_phone" name="customer_phone" type="tel" required
+                                       x-model="phone"
+                                       @input="delete missing.customer_phone"
+                                       :class="missing.customer_phone ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''"
+                                       class="input-dark" placeholder="772607977"
+                                       autocomplete="tel">
+                                <p class="mt-1 text-xs text-white/45">
+                                    Ce numéro recevra la demande de confirmation de paiement.
+                                </p>
+                                <p x-show="missing.customer_phone" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
+
+                                @error('customer_phone')
+                                    <p class="mt-1 text-sm text-rose-300">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        @else
+                            {{-- Configuré mais aucun opérateur renvoyé par l'API : le
+                                 paiement reste à finaliser sur la page dédiée. --}}
+                            <div class="mt-4 flex items-start gap-3 rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-200/85">
+                                <span class="mt-0.5 shrink-0 text-amber-400">@icon('info', 'w-5 h-5')</span>
+                                <p>Aucun moyen de paiement n'est disponible pour le moment.
+                                    Le paiement sera finalisé à l'étape suivante, sur la page sécurisée DexPay.</p>
+                            </div>
+
+                            <div class="mt-5 border-t border-white/10 pt-5">
+                                <label for="customer_phone" class="mb-1.5 block text-sm font-medium text-white/70">
+                                    Téléphone <span class="text-rose-400">*</span>
+                                </label>
+                                <input id="customer_phone" name="customer_phone" type="tel" required
+                                       value="{{ old('customer_phone') }}"
+                                       @input="delete missing.customer_phone"
+                                       :class="missing.customer_phone ? 'border-rose-400/70 focus:border-rose-400 focus:ring-rose-400/25' : ''"
+                                       class="input-dark" placeholder="+221 77 123 45 67"
+                                       autocomplete="tel">
+                                <p x-show="missing.customer_phone" x-cloak class="mt-1 text-sm text-rose-400">Ce champ est obligatoire.</p>
+                            </div>
+                        @endif
                     </section>
+
+                    {{-- Référence pré-générée affichée ci-dessus, réutilisée à la création --}}
+                    <input type="hidden" name="reference" value="{{ $reference }}">
 
                     {{-- Actions --}}
                     <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                         <a href="{{ route('events.show', $event) }}" class="btn-outline justify-center">Annuler</a>
                         <button type="submit" @click="check($event)"
                                 class="btn-hero-primary whitespace-nowrap"
-                                :disabled="sending || total() === 0"
-                                :class="total() === 0 ? 'cursor-not-allowed opacity-50' : ''">
-                            <span x-show="!sending" class="inline-flex items-center gap-2">Réserver @icon('arrow-right', 'w-4 h-4')</span>
-                            <span x-show="sending" x-cloak>Réservation en cours…</span>
+                                :disabled="sending || !canPay"
+                                :class="!canPay ? 'cursor-not-allowed opacity-50' : ''">
+                            <span x-show="!sending" class="inline-flex items-center gap-2">
+                                @if (filled($operators))
+                                    @icon('wallet', 'w-4 h-4') Payer maintenant <span x-text="amountLabel">{{ money($to_pay) }}</span>
+                                @else
+                                    Réserver @icon('arrow-right', 'w-4 h-4')
+                                @endif
+                            </span>
+                            <span x-show="sending" x-cloak class="inline-flex items-center gap-2">
+                                <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+                                Ouverture du paiement…
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -354,7 +497,8 @@
                         @foreach ($qtys as $typeId => $qty)
                             @php $lineType = $types->firstWhere('id', $typeId); @endphp
                             @if ($lineType)
-                                <li class="flex items-center justify-between gap-3 py-2.5 text-sm">
+                                <li class="flex items-center justify-between gap-3 py-2.5 text-sm"
+                                    x-show="isSel({{ $typeId }})">
                                     <span class="min-w-0 text-white/80">
                                         {{ $lineType->name }}
                                         <span class="text-white/45" x-text="'(x' + qtyOf({{ $typeId }}) + ')'">(x{{ $qty }})</span>
@@ -367,9 +511,24 @@
                     </ul>
 
                     <div class="mt-3 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
-                        <span class="text-sm font-semibold text-white/70">Total</span>
-                        <span class="text-xl font-extrabold text-orange-400"
+                        <span class="text-sm font-semibold text-white/70">Sous-total billets</span>
+                        <span class="text-base font-bold text-white"
                               x-text="fmt(grandTotal())">{{ money($totalAmount) }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3 pt-2" x-cloak x-show="totalFee > 0">
+                        <span class="text-sm text-white/55">
+                            Frais DexPay
+                            <span class="block text-xs text-white/40">encaissement, prélevés au paiement</span>
+                        </span>
+                        <span class="text-sm font-semibold text-white"
+                              x-text="totalFeeLabel">{{ ($service_fee + $dexpay_fee) > 0 ? money($service_fee + $dexpay_fee) : '' }}</span>
+                    </div>
+
+                    <div class="mt-3 flex items-baseline justify-between gap-3 border-t border-white/10 pt-4">
+                        <span class="font-semibold text-white">Total à payer</span>
+                        <span class="text-2xl font-extrabold text-orange-400"
+                              x-text="amountLabel">{{ money($to_pay) }}</span>
                     </div>
                 </section>
 

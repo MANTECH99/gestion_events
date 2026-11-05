@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\DexPayException;
 use App\Models\Event;
 use App\Models\Reservation;
 use App\Models\TicketType;
+use App\Services\DexPay\DexPayAccount;
+use App\Services\DexPay\DexPayCheckout;
+use App\Services\ReservationPaymentManager;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,10 +18,20 @@ use Illuminate\Validation\Rule;
 
 class BookingController extends Controller
 {
+    public function __construct(
+        private readonly DexPayCheckout $dexpay,
+        private readonly DexPayAccount $account,
+        private readonly ReservationPaymentManager $payments,
+    ) {}
+
     /**
      * Page de réservation : le récapitulatif part des quantités choisies sur la
      * page événement (?qty[{typeId}]={quantité}). Sans sélection, la page laisse
      * ajouter les types de billets directement dans le formulaire.
+     *
+     * La réservation et le paiement sont fusionnés : la page affiche aussi le
+     * choix du moyen de paiement DexPay, et `store()` démarre la checkout
+     * immédiatement après la création des réservations.
      */
     public function create(Request $request, Event $event): View|RedirectResponse
     {
@@ -47,29 +62,85 @@ class BookingController extends Controller
             }
         }
 
+        $totalAmount = (int) $types->sum(fn ($t) => ($t->price ?? 0) * ($qtys[$t->id] ?? 0));
+
+        // La référence est affichée sur la page (« Réservation BEX-… ») avant
+        // même que la réservation n'existe : elle est réutilisée au POST si
+        // elle est toujours libre.
+        $operators = [];
+        $serviceFee = 0;
+        $dexpayFee = 0;
+
+        // Pas d'appel API quand DexPay n'est pas configuré : les tests rendent
+        // la page sans clés et ne doivent rien appeler.
+        if ($this->dexpay->client()->isConfigured()) {
+            $operators = $this->account->collectOperators();
+            $serviceFee = dexpay_service_fee($totalAmount, $operators[0] ?? null);
+            // Avec client_support_fee=true, DexPay prélève en plus ses frais
+            // d'encaissement au même taux : on les affiche pour que le client
+            // voie le total réellement débité. Sans ce flag, DexPay ne débite
+            // pas ce second frais — on n'affiche donc que la surcharge.
+            $dexpayFee = config('dexpay.client_support_fee')
+                ? dexpay_service_fee($totalAmount, $operators[0] ?? null)
+                : 0;
+        }
+
         return view('booking.create', [
             'event' => $event,
             'types' => $types,
             'qtys' => $qtys,
+            'operators' => $operators,
+            'sandbox' => $this->dexpay->client()->isSandbox(),
+            'configured' => $this->dexpay->client()->isConfigured(),
+            'service_fee' => $serviceFee,
+            'dexpay_fee' => $dexpayFee,
+            'to_pay' => $totalAmount + $serviceFee + $dexpayFee,
+            'reference' => Reservation::makeReference(),
         ]);
     }
 
-    public function store(Request $request, Event $event): RedirectResponse
+    public function store(Request $request, Event $event): RedirectResponse|JsonResponse
     {
         abort_unless($event->isOnSale(), 404);
 
+        $operator = trim((string) $request->input('operator', ''));
+
+        // Le choix du moyen de paiement est validé AVANT toute écriture : un
+        // opérateur inconnu (ou un service non configuré) ne doit jamais créer
+        // de réservation. `operator` reste nullable — sans lui, on conserve
+        // l'ancien comportement (redirection vers la page de paiement).
+        if ($operator !== '') {
+            if (! $this->dexpay->client()->isConfigured()) {
+                return back()->withInput()->withErrors([
+                    'operator' => 'Le service de paiement n\'est pas configuré. Renseignez DEXPAY_API_KEY dans le fichier .env.',
+                ]);
+            }
+
+            $codes = array_column($this->account->collectOperators(), 'code');
+
+            if (! in_array($operator, $codes, true)) {
+                return back()->withInput()->withErrors([
+                    'operator' => 'Ce moyen de paiement n\'est pas disponible.',
+                ]);
+            }
+        }
+
+        $phoneRule = $operator !== ''
+            ? ['required', 'string', 'max:30']
+            : ['nullable', 'string', 'max:30'];
         $useRecap = $request->has('qty') || ! $request->filled('ticket_type_id');
 
         if ($useRecap) {
             $data = $request->validate([
                 'customer_name' => ['required', 'string', 'min:3', 'max:120'],
-                'customer_phone' => ['nullable', 'string', 'max:30'],
+                'customer_phone' => $phoneRule,
                 'qty' => ['required', 'array', 'min:1'],
                 'qty.*' => ['required', 'integer', 'min:1', 'max:20'],
             ], [
                 'qty.required' => 'Sélectionnez au moins un billet.',
                 'qty.min' => 'Sélectionnez au moins un billet.',
                 'qty.*.max' => '20 tickets maximum par type de billet.',
+                'customer_phone.required' => 'Indiquez le numéro de téléphone qui recevra la demande de paiement.',
             ], [
                 'customer_name' => 'nom',
                 'customer_phone' => 'téléphone',
@@ -98,11 +169,14 @@ class BookingController extends Controller
             // Format historique : un seul type de billet.
             $data = $request->validate([
                 'customer_name' => ['required', 'string', 'min:3', 'max:120'],
-                'customer_phone' => ['nullable', 'string', 'max:30'],
+                'customer_phone' => $phoneRule,
                 'ticket_type_id' => ['required', Rule::exists('ticket_types', 'id')->where('event_id', $event->id)],
                 'quantity' => ['required', 'integer', 'min:1', 'max:20'],
-            ], [], [
+            ], [
+                'customer_phone.required' => 'Indiquez le numéro de téléphone qui recevra la demande de paiement.',
+            ], [
                 'customer_name' => 'nom',
+                'customer_phone' => 'téléphone',
                 'ticket_type_id' => 'type de ticket',
                 'quantity' => 'quantité',
             ]);
@@ -131,17 +205,30 @@ class BookingController extends Controller
             }
         }
 
-        $reservations = DB::transaction(function () use ($lines, $data, $event) {
+        // Référence affichée sur la page de réservation : réutilisée pour la
+        // première réservation si elle est toujours libre.
+        $requestedReference = trim((string) $request->input('reference', ''));
+        $firstReference = Reservation::makeReference();
+
+        if ($requestedReference !== '' && preg_match('/^BEX-\d{6}-[A-Z0-9]{6}$/', $requestedReference)) {
+            $taken = Reservation::where('reference', $requestedReference)->exists();
+
+            if (! $taken) {
+                $firstReference = $requestedReference;
+            }
+        }
+
+        $reservations = DB::transaction(function () use ($lines, $data, $event, $firstReference) {
             $created = [];
 
-            foreach ($lines as $line) {
+            foreach ($lines as $index => $line) {
                 $ticketType = TicketType::query()
                     ->whereKey($line['type']->id)
                     ->lockForUpdate()
                     ->firstOrFail();
 
                 $created[] = Reservation::create([
-                    'reference' => Reservation::makeReference(),
+                    'reference' => $index === 0 ? $firstReference : Reservation::makeReference(),
                     'event_id' => $event->id,
                     'ticket_type_id' => $ticketType->id,
                     'user_id' => auth()->id(),
@@ -172,6 +259,47 @@ class BookingController extends Controller
             array_map(fn (Reservation $r) => $r->reference, $reservations),
         );
 
-        return redirect()->route('payment.show', $reservations[0]->reference);
+        // Aucun opérateur choisi : ancien comportement, la page de paiement
+        // reste accessible (repli, anciens liens, tests existants).
+        if ($operator === '') {
+            return redirect()->route('payment.show', $reservations[0]->reference);
+        }
+
+        // Paiement fusionné : on démarre immédiatement la checkout DexPay et
+        // on envoie le client directement sur la page hébergée.
+        try {
+            $this->payments->startOnlinePayment(
+                $reservations[0],
+                (string) $data['customer_phone'],
+                $operator,
+            );
+        } catch (DexPayException $e) {
+            // Repli : la réservation existe, la page de paiement reste le bon
+            // endroit pour réessayer.
+            return redirect()->route('payment.show', $reservations[0]->reference)
+                ->with('error', $e->getMessage());
+        }
+
+        $reservations[0]->refresh();
+        $payment = $reservations[0]->latestPayment;
+        $paymentUrl = $payment?->payment_url;
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => filled($paymentUrl),
+                'payment_url' => $paymentUrl,
+                'reference' => $reservations[0]->reference,
+                'message' => filled($paymentUrl) ? null : 'Impossible de démarrer le paiement.',
+            ], filled($paymentUrl) ? 200 : 422);
+        }
+
+        if (filled($paymentUrl)) {
+            // DexPay refuse iframe et popup : seule la navigation top-level
+            // fonctionne (redirect 302 côté formulaire).
+            return redirect()->away($paymentUrl);
+        }
+
+        return redirect()->route('payment.show', $reservations[0]->reference)
+            ->with('error', 'Impossible de démarrer le paiement. Réessayez depuis la page de paiement.');
     }
 }
