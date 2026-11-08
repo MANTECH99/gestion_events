@@ -31,7 +31,7 @@ class ReservationController extends Controller
     {
         $user = $request->user();
 
-        $eventOptions = Event::when(! $user->isAdmin(), fn ($q) => $q->where('organizer_id', $user->id))
+        $eventOptions = Event::when(! $user->isAdmin(), fn ($q) => $q->where('organizer_id', $user->organizerScopeId()))
             ->orderByDesc('event_date')
             ->get();
 
@@ -44,7 +44,7 @@ class ReservationController extends Controller
 
         $query = Reservation::query()
             ->with(['event', 'ticketType', 'user', 'soldBy'])
-            ->when(! $user->isAdmin(), fn ($q) => $q->whereHas('event', fn ($e) => $e->where('organizer_id', $user->id)))
+            ->when(! $user->isAdmin(), fn ($q) => $q->whereHas('event', fn ($e) => $e->where('organizer_id', $user->organizerScopeId())))
             ->when($request->filled('event_id'), fn ($q) => $q->where('event_id', $request->integer('event_id')))
             ->when($request->filled('status'), fn ($q) => $q->where('payment_status', $request->string('status')->value()))
             ->when($request->filled('channel'), fn ($q) => $q->where('channel', $request->string('channel')->value()))
@@ -142,7 +142,7 @@ class ReservationController extends Controller
         $user = $request->user();
 
         abort_unless(
-            $user->isAdmin() || $reservation->event?->organizer_id === $user->id,
+            $user->isAdmin() || (int) $reservation->event?->organizer_id === $user->organizerScopeId(),
             403
         );
     }

@@ -16,7 +16,7 @@
     $groups = $sections ?? [['items' => $links]];
     $cta = $cta ?? null;
     // Sombre sur tout l'espace de gestion, bascule clair via le cookie « theme ».
-    $dark = request()->routeIs('organizer.*', 'admin.*') && request()->cookie('theme') !== 'light';
+    $dark = request()->routeIs('organizer.*', 'admin.*', 'treasurer.*') && request()->cookie('theme') !== 'light';
 @endphp
 
 {{-- Colonne pleine hauteur : sous lg le tiroir occupe l'écran, au-dessus elle borde le header. --}}

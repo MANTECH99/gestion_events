@@ -4,7 +4,7 @@
     <div class="mb-5">
         <h1 class="text-2xl font-extrabold tracking-tight text-ink-950">Utilisateurs</h1>
         <p class="mt-1 text-sm text-ink-600">
-            Créez vos points de vente et nommez vos agents de contrôle.
+            Créez vos points de vente et vos trésorières, nommez vos agents de contrôle.
         </p>
     </div>
 
@@ -15,6 +15,7 @@
                 <select name="role" onchange="this.form.submit()" class="input w-auto py-2 text-sm">
                     <option value="">Tous les rôles</option>
                     <option value="user" @selected(request('role') === 'user')>Point de vente</option>
+                    <option value="treasurer" @selected(request('role') === 'treasurer')>Trésorière</option>
                     <option value="agent" @selected(request('role') === 'agent')>Agent</option>
                 </select>
                 <button class="btn-outline btn-sm">Filtrer</button>
@@ -25,7 +26,7 @@
                     @include('partials.empty', [
                         'icon' => 'users',
                         'title' => 'Aucun utilisateur',
-                        'message' => 'Créez un point de vente pour lui attribuer du stock.',
+                        'message' => 'Créez un point de vente ou une trésorière pour les rattacher à votre organisation.',
                     ])
                 @else
                     <div class="overflow-x-auto">
@@ -66,7 +67,7 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="badge {{ $target->isAgent() ? 'bg-violet-100 text-violet-700' : 'bg-brand-100 text-brand-700' }}">
+                                            <span class="badge {{ $target->isAgent() ? 'bg-violet-100 text-violet-700' : ($target->isTreasurer() ? 'bg-emerald-100 text-emerald-700' : 'bg-brand-100 text-brand-700') }}">
                                                 {{ $target->role_label }}
                                             </span>
                                         </td>
@@ -77,13 +78,14 @@
                                         </td>
                                         <td class="text-right">
                                             <div class="flex justify-end gap-1.5">
-                                                <form method="POST" action="{{ route('organizer.users.toggle-agent', $target) }}">
-                                                    @csrf
-                                                    <button class="btn-ghost btn-sm" title="{{ $target->isAgent() ? 'Retirer le rôle agent' : 'Nommer agent' }}">
-                                                        @icon($target->isAgent() ? 'user-minus' : 'user-check', 'w-4 h-4')
-                                                    </button>
-                                                </form>
-
+                                                @unless ($target->isTreasurer())
+                                                    <form method="POST" action="{{ route('organizer.users.toggle-agent', $target) }}">
+                                                        @csrf
+                                                        <button class="btn-ghost btn-sm" title="{{ $target->isAgent() ? 'Retirer le rôle agent' : 'Nommer agent' }}">
+                                                            @icon($target->isAgent() ? 'user-minus' : 'user-check', 'w-4 h-4')
+                                                        </button>
+                                                    </form>
+                                                @endunless
                                                 <form method="POST" action="{{ route('organizer.users.toggle-active', $target) }}">
                                                     @csrf
                                                     <button class="btn-ghost btn-sm" title="{{ $target->is_active ? 'Désactiver' : 'Réactiver' }}">
@@ -112,15 +114,29 @@
         </div>
 
         <div>
-            <form method="POST" action="{{ route('organizer.users.store') }}" class="card sticky top-24 space-y-4 p-6">
+            <form method="POST" action="{{ route('organizer.users.store') }}"
+                  x-data="{ type: '{{ old('account_type', 'point_of_sale') }}' }"
+                  class="card sticky top-24 space-y-4 p-6">
                 @csrf
 
                 <div>
-                    <h2 class="font-bold text-ink-950">Créer un point de vente</h2>
-                    <p class="mt-1 text-xs text-ink-500">Le compte pourra vendre du stock qui lui sera attribué.</p>
+                    <h2 class="font-bold text-ink-950">Créer un compte</h2>
+                    <p class="mt-1 text-xs text-ink-500">
+                        Point de vente : vend du stock. Trésorière : effectue vos retraits avec votre code de retrait.
+                    </p>
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+                    <div>
+                        <label for="account_type" class="label">Type de compte</label>
+                        <select id="account_type" name="account_type" x-model="type" required
+                                class="input @error('account_type') input-error @enderror">
+                            <option value="point_of_sale" @selected(old('account_type', 'point_of_sale') === 'point_of_sale')">Point de vente</option>
+                            <option value="treasurer" @selected(old('account_type') === 'treasurer')">Trésorière</option>
+                        </select>
+                        @error('account_type')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
+                    </div>
+
                     <div>
                         <label for="first_name" class="label">Prénom</label>
                         <input id="first_name" name="first_name" value="{{ old('first_name') }}" required class="input @error('first_name') input-error @enderror">
@@ -145,7 +161,7 @@
                         @error('email')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
                     </div>
 
-                    <div>
+                    <div x-cloak x-show="type === 'point_of_sale'">
                         <label for="point_of_sale" class="label">Point de vente</label>
                         <input id="point_of_sale" name="point_of_sale" value="{{ old('point_of_sale') }}"
                                placeholder="ex : Boutique Centre-ville" class="input">

@@ -11,7 +11,7 @@
 @php
     $hasSidebar = view()->hasSection('sidebar');
     // Espaces de gestion sombres par défaut (cookie « theme » = « light » pour le clair).
-    $themeDark = request()->routeIs('organizer.*', 'admin.*') && request()->cookie('theme') !== 'light';
+    $themeDark = request()->routeIs('organizer.*', 'admin.*', 'treasurer.*') && request()->cookie('theme') !== 'light';
     // Bandeau flash déjà affiché en haut : le contenu se compacte pour ne pas cumuler les paddings.
     $hasFlash = $errors->any() || session('success') || session('error') || session('status');
 @endphp
@@ -79,8 +79,8 @@
         @endif
     </main>
 
-    {{-- Pas de footer dans les espaces de gestion : admin, organisateur, agent, point de vente. --}}
-    @unless (request()->routeIs('organizer.*', 'admin.*', 'pos.*', 'agent.*'))
+    {{-- Pas de footer dans les espaces de gestion : admin, organisateur, trésorière, agent, point de vente. --}}
+    @unless (request()->routeIs('organizer.*', 'admin.*', 'treasurer.*', 'pos.*', 'agent.*'))
         @include('partials.footer', ['hasSidebar' => $hasSidebar])
     @endunless
 

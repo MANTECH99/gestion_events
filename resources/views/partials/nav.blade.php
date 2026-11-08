@@ -3,7 +3,7 @@
     $hasSidebar = $hasSidebar ?? false;
     $onHome = request()->routeIs('home');
     // Espaces de gestion : sombre par défaut, basculable en clair via le cookie « theme ».
-    $backoffice = request()->routeIs('organizer.*', 'admin.*');
+    $backoffice = request()->routeIs('organizer.*', 'admin.*', 'treasurer.*');
     $themeDark = $backoffice && request()->cookie('theme') !== 'light';
     // Header transparent sur l'accueil, la page détail d'événement et la page de réservation (thèmes sombres).
     $darkHeader = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*') || $themeDark;
@@ -12,7 +12,7 @@
 <header class="app-header no-print z-50 backdrop-blur-lg {{ $darkHeader ? 'absolute inset-x-0 top-0 bg-transparent' : 'sticky top-0 border-b border-ink-200/60 bg-white/85' }}">
     {{-- Sur les interfaces de gestion, la colonne fixe occupe la bande gauche du header. --}}
     <div class="{{ $hasSidebar ? 'lg:pl-64' : '' }}">
-        <div x-data="{ open: false }" @click.outside="open = false" class="relative flex h-16 {{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} items-center gap-4 px-4 sm:px-6 lg:px-8">
+        <div class="relative flex h-16 {{ $hasSidebar ? 'w-full' : 'mx-auto max-w-7xl' }} items-center gap-4 px-4 sm:px-6 lg:px-8">
             <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2.5">
                 <img src="{{ asset('images/icon.svg') }}?v={{ config('app.asset_version') }}" alt="" width="36" height="36"
                      class="h-9 w-9 shrink-0 rounded-xl shadow-lg {{ $darkHeader ? 'shadow-black/40' : 'shadow-orange-500/40' }}">
@@ -20,74 +20,6 @@
                     Billeterie <span class="{{ $darkHeader ? 'text-white' : 'text-gradient' }}">Express</span>
                 </span>
             </a>
-
-            {{-- Menu mobile : la navigation principale est masquée sous lg --}}
-            <div class="lg:hidden">
-                <button @click="open = !open"
-                        class="grid h-9 w-9 place-items-center rounded-xl border transition {{ $darkHeader ? 'border-white/25 bg-white/10 text-white hover:bg-white/20' : 'border-ink-200 bg-white text-ink-700 hover:border-ink-300' }}"
-                        :aria-expanded="open ? 'true' : 'false'" aria-controls="menu-mobile" aria-label="Ouvrir le menu">
-                    <span x-show="!open">@icon('menu', 'w-5 h-5')</span>
-                    <span x-cloak x-show="open">@icon('close', 'w-5 h-5')</span>
-                </button>
-
-                <div id="menu-mobile" x-cloak x-show="open" x-transition
-                     class="absolute left-4 top-full mt-px w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border shadow-xl {{ $darkHeader ? 'border-white/15 bg-ink-950/95 backdrop-blur-lg' : 'border-ink-200 bg-white' }}">
-                    <div class="p-1.5 text-sm">
-                        <a href="{{ route('home') }}"
-                           class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }} {{ request()->routeIs('home') ? ($darkHeader ? 'bg-white/10 text-white' : 'bg-brand-50 text-brand-700') : '' }}">
-                            @icon('ticket', 'w-4 h-4') Événements
-                        </a>
-
-                        @auth
-                            <a href="{{ route('reservations.index') }}"
-                               class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }} {{ request()->routeIs('reservations.*') ? ($darkHeader ? 'bg-white/10 text-white' : 'bg-brand-50 text-brand-700') : '' }}">
-                                @icon('calendar', 'w-4 h-4') Mes réservations
-                            </a>
-
-                            @if ($user->isAgent())
-                                <a href="{{ route('agent.index') }}"
-                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }} {{ request()->routeIs('agent.*') ? ($darkHeader ? 'bg-white/10 text-white' : 'bg-brand-50 text-brand-700') : '' }}">
-                                    @icon('scan', 'w-4 h-4') Espace agent
-                                </a>
-                            @endif
-
-                            @if ($user->isOrganizer() || $user->isAdmin())
-                                <a href="{{ route('organizer.dashboard') }}"
-                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
-                                    @icon('chart-bar', 'w-4 h-4') Tableau de bord
-                                </a>
-                            @endif
-
-                            @if ($user->isManagedPointOfSale())
-                                <a href="{{ route('pos.dashboard') }}"
-                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
-                                    @icon('store', 'w-4 h-4') Point de vente
-                                </a>
-                            @endif
-
-                            @if ($user->isAdmin())
-                                <a href="{{ route('admin.dashboard') }}"
-                                   class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
-                                    @icon('shield', 'w-4 h-4') Administration
-                                </a>
-                            @endif
-
-                            @if ($backoffice)
-                                <form method="POST" action="{{ route('theme.update') }}" class="sm:hidden">
-                                    @csrf
-                                    <button type="submit" class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
-                                        @icon($darkHeader ? 'sun' : 'moon', 'w-4 h-4') {{ $darkHeader ? 'Mode clair' : 'Mode sombre' }}
-                                    </button>
-                                </form>
-                            @endif
-                        @else
-                            <a href="{{ route('login') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
-                                @icon('user', 'w-4 h-4') Connexion
-                            </a>
-                        @endauth
-                    </div>
-                </div>
-            </div>
 
             @if ($darkHeader)
                 @php $homeAnchor = $onHome ? '' : route('home'); @endphp
@@ -178,6 +110,11 @@
                                         @icon('scan', 'w-4 h-4') Scanner un ticket
                                     </a>
                                 @endif
+                                @if ($user->isTreasurer())
+                                    <a href="{{ route('treasurer.payouts.index') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
+                                        @icon('wallet', 'w-4 h-4') Espace trésorière
+                                    </a>
+                                @endif
                                 @if ($user->isOrganizer() || $user->isAdmin())
                                     <a href="{{ route('organizer.events.index') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 {{ $darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-700 hover:bg-ink-50' }}">
                                         @icon('calendar', 'w-4 h-4') Mes événements
@@ -218,17 +155,23 @@
                            aria-label="Rechercher un événement">
                             @icon('search', 'w-5 h-5')
                         </a>
+                        {{-- Desktop : inchangé (Se connecter + S'inscrire). Mobile : « Connexion ». --}}
                         <a href="{{ route('login') }}"
                            class="btn btn-sm hidden border border-white/30 text-white hover:bg-white/10 focus-visible:ring-white focus-visible:ring-offset-0 sm:inline-flex">
                             Se connecter
                         </a>
+                        <a href="{{ route('login') }}"
+                           class="btn btn-sm bg-orange-400 text-ink-950 shadow-lg shadow-orange-400/25 hover:bg-orange-300 sm:hidden">
+                            Connexion
+                        </a>
                         <a href="{{ route('register') }}"
-                           class="btn btn-sm bg-orange-400 text-ink-950 shadow-lg shadow-orange-400/25 hover:bg-orange-300">
+                           class="btn btn-sm hidden bg-orange-400 text-ink-950 shadow-lg shadow-orange-400/25 hover:bg-orange-300 sm:inline-flex">
                             S'inscrire
                         </a>
                     @else
                         <a href="{{ route('login') }}" class="btn-ghost btn-sm hidden sm:inline-flex">Connexion</a>
-                        <a href="{{ route('register') }}" class="btn-primary btn-sm">S'inscrire</a>
+                        <a href="{{ route('login') }}" class="btn-primary btn-sm sm:hidden">Connexion</a>
+                        <a href="{{ route('register') }}" class="btn-primary btn-sm hidden sm:inline-flex">S'inscrire</a>
                     @endif
                 @endauth
             </div>

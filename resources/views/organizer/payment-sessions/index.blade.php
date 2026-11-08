@@ -1,4 +1,9 @@
-@extends('layouts.organizer')
+@extends(request()->routeIs('treasurer.*') ? 'layouts.treasurer' : 'layouts.organizer')
+
+@php
+    // Espace trésorière : consultation seule (pas de bouton « actualiser »).
+    $isTreasurer = request()->routeIs('treasurer.*');
+@endphp
 
 @section('content')
     <div class="mb-5">
@@ -47,7 +52,9 @@
                             <th>Opérateur</th>
                             <th>Statut</th>
                             <th>Créée le</th>
-                            <th class="text-right">Action</th>
+                            @unless ($isTreasurer)
+                                <th class="text-right">Action</th>
+                            @endunless
                         </tr>
                     </thead>
                     <tbody>
@@ -96,16 +103,18 @@
                                 <td class="whitespace-nowrap text-xs text-ink-600">
                                     {{ $session->created_at->translatedFormat('d/m/Y H:i') }}
                                 </td>
-                                <td class="text-right">
-                                    @if (! in_array($session->status, ['completed', 'success', 'failed', 'cancelled', 'expired', 'refunded'], true) && $session->reference)
-                                        <form method="POST" action="{{ route('organizer.payment-sessions.sync', $session) }}">
-                                            @csrf
-                                            <button class="btn-ghost btn-sm" title="Actualiser la session">
-                                                @icon('refresh', 'w-4 h-4')
-                                            </button>
-                                        </form>
-                                    @endif
-                                </td>
+                                @unless ($isTreasurer)
+                                    <td class="text-right">
+                                        @if (! in_array($session->status, ['completed', 'success', 'failed', 'cancelled', 'expired', 'refunded'], true) && $session->reference)
+                                            <form method="POST" action="{{ route('organizer.payment-sessions.sync', $session) }}">
+                                                @csrf
+                                                <button class="btn-ghost btn-sm" title="Actualiser la session">
+                                                    @icon('refresh', 'w-4 h-4')
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </td>
+                                @endunless
                             </tr>
                         @endforeach
                     </tbody>

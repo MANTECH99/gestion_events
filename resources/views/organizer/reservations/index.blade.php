@@ -1,4 +1,11 @@
-@extends('layouts.organizer')
+@extends(request()->routeIs('treasurer.*') ? 'layouts.treasurer' : 'layouts.organizer')
+
+@php
+    // Espace trésorière : consultation seule (téléchargements possibles,
+    // mais ni remboursement ni suppression).
+    $isTreasurer = request()->routeIs('treasurer.*');
+    $pfx = $isTreasurer ? 'treasurer' : 'organizer';
+@endphp
 
 @section('content')
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -34,7 +41,7 @@
         <div class="flex flex-wrap items-center gap-2">
             <button class="btn-primary btn-sm">@icon('filter', 'w-4 h-4') Filtrer</button>
             @if (array_filter($filters))
-                <a href="{{ route('organizer.reservations.index') }}" class="btn-ghost btn-sm">Réinitialiser</a>
+                <a href="{{ route($pfx.'.reservations.index') }}" class="btn-ghost btn-sm">Réinitialiser</a>
             @endif
         </div>
     </form>
@@ -142,55 +149,59 @@
                                 </td>
                                 <td class="text-right">
                                     <div class="flex justify-end gap-1.5">
-                                        <a href="{{ route('organizer.reservations.pdf', $reservation) }}" class="btn-ghost btn-sm" title="Récapitulatif de la réservation (PDF)">
+                                        <a href="{{ route($pfx.'.reservations.pdf', $reservation) }}" class="btn-ghost btn-sm" title="Récapitulatif de la réservation (PDF)">
                                             @icon('download', 'w-4 h-4')
                                         </a>
 
                                         @if ($reservation->isPaid())
                                             <div x-data="ticketImage" class="inline-flex">
                                                 <button type="button" :disabled="busy"
-                                                        @click="captureFromUrl('{{ route('organizer.reservations.cards', $reservation) }}', '{{ $reservation->reference }}')"
+                                                        @click="captureFromUrl('{{ route($pfx.'.reservations.cards', $reservation) }}', '{{ $reservation->reference }}')"
                                                         class="btn-ghost btn-sm disabled:opacity-60" title="Enregistrer les billets (image)">
                                                     @icon('ticket', 'w-4 h-4')
                                                 </button>
                                             </div>
                                         @endif
 
-                                        @if ($reservation->isPaid())
-                                            <button type="button" @click="confirmRefund = true" class="btn-ghost btn-sm text-orange-600" title="Rembourser">
-                                                @icon('refresh', 'w-4 h-4')
-                                            </button>
-                                        @endif
-
-                                        @unless ($reservation->isPaid())
-                                            <form method="POST" action="{{ route('organizer.reservations.destroy', $reservation) }}"
-                                                  onsubmit="return confirm('Supprimer cette réservation ?');">
-                                                @csrf @method('DELETE')
-                                                <button class="btn-ghost btn-sm text-rose-600" title="Supprimer">
-                                                    @icon('trash', 'w-4 h-4')
+                                        @unless ($isTreasurer)
+                                            @if ($reservation->isPaid())
+                                                <button type="button" @click="confirmRefund = true" class="btn-ghost btn-sm text-orange-600" title="Rembourser">
+                                                    @icon('refresh', 'w-4 h-4')
                                                 </button>
-                                            </form>
+                                            @endif
+
+                                            @unless ($reservation->isPaid())
+                                                <form method="POST" action="{{ route('organizer.reservations.destroy', $reservation) }}"
+                                                      onsubmit="return confirm('Supprimer cette réservation ?');">
+                                                    @csrf @method('DELETE')
+                                                    <button class="btn-ghost btn-sm text-rose-600" title="Supprimer">
+                                                        @icon('trash', 'w-4 h-4')
+                                                    </button>
+                                                </form>
+                                            @endunless
                                         @endunless
                                     </div>
 
-                                    <div x-cloak x-show="confirmRefund" x-transition
-                                         class="absolute inset-0 z-40 grid place-items-center rounded-2xl bg-ink-950/70 p-4"
-                                         style="position: fixed;">
-                                        <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl" @click.outside="confirmRefund = false">
-                                            <h3 class="font-bold text-ink-950">Confirmer le remboursement</h3>
-                                            <p class="mt-2 text-sm text-ink-600">
-                                                Rembourser <strong>{{ $reservation->reference }}</strong> ({{ money($reservation->total_amount) }})
-                                                via DexPay ? Les tickets seront invalidés.
-                                            </p>
-                                            <div class="mt-5 flex gap-2">
-                                                <form method="POST" action="{{ route('organizer.reservations.refund', $reservation) }}" class="flex-1">
-                                                    @csrf
-                                                    <button class="btn-primary w-full justify-center btn-sm">Rembourser</button>
-                                                </form>
-                                                <button type="button" @click="confirmRefund = false" class="btn-ghost btn-sm">Annuler</button>
+                                    @unless ($isTreasurer)
+                                        <div x-cloak x-show="confirmRefund" x-transition
+                                             class="absolute inset-0 z-40 grid place-items-center rounded-2xl bg-ink-950/70 p-4"
+                                             style="position: fixed;">
+                                            <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl" @click.outside="confirmRefund = false">
+                                                <h3 class="font-bold text-ink-950">Confirmer le remboursement</h3>
+                                                <p class="mt-2 text-sm text-ink-600">
+                                                    Rembourser <strong>{{ $reservation->reference }}</strong> ({{ money($reservation->total_amount) }})
+                                                    via DexPay ? Les tickets seront invalidés.
+                                                </p>
+                                                <div class="mt-5 flex gap-2">
+                                                    <form method="POST" action="{{ route('organizer.reservations.refund', $reservation) }}" class="flex-1">
+                                                        @csrf
+                                                        <button class="btn-primary w-full justify-center btn-sm">Rembourser</button>
+                                                    </form>
+                                                    <button type="button" @click="confirmRefund = false" class="btn-ghost btn-sm">Annuler</button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    @endunless
                                 </td>
                             </tr>
                         @endforeach

@@ -34,6 +34,8 @@ class User extends Authenticatable
 
     public const ROLE_USER = 'user';
 
+    public const ROLE_TREASURER = 'treasurer';
+
     public const ROLE_CLIENT = 'client';
 
     /** Libellés des rôles. */
@@ -42,6 +44,7 @@ class User extends Authenticatable
         self::ROLE_ORGANIZER => 'Organisateur',
         self::ROLE_AGENT => 'Agent',
         self::ROLE_USER => 'Point de vente',
+        self::ROLE_TREASURER => 'Trésorière',
         self::ROLE_CLIENT => 'Client',
     ];
 
@@ -97,6 +100,12 @@ class User extends Authenticatable
     public function agents(): HasMany
     {
         return $this->hasMany(self::class, 'organizer_id')->where('role', self::ROLE_AGENT);
+    }
+
+    /** Trésorières rattachées à cet organisateur. */
+    public function treasurers(): HasMany
+    {
+        return $this->hasMany(self::class, 'organizer_id')->where('role', self::ROLE_TREASURER);
     }
 
     public function reservations(): HasMany
@@ -173,6 +182,26 @@ class User extends Authenticatable
         return $this->payout_pin !== null && Hash::check($pin, $this->payout_pin);
     }
 
+    /**
+     * Propriétaire du code de retrait à vérifier pour ce compte.
+     *
+     * Une trésorière utilise le code défini par son organisateur (qui le lui
+     * communique) ; un organisateur vérifie son propre code.
+     */
+    public function payoutPinOwner(): self
+    {
+        return $this->organizer ?? $this;
+    }
+
+    /**
+     * Identifiant organisateur dont ce compte relève pour ses finances et ses
+     * données (lui-même, sauf pour un compte rattaché comme la trésorière).
+     */
+    public function organizerScopeId(): int
+    {
+        return (int) ($this->organizer_id ?? $this->id);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
@@ -192,6 +221,12 @@ class User extends Authenticatable
     public function isPointOfSale(): bool
     {
         return $this->role === self::ROLE_USER;
+    }
+
+    /** Une trésorière effectue les retraits de son organisateur. */
+    public function isTreasurer(): bool
+    {
+        return $this->role === self::ROLE_TREASURER;
     }
 
     /** Un point de vente rattaché à un organisateur, avec un stock physique à vendre. */

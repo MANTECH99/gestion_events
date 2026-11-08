@@ -177,9 +177,12 @@
         <div class="absolute inset-[1.5px] overflow-hidden" aria-hidden="true" style="background: radial-gradient(55% 130% at 50% 155%, rgba(249,115,22,.30) 0%, rgba(249,115,22,.10) 45%, transparent 75%);"></div>
         <div class="relative flex items-center justify-between gap-3">
             <span class="flex min-w-0 items-center gap-2">
-                <span class="grid h-4 w-4 shrink-0 place-items-center rounded bg-orange-500 text-[#0c0c0f]">
-                    @icon('ticket', 'w-2.5 h-2.5')
-                </span>
+                {{-- Pied : photo de profil de l'organisateur, à défaut le logo. --}}
+                @if ($organizerAvatar)
+                    <img src="{{ $organizerAvatar }}" alt="" class="h-4 w-4 shrink-0 rounded-full object-cover">
+                @else
+                    <img src="{{ asset('images/icon.svg') }}" alt="" class="h-4 w-4 shrink-0">
+                @endif
                 <span class="truncate text-[11px] font-semibold text-white/75">Billeterie<span class="text-orange-500"> Express</span></span>
             </span>
             <span class="shrink-0 text-[11px] font-semibold text-white/40">{{ $ticket->event->event_date?->year ?? now()->year }}</span>

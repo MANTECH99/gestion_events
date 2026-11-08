@@ -71,6 +71,14 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function treasurer(?User $organizer = null): static
+    {
+        return $this->state(fn () => [
+            'role' => User::ROLE_TREASURER,
+            'organizer_id' => $organizer?->id,
+        ]);
+    }
+
     public function inactive(): static
     {
         return $this->state(fn () => ['is_active' => false]);

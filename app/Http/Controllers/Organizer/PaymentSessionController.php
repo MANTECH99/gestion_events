@@ -44,7 +44,7 @@ class PaymentSessionController extends Controller
 
         $scoped = fn ($q) => $q->when(
             ! $user->isAdmin(),
-            fn ($q) => $q->whereHas('reservation.event', fn ($q) => $q->where('organizer_id', $user->id))
+            fn ($q) => $q->whereHas('reservation.event', fn ($q) => $q->where('organizer_id', $user->organizerScopeId()))
         );
 
         $sessions = $scoped(Payment::query())

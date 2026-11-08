@@ -26,12 +26,12 @@ class PayoutController extends Controller
         $user = $request->user();
 
         $payouts = Payout::query()
-            ->when(! $user->isAdmin(), fn ($q) => $q->where('organizer_id', $user->id))
+            ->when(! $user->isAdmin(), fn ($q) => $q->where('organizer_id', $user->organizerScopeId()))
             ->latest()
             ->paginate(15);
 
         $summaryRows = Payout::query()
-            ->when(! $user->isAdmin(), fn ($q) => $q->where('organizer_id', $user->id))
+            ->when(! $user->isAdmin(), fn ($q) => $q->where('organizer_id', $user->organizerScopeId()))
             ->get(['amount', 'fees']);
 
         $summary = [
@@ -44,7 +44,7 @@ class PayoutController extends Controller
         // (tous les événements pour un administrateur).
         $organizerEventIds = $user->isAdmin()
             ? null
-            : Event::where('organizer_id', $user->id)->pluck('id')->all();
+            : Event::where('organizer_id', $user->organizerScopeId())->pluck('id')->all();
         $organizerRevenue = $this->stats->summary(null, null, $organizerEventIds)['total_revenue'];
 
         $configured = $this->account->client()->isConfigured();
@@ -95,9 +95,17 @@ class PayoutController extends Controller
             'payout_pin' => 'code de retrait',
         ]);
 
-        // 2FA retrait : code PIN défini dans le profil, vérifié avant tout appel DexPay.
-        if (! $user->hasPayoutPin()) {
-            return back()->withInput()->with('error', 'Définissez d\'abord votre code de retrait dans votre profil.');
+        // 2FA retrait : code défini par l'organisateur — une trésorière utilise
+        // le code que l'organisateur lui a communiqué — vérifié avant tout
+        // appel DexPay.
+        $pinOwner = $user->payoutPinOwner();
+
+        if (! $pinOwner->hasPayoutPin()) {
+            $message = $user->isTreasurer()
+                ? 'Votre organisateur n\'a pas encore défini de code de retrait : demandez-lui d\'en créer un dans son profil.'
+                : 'Définissez d\'abord votre code de retrait dans votre profil.';
+
+            return back()->withInput()->with('error', $message);
         }
 
         // Limitation : 5 tentatives par minute (anti-force brute du code).
@@ -107,7 +115,7 @@ class PayoutController extends Controller
             return back()->withInput()->with('error', 'Trop de tentatives. Réessayez dans '.RateLimiter::availableIn($throttleKey).' secondes.');
         }
 
-        if (! $user->verifyPayoutPin($data['payout_pin'])) {
+        if (! $pinOwner->verifyPayoutPin($data['payout_pin'])) {
             RateLimiter::hit($throttleKey, 60);
 
             return back()->withInput()->withErrors(['payout_pin' => 'Code de retrait incorrect.']);
@@ -141,14 +149,14 @@ class PayoutController extends Controller
                 operator: $data['operator'],
                 recipientName: $data['recipient_name'] ?? null,
                 webhookUrl: route('webhooks.dexpay'),
-                metadata: ['organizer_id' => (string) $user->id, 'merchant_reference' => $reference],
+                metadata: ['organizer_id' => (string) $user->organizerScopeId(), 'merchant_reference' => $reference],
             );
         } catch (DexPayException $e) {
             return back()->withInput()->with('error', 'Retrait refusé : '.$e->getMessage());
         }
 
         Payout::create([
-            'organizer_id' => $user->id,
+            'organizer_id' => $user->organizerScopeId(),
             'reference' => $reference,
             'dexpay_id' => $remote['id'] ?? null,
             'amount' => (int) $data['amount'],
@@ -171,7 +179,7 @@ class PayoutController extends Controller
     {
         $user = $request->user();
 
-        abort_unless($user->isAdmin() || $payout->organizer_id === $user->id, 403);
+        abort_unless($user->isAdmin() || (int) $payout->organizer_id === $user->organizerScopeId(), 403);
 
         try {
             $this->applyRemoteStatus($payout);

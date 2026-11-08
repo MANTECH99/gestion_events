@@ -1,4 +1,10 @@
-@extends('layouts.organizer')
+@extends(request()->routeIs('treasurer.*') ? 'layouts.treasurer' : 'layouts.organizer')
+
+@php
+    // Espace trésorière : mêmes pages que l'organisateur, routes « treasurer.* ».
+    $isTreasurer = request()->routeIs('treasurer.*');
+    $pfx = $isTreasurer ? 'treasurer' : 'organizer';
+@endphp
 
 @section('content')
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -51,8 +57,8 @@
     </div>
 
     <div class="grid gap-6 lg:grid-cols-3">
-        <div class="lg:col-span-2">
-            <div class="mb-5 grid gap-4 sm:grid-cols-2">
+        <div class="contents min-w-0 lg:block lg:col-span-2">
+            <div class="order-1 mb-5 grid gap-4 sm:grid-cols-2">
                 <div class="card p-5">
                     <div class="flex items-center gap-3">
                         <span class="grid h-11 w-11 place-items-center rounded-xl bg-emerald-50 text-emerald-600">
@@ -82,7 +88,7 @@
                 </div>
             </div>
 
-            <div class="card overflow-hidden">
+            <div class="card order-3 overflow-hidden">
                 <div class="border-b border-ink-100 px-5 py-4">
                     <h2 class="font-semibold text-ink-900">Historique des retraits</h2>
                 </div>
@@ -137,7 +143,7 @@
                                         </td>
                                         <td class="text-right">
                                             @if (! in_array(strtoupper((string) $payout->status), ['COMPLETED', 'FAILED', 'CANCELLED'], true))
-                                                <form method="POST" action="{{ route('organizer.payouts.sync', $payout) }}">
+                                                <form method="POST" action="{{ route($pfx.'.payouts.sync', $payout) }}">
                                                     @csrf
                                                     <button class="btn-ghost btn-sm" title="Actualiser le statut">
                                                         @icon('refresh', 'w-4 h-4')
@@ -156,8 +162,8 @@
             </div>
         </div>
 
-        <div>
-            <form method="POST" action="{{ route('organizer.payouts.store') }}" class="card sticky top-24 space-y-4 p-6">
+        <div class="order-2 min-w-0">
+            <form method="POST" action="{{ route($pfx.'.payouts.store') }}" class="card sticky top-24 space-y-4 p-6">
                 @csrf
 
                 <div>
@@ -210,7 +216,13 @@
                            placeholder="••••"
                            class="input @error('payout_pin') input-error @enderror">
                     <p class="mt-1.5 text-xs text-ink-500">
-                        @if (auth()->user()->hasPayoutPin())
+                        @if ($isTreasurer)
+                            @if (auth()->user()->payoutPinOwner()->hasPayoutPin())
+                                Code de retrait défini par votre organisateur (communiqué par lui, 4 à 6 chiffres).
+                            @else
+                                <span class="font-semibold text-rose-600">Votre organisateur n'a pas encore défini de code de retrait.</span> Demandez-lui d'en créer un dans son profil avant tout retrait.
+                            @endif
+                        @elseif (auth()->user()->hasPayoutPin())
                             Code défini dans votre profil (4 à 6 chiffres).
                         @else
                             <a href="{{ route('profil.show') }}" class="font-semibold text-rose-600 underline">Définissez d'abord votre code de retrait</a> dans votre profil.

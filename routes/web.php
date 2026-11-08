@@ -194,6 +194,24 @@ Route::middleware('auth')->group(function () {
         Route::post('/ventes', [PointOfSaleController::class, 'store'])->name('sales.store');
     });
 
+    /* ---- Espace trésorière ----
+       Mêmes contrôleurs que l'espace organisateur : les requêtes sont
+       bornées à l'organisateur rattaché (organizerScopeId). La trésorière
+       retire avec le code défini par l'organisateur et consulte les
+       sessions de paiement et les réservations (sans remboursement). */
+    Route::prefix('tresorerie')->name('treasurer.')->middleware('role:treasurer')->group(function () {
+        Route::get('/retraits', [OrganizerPayout::class, 'index'])->name('payouts.index');
+        Route::post('/retraits', [OrganizerPayout::class, 'store'])->name('payouts.store');
+        Route::post('/retraits/{payout}/sync', [OrganizerPayout::class, 'sync'])->name('payouts.sync');
+
+        Route::get('/sessions-de-paiement', [OrganizerPaymentSession::class, 'index'])->name('payment-sessions.index');
+
+        Route::get('/reservations', [OrganizerReservation::class, 'index'])->name('reservations.index');
+        Route::get('/reservations/{reservation}/telecharger', [OrganizerReservation::class, 'download'])->name('reservations.pdf');
+        Route::get('/reservations/{reservation}/billets', [OrganizerReservation::class, 'downloadTickets'])->name('reservations.tickets');
+        Route::get('/reservations/{reservation}/cartes', [OrganizerReservation::class, 'cards'])->name('reservations.cards');
+    });
+
     /* ---- Administration ---- */
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');

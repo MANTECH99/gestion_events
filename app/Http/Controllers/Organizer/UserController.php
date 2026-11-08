@@ -19,7 +19,7 @@ class UserController extends Controller
         $users = User::query()
             ->with('organizer')
             ->when(! $user->isAdmin(), fn ($q) => $q->where('organizer_id', $user->id))
-            ->when($user->isOrganizer(), fn ($q) => $q->whereIn('role', [User::ROLE_AGENT, User::ROLE_USER]))
+            ->when($user->isOrganizer(), fn ($q) => $q->whereIn('role', [User::ROLE_AGENT, User::ROLE_USER, User::ROLE_TREASURER]))
             ->when($request->filled('role'), fn ($q) => $q->where('role', $request->string('role')->value()))
             ->when($request->filled('q'), fn ($q) => $q->search($request->string('q')->trim()->value()))
             ->orderBy('last_name')
@@ -31,12 +31,13 @@ class UserController extends Controller
         ]);
     }
 
-    /** Création d'un point de vente par l'organisateur. */
+    /** Création d'un point de vente ou d'une trésorière par l'organisateur. */
     public function store(Request $request): RedirectResponse
     {
         $user = $request->user();
 
         $data = $request->validate([
+            'account_type' => ['required', 'in:point_of_sale,treasurer'],
             'first_name' => ['required', 'string', 'max:60'],
             'last_name' => ['required', 'string', 'max:60'],
             'username' => ['required', 'string', 'min:3', 'max:40', 'regex:/^[\pL\pN _-]+$/u', 'unique:users,username'],
@@ -45,6 +46,7 @@ class UserController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
             'point_of_sale' => ['nullable', 'string', 'max:120'],
         ], [], [
+            'account_type' => 'type de compte',
             'first_name' => 'prénom',
             'last_name' => 'nom',
             'email' => 'email',
@@ -52,11 +54,18 @@ class UserController extends Controller
             'point_of_sale' => 'point de vente',
         ]);
 
+        $isTreasurer = $data['account_type'] === 'treasurer';
+        unset($data['account_type']);
+
         User::create([
             ...$data,
-            'role' => User::ROLE_USER,
+            'role' => $isTreasurer ? User::ROLE_TREASURER : User::ROLE_USER,
             'organizer_id' => $user->isAdmin() ? ($request->input('organizer_id') ?: $user->id) : $user->id,
         ]);
+
+        if ($isTreasurer) {
+            return back()->with('success', 'Trésorière créée. Communiquez-lui votre code de retrait : elle en aura besoin pour effectuer les retraits.');
+        }
 
         return back()->with('success', 'Point de vente créé. Vous pouvez maintenant lui attribuer du stock.');
     }
@@ -68,6 +77,10 @@ class UserController extends Controller
 
         if ($target->isAdmin()) {
             return back()->with('error', 'Un administrateur ne peut pas être rétrogradé.');
+        }
+
+        if ($target->isTreasurer()) {
+            return back()->with('error', 'Une trésorière ne peut pas être nommée agent.');
         }
 
         $isAgent = $target->isAgent();

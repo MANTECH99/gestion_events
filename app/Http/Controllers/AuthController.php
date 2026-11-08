@@ -87,6 +87,7 @@ class AuthController extends Controller
         return match (true) {
             $user->isAdmin() => route('admin.dashboard'),
             $user->isOrganizer() => route('organizer.dashboard'),
+            $user->isTreasurer() => route('treasurer.payouts.index'),
             $user->isAgent() => route('agent.index'),
             $user->isManagedPointOfSale() => route('pos.dashboard'),
             default => route('reservations.index'),
