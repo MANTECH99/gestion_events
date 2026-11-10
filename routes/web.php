@@ -44,6 +44,7 @@ Route::post('/evenements/{event}/avis', [EventReviewController::class, 'store'])
     ->name('events.reviews.store')
     ->middleware('throttle:5,1');
 Route::get('/favoris', [FavorisController::class, 'index'])->name('favoris.index');
+Route::view('/devenir-partenaire', 'partners.become')->name('partners.become');
 
 /* ------------------------------------------------------------------ */
 /*  Réservation + paiement (avec ou sans compte) */

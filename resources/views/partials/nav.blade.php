@@ -6,7 +6,7 @@
     $backoffice = request()->routeIs('organizer.*', 'admin.*', 'treasurer.*');
     $themeDark = $backoffice && request()->cookie('theme') !== 'light';
     // Header transparent sur l'accueil, la page détail d'événement et la page de réservation (thèmes sombres).
-    $darkHeader = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*') || $themeDark;
+    $darkHeader = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*', 'partners.*') || $themeDark;
 @endphp
 
 <header class="app-header no-print z-50 backdrop-blur-lg {{ $darkHeader ? 'absolute inset-x-0 top-0 bg-transparent' : 'sticky top-0 border-b border-ink-200/60 bg-white/85' }}">

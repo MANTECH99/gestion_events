@@ -55,7 +55,7 @@
 <body class="flex min-h-full flex-col bg-ink-50">
     @include('partials.nav', ['hasSidebar' => $hasSidebar])
 
-    <main class="flex-1 {{ request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*') || $themeDark ? 'bg-ink-950' : '' }}">
+    <main class="flex-1 {{ request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*', 'partners.*') || $themeDark ? 'bg-ink-950' : '' }}">
         @include('partials.flash')
 
         @if ($hasSidebar)

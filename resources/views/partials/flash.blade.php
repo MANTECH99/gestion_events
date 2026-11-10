@@ -1,5 +1,5 @@
 @php
-    $darkTheme = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*')
+    $darkTheme = request()->routeIs('home', 'events.show', 'booking.create', 'payment.show', 'login', 'register', 'reservations.index', 'reservations.show', 'tickets.show', 'tickets.reservation', 'pos.dashboard', 'agent.index', 'agent.scan', 'favoris.*', 'profil.*', 'partners.*')
         || (request()->routeIs('organizer.*', 'admin.*', 'treasurer.*') && request()->cookie('theme') !== 'light');
     $pad = $darkTheme
         ? 'pt-24 sm:pt-28'
