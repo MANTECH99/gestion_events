@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\ShowMaintenancePage;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
+        ]);
+
+        // Page de maintenance (MAINTENANCE_ENABLED dans .env) : après le
+        // démarrage de session pour que l'admin soit reconnu et contourne.
+        $middleware->web(append: [
+            ShowMaintenancePage::class,
         ]);
 
         // Le TLS est termine par le reverse proxy / tunnel devant l'application :

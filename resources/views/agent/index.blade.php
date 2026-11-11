@@ -12,9 +12,10 @@
                 </p>
             </div>
 
-            <div class="flex flex-wrap gap-2">
+            {{-- Une seule ligne sur mobile : filtre à gauche (il rétrécit), Scanner figé à droite. --}}
+            <div class="flex w-full items-center gap-2 sm:w-auto">
                 @if ($events->count() > 1)
-                    <form method="GET" class="flex gap-2">
+                    <form method="GET" class="flex min-w-0 flex-1 items-center gap-2">
                         <select name="event" onchange="this.form.submit()" class="input-dark py-2 text-sm">
                             <option value="">Tous les événements</option>
                             @foreach ($events as $e)
@@ -27,7 +28,7 @@
                     </form>
                 @endif
 
-                <a href="{{ route('agent.scan', $event ? ['event' => $event->id] : []) }}" class="btn-hero-primary btn-sm !px-3 !py-1.5 text-xs">
+                <a href="{{ route('agent.scan', $event ? ['event' => $event->id] : []) }}" class="btn-hero-primary btn-sm shrink-0 !px-3 !py-1.5 text-xs">
                     @icon('scan', 'w-4 h-4') Scanner
                 </a>
             </div>

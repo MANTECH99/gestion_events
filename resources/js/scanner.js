@@ -134,6 +134,19 @@ function ticketScanner(config) {
             await this.handle(code);
         },
 
+        /**
+         * Bouton « Continuer » : masque le résultat affiché et remet la
+         * caméra en service pour le billet suivant, sans repasser par le
+         * tableau de bord de l'agent.
+         */
+        async continueScan() {
+            this.lastResult = null;
+
+            if (!this.running) {
+                await this.start();
+            }
+        },
+
         async validate(code) {
             const response = await fetch(this.config.validateUrl, {
                 method: 'POST',

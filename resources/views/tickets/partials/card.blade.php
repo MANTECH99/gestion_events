@@ -121,6 +121,15 @@
                     {!! $qr !!}
                 </div>
             </div>
+
+            {{-- Tampon centré sur le QR code. --}}
+            @if ($isUsed || $isInvalid)
+                <div class="absolute inset-0 grid place-items-center">
+                    <span class="-rotate-12 rounded-2xl border-4 border-rose-600 bg-white/70 px-5 py-2 text-2xl font-extrabold uppercase tracking-widest text-rose-600">
+                        {{ $isUsed ? 'Utilisé' : 'Invalide' }}
+                    </span>
+                </div>
+            @endif
         </div>
 
         <div class="relative mx-auto mt-3 flex w-fit items-center justify-center gap-2">
@@ -189,11 +198,4 @@
         </div>
     </div>
 
-    @if ($isUsed || $isInvalid)
-        <div class="absolute inset-0 grid place-items-center">
-            <span class="-rotate-12 rounded-2xl border-4 border-rose-600 bg-white/70 px-6 py-2 text-2xl font-extrabold uppercase tracking-widest text-rose-600">
-                {{ $isUsed ? 'Utilisé' : 'Invalide' }}
-            </span>
-        </div>
-    @endif
 </div>

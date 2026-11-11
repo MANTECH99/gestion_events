@@ -75,6 +75,13 @@
                             </template>
                         </dl>
                     </template>
+
+                    {{-- Enchaîner immédiatement le billet suivant, sans repasser --}}
+                    {{-- par le tableau de bord de l'agent. --}}
+                    <button type="button" x-cloak x-show="lastResult && ! busy" @click="continueScan()"
+                            class="btn-hero-primary mt-4 justify-center">
+                        @icon('scan', 'w-4 h-4') Continuer
+                    </button>
                 </div>
             </div>
         </div>
