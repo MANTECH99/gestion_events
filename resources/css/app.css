@@ -369,6 +369,12 @@
     border-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Panneau de modal : le .card sombre est translucide (blanc/5), le contenu
+   derrière transparaît — on donne un fond solide pour la lisibilité. */
+.dark .modal-panel {
+    background-color: #171a24;
+}
+
 .dark .input {
     background-color: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.15);

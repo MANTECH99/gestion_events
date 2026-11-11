@@ -63,7 +63,7 @@
                         <a href="{{ route($link['route']) }}" @if ($isActive) aria-current="page" @endif
                            class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
                                   {{ $isActive ? ($dark ? 'bg-white/10 text-white' : 'bg-ink-950 text-white shadow') : ($dark ? 'text-white/70 hover:bg-white/10 hover:text-white' : 'text-ink-600 hover:bg-ink-100 hover:text-ink-900') }}">
-                            @icon($link['icon'], 'w-4 h-4 '.($isActive ? ($dark ? 'text-orange-400' : '') : ($dark ? 'text-white/40' : 'text-ink-400')))
+                            <span class="{{ $isActive ? ($dark ? 'text-orange-400' : '') : ($dark ? 'text-white/40' : 'text-ink-400') }}">@icon($link['icon'], 'w-4 h-4')</span>
                             <span class="truncate">{{ $link['label'] }}</span>
                         </a>
                     @endforeach

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\PartnerRequestController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
@@ -227,6 +228,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/organisateurs/{organizer}', [AdminController::class, 'destroyOrganizer'])->name('organizers.destroy');
         Route::get('/utilisateurs', [AdminController::class, 'users'])->name('users.index');
         Route::patch('/utilisateurs/{target}/verifier', [AdminController::class, 'verify'])->name('users.verify');
+
+        /* Demandes du formulaire « Devenir partenaire » (aucun mail : traitées ici). */
+        Route::get('/demandes-partenaires', [PartnerRequestController::class, 'index'])->name('partner-requests.index');
+        Route::patch('/demandes-partenaires/{partnerRequest}', [PartnerRequestController::class, 'update'])->name('partner-requests.update');
     });
 });
 

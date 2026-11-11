@@ -6,58 +6,55 @@
 @section('content')
     @php $hasFlash = $errors->any() || session('success') || session('error') || session('status'); @endphp
 
-    {{-- Héro --}}
+    {{-- Héro — maquette : fond de l'application, photo fondue dans le fond (aucune coupe) --}}
     <section class="relative overflow-hidden bg-ink-950">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="absolute inset-0" style="background:
-                linear-gradient(180deg, rgba(6,18,44,.85) 0%, rgba(14,48,96,.62) 40%, rgba(10,28,64,.35) 60%, rgba(8,12,28,0) 78%);"></div>
-            <div class="absolute inset-0" style="background:
-                radial-gradient(46% 40% at 52% 18%, rgba(249,115,22,.30), rgba(249,115,22,0) 72%);"></div>
-            <div class="absolute inset-0" style="background:
-                radial-gradient(40% 34% at 84% 74%, rgba(40,110,200,.28), rgba(40,110,200,0) 72%);"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-ink-950/80 via-transparent to-ink-950/40"></div>
+        {{-- Photo de droite, sur les mêmes colonnes que le header (max-w-7xl), entière --}}
+        <div class="absolute inset-0 hidden xl:block" aria-hidden="true">
+            <div class="relative mx-auto h-full w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="absolute bottom-0 left-[672px] right-8 top-16">
+                    <div class="absolute bottom-0 left-0 right-0">
+                        <img src="{{ asset('images/hero_section3.png') }}" alt="" width="1339" height="941"
+                             class="block h-auto max-h-full w-full object-contain object-left-bottom">
+                        <div class="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-ink-950 to-transparent"></div>
+                        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-ink-950 to-transparent"></div>
+                        <div class="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-ink-950 to-transparent"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="relative mx-auto max-w-7xl px-4 pb-14 {{ $hasFlash ? 'pt-6 sm:pt-8' : 'pt-28 sm:pt-32' }} sm:px-6 lg:px-8 lg:pb-20 {{ $hasFlash ? 'lg:pt-10' : 'lg:pt-40' }}">
-            <div class="mx-auto max-w-3xl text-center">
-                <span class="inline-flex items-center gap-2.5 rounded-full bg-white/10 py-2 pl-3 pr-4 text-sm font-medium text-white ring-1 ring-white/20 backdrop-blur">
-                    <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-orange-500 text-ink-950">
-                        @icon('users', 'w-3.5 h-3.5')
-                    </span>
-                    Programme partenaire · Sénégal
+        <div class="relative mx-auto w-full max-w-7xl px-4 pb-10 sm:px-6 lg:px-8 {{ $hasFlash ? 'pt-6 sm:pt-8 lg:pt-10' : 'pt-[86px]' }}">
+            <div class="max-w-[600px]">
+                <span class="inline-flex items-center gap-2.5 rounded-full bg-orange-400/15 py-1.5 pl-4 pr-5 text-[13px] font-medium leading-5 text-orange-400 sm:text-sm">
+                    🤝 Programme partenaire · Sénégal
                 </span>
 
-                <h1 class="mt-7 text-4xl font-extrabold leading-[1.06] tracking-tight text-white sm:text-5xl lg:text-[3.4rem]">
-                    Devenez
-                    <span class="relative inline-block text-orange-400">partenaire
-                        <svg class="absolute -bottom-2.5 left-0 h-3.5 w-full" viewBox="0 0 220 14" fill="none"
-                             preserveAspectRatio="none" aria-hidden="true">
-                            <path d="M4 9 C 70 3, 160 3, 216 8" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-                        </svg>
-                    </span>
+                <h1 class="mt-4 text-[2rem] font-extrabold leading-[1.05] tracking-tight text-white sm:text-[2.5rem] lg:text-[2.25rem] xl:text-[3rem] 2xl:text-[3.25rem]">
+                    Devenez <span class="text-orange-400">partenaire</span>
                     <br class="hidden sm:block">de Billeterie Express
                 </h1>
 
-                <p class="mx-auto mt-7 max-w-2xl leading-relaxed text-white/70 sm:text-lg">
+                <p class="mt-7 max-w-[36rem] text-[16px] leading-[25px] text-white/90 xl:max-w-[32rem]">
                     Vous organisez un événement, tenez un point de vente ou représentez une marque ?
                     Rejoignez la billetterie en ligne qui fait vibrer le Sénégal et touchez des milliers
                     de spectateurs, en toute sécurité.
                 </p>
 
-                <div class="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-                    <a href="#formules" class="btn-hero-primary">
+                <div class="mt-[26px] flex flex-col gap-4 sm:flex-row sm:items-center">
+                    <a href="#formules"
+                       class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-orange-400 px-7 text-[15px] font-semibold text-ink-950 shadow-lg shadow-orange-400/25 transition hover:bg-orange-300 active:bg-orange-500 sm:w-auto">
                         Découvrir les formules @icon('arrow-right', 'w-5 h-5')
                     </a>
                     <a href="mailto:{{ config('mail.from.address') }}?subject={{ rawurlencode('Partenariat — Billeterie Express') }}"
-                       class="btn-hero-ghost">
-                        <span class="grid h-7 w-7 place-items-center rounded-full bg-white/15">
-                            @icon('mail', 'w-3.5 h-3.5')
+                       class="inline-flex h-12 w-full items-center justify-center gap-3 rounded-full border border-white/30 px-6 text-[15px] font-semibold text-white transition hover:bg-white/10 sm:w-auto">
+                        <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-orange-400 text-ink-950">
+                            @icon('mail', 'w-4 h-4')
                         </span>
                         Nous contacter
                     </a>
                 </div>
 
-                <div class="mt-10 hidden flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-white/65 sm:flex">
+                <div class="mt-8 hidden flex-wrap items-center gap-x-6 gap-y-2 text-[12px] text-white/60 sm:flex">
                     @foreach ([
                         ['icon' => 'check-circle', 'label' => 'Inscription sans engagement'],
                         ['icon' => 'shield', 'label' => 'Paiement sécurisé DexPay'],
@@ -71,6 +68,15 @@
                 </div>
             </div>
         </div>
+
+        {{-- Photo mobile / tablette, à fond perdu, fondue dans le fond --}}
+        <div class="relative xl:hidden">
+            <img src="{{ asset('images/hero_section3.png') }}" alt="" width="1339" height="941" class="block w-full">
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-ink-950 to-transparent" aria-hidden="true"></div>
+        </div>
+
+        {{-- fondu vers la suite (evite toute couture) --}}
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-ink-950 to-transparent" aria-hidden="true"></div>
     </section>
 
     <div class="bg-ink-950 pb-16 pt-14 sm:pt-16">
@@ -114,12 +120,6 @@
             {{-- Rejoignez notre réseau de partenaires (maquette) --}}
             <section id="partenaires-form" class="scroll-mt-24">
                 <div class="relative overflow-hidden rounded-3xl border border-[#cf9563]/45 bg-white/5">
-                    {{-- Foule (photo détourée), bas-gauche : coupée sur le trait doré --}}
-                    <div class="pointer-events-none absolute -bottom-4 left-0 hidden h-[86px] w-[50%] lg:block" aria-hidden="true"
-                         style="-webkit-mask-image: linear-gradient(to right, #000 0 80%, transparent 86%); mask-image: linear-gradient(to right, #000 0 80%, transparent 86%);">
-                        <img src="{{ asset('images/foule.png') }}" alt="" class="h-full w-full object-cover object-bottom" loading="lazy" decoding="async">
-                    </div>
-
                     <div class="relative z-10 grid gap-10 p-6 sm:p-10 lg:grid-cols-[36fr_64fr] lg:gap-0 lg:pb-7 lg:pl-24 lg:pr-10 lg:pt-10">
                         {{-- Colonne gauche : icône + titre + paragraphe --}}
                         <div class="text-center lg:-mt-5 lg:pr-8 lg:text-left">
@@ -136,6 +136,25 @@
                                 Remplissez le formulaire ci-contre et notre équipe vous contactera
                                 rapidement pour discuter de votre projet.
                             </p>
+
+                            {{-- Logos des 5 partenaires : tuiles blanches (logos noir/blanc/bleu
+                                 restent lisibles) ; general.png est un logo blanc → inverti,
+                                 et son contenu n'occupe que 38 % de son canvas → taille +40 %. --}}
+                            <div class="mt-6 grid grid-cols-5 gap-2 lg:gap-2.5">
+                                @foreach ([
+                                    ['file' => 'hostinger.png', 'alt' => 'Hostinger'],
+                                    ['file' => 'galsen.png', 'alt' => 'Galsen'],
+                                    ['file' => 'general.png', 'alt' => 'General', 'invert' => true, 'size' => 'max-h-10'],
+                                    ['file' => 'cloudfare.png', 'alt' => 'Cloudflare'],
+                                    ['file' => 'dexpay.png', 'alt' => 'DexPay'],
+                                ] as $logo)
+                                    <span class="flex h-11 w-full items-center justify-center rounded-xl bg-white px-1.5">
+                                        <img src="{{ asset('images/'.$logo['file']) }}" alt="{{ $logo['alt'] }}"
+                                             class="{{ !empty($logo['invert']) ? 'invert ' : '' }}{{ $logo['size'] ?? 'max-h-7' }} max-w-full object-contain"
+                                             loading="lazy" decoding="async">
+                                    </span>
+                                @endforeach
+                            </div>
                         </div>
 
                         {{-- Colonne droite : séparateur orange + formulaire --}}
@@ -288,7 +307,7 @@
                                 'Agents de contrôle et points de vente',
                             ],
                             'cta' => 'Créer un compte',
-                            'href' => route('register'),
+                            'href' => '#partenaires-form',
                             'featured' => true,
                         ],
                         [
@@ -303,7 +322,7 @@
                                 'Impression des QR codes sur place',
                             ],
                             'cta' => 'Devenir point de vente',
-                            'href' => 'mailto:'.config('mail.from.address').'?subject='.rawurlencode('Partenariat point de vente — Billeterie Express'),
+                            'href' => '#partenaires-form',
                             'featured' => false,
                         ],
                         [
@@ -318,7 +337,7 @@
                                 'Facturation simple et transparente',
                             ],
                             'cta' => 'Parler à notre équipe',
-                            'href' => 'mailto:'.config('mail.from.address').'?subject='.rawurlencode('Partenariat entreprise — Billeterie Express'),
+                            'href' => '#partenaires-form',
                             'featured' => false,
                         ],
                     ] as $plan)

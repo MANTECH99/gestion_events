@@ -448,8 +448,8 @@
                                 <p class="mt-1 text-sm text-white/70">Rejoignez des milliers de fans et réservez dès maintenant vos billets !</p>
                             </div>
                         </div>
-                        <a href="{{ route('home') }}#evenements" class="inline-flex shrink-0 items-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-400">
-                            Explorer les événements @icon('arrow-right', 'w-4 h-4')
+                        <a href="{{ route('partners.become') }}" class="inline-flex shrink-0 items-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-400">
+                            Devenir partenaire @icon('arrow-right', 'w-4 h-4')
                         </a>
                     </div>
                 </div>

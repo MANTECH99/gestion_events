@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PartnerRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -9,8 +10,9 @@ class PartnerController extends Controller
 {
     /**
      * Enregistre une demande « Rejoignez notre réseau de partenaires ».
-     * Aucun mail n'est envoyé (MAIL_MAILER=log) : la demande est validée,
-     * puis confirmée par un message flash affiché par partials/flash.
+     * Aucun mail n'est envoyé (MAIL_MAILER=log) : la demande est persistée
+     * en base et traitée par l'admin depuis son back-office
+     * (admin.partner-requests.index).
      */
     public function store(Request $request): RedirectResponse
     {
@@ -28,15 +30,13 @@ class PartnerController extends Controller
             'message'        => 'message',
         ]);
 
-        // Pas de persistance : le projet n'a ni table ni mail configuré pour
-        // cela. On confirme à l'utilisateur (le portefeuille arrive plus tard).
-        unset($validated);
+        PartnerRequest::create($validated);
 
         // Clé dédiée : affichée par la section elle-même (l'ancre #partenaires-form
         // saute directement dessus, le bandeau haut de partials/flash ne se verrait pas).
         return redirect()
             ->route('partners.become')
             ->withFragment('partenaires-form')
-            ->with('partner_success', 'Merci ! Votre demande a bien été envoyée, notre équipe vous contactera rapidement.');
+            ->with('partner_success', 'Merci ! Votre demande a bien été enregistrée, notre équipe vous contactera rapidement.');
     }
 }

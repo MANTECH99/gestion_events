@@ -40,12 +40,21 @@
                        class="border-b-2 border-transparent rounded-lg px-3 py-2 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white">
                         À propos
                     </a>
+                    <a href="{{ route('partners.become') }}"
+                       class="{{ request()->routeIs('partners.*') ? 'border-b-2 border-orange-400' : 'border-b-2 border-transparent' }} rounded-lg px-3 py-2 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white">
+                        Partenariat
+                    </a>
                 </nav>
             @else
             <nav class="ml-4 hidden items-center gap-1 lg:flex">
                 <a href="{{ route('home') }}"
                    class="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 {{ request()->routeIs('home') ? 'bg-ink-100 text-ink-900' : '' }}">
                     Événements
+                </a>
+
+                <a href="{{ route('partners.become') }}"
+                   class="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 {{ request()->routeIs('partners.*') ? 'bg-ink-100 text-ink-900' : '' }}">
+                    Partenariat
                 </a>
 
                 @auth
@@ -86,7 +95,7 @@
                                 {{ $user->initials }}
                             </span>
                             <span class="hidden max-w-[9rem] truncate font-medium sm:block {{ $darkHeader ? 'text-white' : 'text-ink-800' }}">{{ $user->first_name }}</span>
-                            @icon('chevron-down', "w-4 h-4 " . ($darkHeader ? 'text-orange-300' : 'text-orange-500'))
+                            <span class="{{ $darkHeader ? 'text-orange-300' : 'text-orange-500' }}">@icon('chevron-down', 'w-4 h-4')</span>
                         </button>
 
                         <div x-cloak x-show="open" x-transition
