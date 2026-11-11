@@ -7,6 +7,7 @@ import './payment';
 import './scanner';
 import './pwa';
 import './ticket-image';
+import './ticket-search';
 import { toast } from './utils';
 
 window.Alpine = Alpine;

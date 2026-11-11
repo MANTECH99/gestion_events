@@ -34,11 +34,41 @@ class AgentController extends Controller
         // l'agent (sinon les billets d'autres organisateurs fuiteraient).
         $scopeIds = $event ? [$event->id] : $events->pluck('id')->all();
 
+        // Filtre au-dessus du tableau : billets en attente d'entrée
+        // (défaut) ou billets déjà utilisés (?liste=utilises).
+        $liste = $request->query('liste') === 'utilises' ? 'utilises' : 'attente';
+
+        // Recherche live sous le filtre (?q=) : chaque mot tapé doit
+        // correspondre quelque part (code, titulaire, référence, type).
+        $q = trim((string) $request->query('q', ''));
+
         $tickets = Ticket::query()
             ->whereIn('event_id', $scopeIds)
-            ->where('status', Ticket::STATUS_VALID)
+            ->where('status', $liste === 'utilises' ? Ticket::STATUS_USED : Ticket::STATUS_VALID)
             ->with(['event', 'ticketType', 'reservation'])
-            ->orderBy('created_at')
+            ->when($q !== '', function ($query) use ($q) {
+                foreach (preg_split('/\s+/', $q) as $mot) {
+                    if ($mot === '') {
+                        continue;
+                    }
+
+                    $like = '%'.$mot.'%';
+
+                    // Les mots sont cumulés (ET) : « abdoul man » ne
+                    // montre que les billets contenant les deux mots.
+                    $query->where(function ($sub) use ($like) {
+                        $sub->where('code', 'like', $like)
+                            ->orWhere('holder_name', 'like', $like)
+                            ->orWhereHas('reservation', fn ($r) => $r->where('reference', 'like', $like))
+                            ->orWhereHas('ticketType', fn ($t) => $t->where('name', 'like', $like));
+                    });
+                }
+            })
+            ->when(
+                $liste === 'utilises',
+                fn ($query) => $query->orderByDesc('used_at'),
+                fn ($query) => $query->orderBy('created_at')
+            )
             ->paginate(20)
             ->withQueryString();
 
@@ -46,6 +76,14 @@ class AgentController extends Controller
             'tickets' => $tickets,
             'events' => $events,
             'event' => $event,
+            'liste' => $liste,
+            'q' => $q,
+            // Compteur « Billets valides » global : ni le filtre de liste
+            // ni la recherche ne doivent le faire varier.
+            'validCount' => Ticket::query()
+                ->whereIn('event_id', $scopeIds)
+                ->where('status', Ticket::STATUS_VALID)
+                ->count(),
             'usedCount' => Ticket::query()
                 ->whereIn('event_id', $scopeIds)
                 ->where('status', Ticket::STATUS_USED)

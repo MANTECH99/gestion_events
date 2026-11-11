@@ -17,6 +17,7 @@ function ticketScanner(config) {
         error: '',
         manual: '',
         lastResult: null,
+        lastCameraCode: null,
         cameraSupported: false,
 
         async init() {
@@ -49,7 +50,7 @@ function ticketScanner(config) {
                 await this.scanner.start(
                     cameraId,
                     { fps: 12, qrbox: { width: 260, height: 260 }, aspectRatio: 1 },
-                    (decoded) => this.handle(decoded),
+                    (decoded) => this.handle(decoded, /* fromCamera */ true),
                     () => {
                         /* trames non reconnues : ignorées */
                     }
@@ -78,20 +79,25 @@ function ticketScanner(config) {
             this.running = false;
         },
 
-        async handle(code) {
+        async handle(code, fromCamera = false) {
             if (this.busy || !code) return;
+
+            // html5-qrcode rappelle le même code à chaque image : le dernier
+            // QR lu par la caméra est ignoré jusqu'à ce qu'un autre code
+            // passe devant (sinon re-validation en boucle du billet resté
+            // devant l'objectif, avec son répété). La saisie manuelle n'est
+            // pas concernée et sert de repli pour re-valider.
+            if (fromCamera && code === this.lastCameraCode) return;
+
+            if (fromCamera) {
+                this.lastCameraCode = code;
+            }
 
             this.busy = true;
             this.lastResult = { code, ok: null, message: 'Vérification…' };
 
-            // Pause la caméra le temps de la requête pour éviter les doubles scans.
-            if (this.running) {
-                try {
-                    await this.scanner.pause(true);
-                } catch (e) {
-                    /* ignore */
-                }
-            }
+            // Pause le scanner le temps de la requête pour éviter les doubles scans.
+            this.pauseScanner();
 
             try {
                 const data = await this.validate(code);
@@ -115,13 +121,10 @@ function ticketScanner(config) {
             } finally {
                 this.busy = false;
 
-                if (this.running) {
-                    try {
-                        await this.scanner.pause(false);
-                    } catch (e) {
-                        /* ignore */
-                    }
-                }
+                // Pas de reprise volontairement : le scanner reste en pause
+                // (« Scanner paused » en bas) tant que le résultat s'affiche
+                // en haut. C'est le bouton « Continuer » qui réactive la
+                // caméra pour le billet suivant.
             }
         },
 
@@ -135,16 +138,21 @@ function ticketScanner(config) {
         },
 
         /**
-         * Bouton « Continuer » : masque le résultat affiché et remet la
-         * caméra en service pour le billet suivant, sans repasser par le
-         * tableau de bord de l'agent.
+         * Bouton « Continuer » : masque le résultat affiché en haut et
+         * réactive la caméra laissée en pause en bas, pour le billet
+         * suivant, sans repasser par le tableau de bord de l'agent.
          */
         async continueScan() {
             this.lastResult = null;
 
-            if (!this.running) {
-                await this.start();
+            if (this.running && this.scanner) {
+                // Reprend la lecture là où elle s'est arrêtée (sinon le
+                // bandeau « Scanner paused » resterait affiché).
+                this.resumeScanner();
+                return;
             }
+
+            await this.start();
         },
 
         async validate(code) {
@@ -187,6 +195,31 @@ function ticketScanner(config) {
                 osc.stop(ctx.currentTime + (success ? 0.35 : 0.5));
             } catch (e) {
                 /* le son est un bonus, pas une fonctionnalité critique */
+            }
+        },
+
+        /** Met le scanner en pause (ignoré s'il n'est pas en état de scanner). */
+        pauseScanner() {
+            if (!this.running || !this.scanner) return;
+
+            try {
+                this.scanner.pause(true);
+            } catch (e) {
+                /* déjà en pause, ou pas d'état actif */
+            }
+        },
+
+        /**
+         * Reprend une lecture en pause : sans cela, le bandeau « Scanner
+         * paused » reste affiché et plus aucun billet n'est détecté.
+         */
+        resumeScanner() {
+            if (!this.running || !this.scanner) return;
+
+            try {
+                this.scanner.resume();
+            } catch (e) {
+                /* pas en pause : rien à reprendre */
             }
         },
 
