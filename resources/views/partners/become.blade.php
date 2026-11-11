@@ -24,9 +24,10 @@
         </div>
 
         <div class="relative mx-auto w-full max-w-7xl px-4 pb-10 sm:px-6 lg:px-8 {{ $hasFlash ? 'pt-6 sm:pt-8 lg:pt-10' : 'pt-[86px]' }}">
-            <div class="max-w-[600px]">
+            <div class="mx-auto max-w-[600px] text-center lg:mx-0 lg:text-left">
                 <span class="inline-flex items-center gap-2.5 rounded-full bg-orange-400/15 py-1.5 pl-4 pr-5 text-[13px] font-medium leading-5 text-orange-400 sm:text-sm">
-                    🤝 Programme partenaire · Sénégal
+                    @icon('handshake', 'h-4 w-4 shrink-0')
+                    Programme partenaire · Sénégal
                 </span>
 
                 <h1 class="mt-4 text-[2rem] font-extrabold leading-[1.05] tracking-tight text-white sm:text-[2.5rem] lg:text-[2.25rem] xl:text-[3rem] 2xl:text-[3.25rem]">
@@ -34,19 +35,19 @@
                     <br class="hidden sm:block">de Billeterie Express
                 </h1>
 
-                <p class="mt-7 max-w-[36rem] text-[16px] leading-[25px] text-white/90 xl:max-w-[32rem]">
+                <p class="mx-auto mt-7 max-w-[36rem] text-[16px] leading-[25px] text-white/90 lg:mx-0 xl:max-w-[32rem]">
                     Vous organisez un événement, tenez un point de vente ou représentez une marque ?
                     Rejoignez la billetterie en ligne qui fait vibrer le Sénégal et touchez des milliers
                     de spectateurs, en toute sécurité.
                 </p>
 
-                <div class="mt-[26px] flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div class="mt-[26px] flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
                     <a href="#formules"
-                       class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-orange-400 px-7 text-[15px] font-semibold text-ink-950 shadow-lg shadow-orange-400/25 transition hover:bg-orange-300 active:bg-orange-500 sm:w-auto">
+                       class="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-orange-400 px-7 text-[15px] font-semibold text-ink-950 shadow-lg shadow-orange-400/25 transition hover:bg-orange-300 active:bg-orange-500">
                         Découvrir les formules @icon('arrow-right', 'w-5 h-5')
                     </a>
                     <a href="mailto:{{ config('mail.from.address') }}?subject={{ rawurlencode('Partenariat — Billeterie Express') }}"
-                       class="inline-flex h-12 w-full items-center justify-center gap-3 rounded-full border border-white/30 px-6 text-[15px] font-semibold text-white transition hover:bg-white/10 sm:w-auto">
+                       class="inline-flex h-12 items-center justify-center gap-3 rounded-full border border-white/30 px-6 text-[15px] font-semibold text-white transition hover:bg-white/10">
                         <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-orange-400 text-ink-950">
                             @icon('mail', 'w-4 h-4')
                         </span>

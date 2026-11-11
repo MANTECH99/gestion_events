@@ -66,12 +66,12 @@
                         <a href="#evenements" class="btn-hero-primary">
                             Découvrir les événements @icon('arrow-right', 'w-5 h-5')
                         </a>
-                        <button type="button" class="btn-hero-ghost">
+                        <a href="{{ route('partners.become') }}" class="btn-hero-ghost">
                             <span class="grid h-7 w-7 place-items-center rounded-full bg-white/15">
-                                <svg viewBox="0 0 24 24" class="h-3 w-3" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+                                @icon('handshake', 'h-4 w-4')
                             </span>
-                            Voir la vidéo
-                        </button>
+                            Partenariat
+                        </a>
                     </div>
 
                     {{-- Desktop : statistiques --}}
