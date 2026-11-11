@@ -90,6 +90,42 @@ class Icon
         'tag' => '<path d="M20.6 13.4 12 4.8H4.8V12l8.6 8.6a2 2 0 0 0 2.8 0l4.4-4.4a2 2 0 0 0 0-2.8z"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" stroke="none"/>',
         'sun' => '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
         'moon' => '<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>',
+        'handshake' => '<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>',
+        'message' => '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/>',
+        'play' => '<rect x="3" y="4.5" width="18" height="15" rx="3.5"/><path d="M10.5 9.5v5l4-2.5z"/>',
+    ];
+
+    /**
+     * Variantes en aplat (plein) — maquette « Nos partenaires ».
+     * Les sous-chemins imbriqués gèrent les creux via fill-rule="evenodd".
+     *
+     * @var array<string, string>
+     */
+    private const SOLID = [
+        // Calendrier : deux attachants, corps arrondi, creux intérieur, pointillés, coin plié.
+        'calendar' => '<path fill-rule="evenodd" d="M7 1.6h2.4V4H7zM14.6 1.6H17V4h-2.4z'
+            .'M4.5 4h15A2.5 2.5 0 0 1 22 6.5v11a2.5 2.5 0 0 1-2.5 2.5H4.5A2.5 2.5 0 0 1 2 17.5v-11A2.5 2.5 0 0 1 4.5 4z'
+            .'M4.5 8.6h15v7.8H4.5z'
+            .'M6.5 10.4h2.1v2.1H6.5zM9.6 10.4h2.1v2.1H9.6zM12.7 10.4h2.1v2.1h-2.1zM15.8 10.4h2.1v2.1h-2.1z'
+            .'M6.5 13.5h2.1v2.1H6.5zM9.6 13.5h2.1v2.1H9.6zM12.7 13.5h2.1v2.1h-2.1z'
+            .'M15.5 20h4a2.5 2.5 0 0 0 2.5-2.5L19.5 16.5z"/>',
+        // Méga-phone : capuchon arrondi, cornet, poignée, trois ondes.
+        'megaphone' => '<path d="M1.8 10.4h2.6v3.2H1.8a1.6 1.6 0 0 1 0-3.2z'
+            .'M4.4 10.4 18.2 5v14L4.4 13.6z'
+            .'M6.3 14.2h3v5.1a1.5 1.5 0 0 1-1.5 1.5 1.5 1.5 0 0 1-1.5-1.5z'
+            .'M20 6.6h2.4v1.7H20zM20 11.15h2.4v1.7H20zM20 15.7h2.4v1.7H20z"/>',
+        // Play : carré arrondi, creux, triangle central.
+        'play' => '<path fill-rule="evenodd" d="M6.5 3.6h11a4 4 0 0 1 4 4v8.8a4 4 0 0 1-4 4h-11a4 4 0 0 1-4-4V7.6a4 4 0 0 1 4-4z'
+            .'M7.6 7.8h8.8a1.6 1.6 0 0 1 1.6 1.6v5.2a1.6 1.6 0 0 1-1.6 1.6H7.6A1.6 1.6 0 0 1 6 14.6V9.4a1.6 1.6 0 0 1 1.6-1.6z'
+            .'M10.7 9.6 15.4 12.2 10.7 14.8z"/>',
+        // Bâtiment : tour + aile + socle, fenêtres creusées.
+        'building' => '<path fill-rule="evenodd" d="M6 2.6h10V9h4.5v10H21v2.5H2.5V19H6z'
+            .'M8.1 5.4h2.2v2.3H8.1zM11.6 5.4h2.2v2.3h-2.2z'
+            .'M8.1 9.3h2.2v2.3H8.1zM11.6 9.3h2.2v2.3h-2.2z'
+            .'M8.1 13.2h2.2v2.3H8.1zM11.6 13.2h2.2v2.3h-2.2z'
+            .'M17.4 11.3h2v2.2h-2zM17.4 14.8h2v2.2h-2z"/>',
+        // Engrenage : denture pleine, trou central.
+        'settings' => '<path fill-rule="evenodd" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 16.4c-2.43 0-4.4-1.97-4.4-4.4s1.97-4.4 4.4-4.4 4.4 1.97 4.4 4.4-1.97 4.4-4.4 4.4z"/>',
     ];
 
     public static function render(string $name, string $class = 'w-5 h-5'): string
@@ -99,6 +135,22 @@ class Icon
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
             .'stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" '
             .'class="'.$class.'" aria-hidden="true">'.$path.'</svg>';
+    }
+
+    /**
+     * Rendu en aplat avec dégradé orange vertical (haut plus clair que le bas),
+     * fidèle à la maquette « Nos partenaires ».
+     */
+    public static function renderSolid(string $name, string $class = 'w-5 h-5'): string
+    {
+        $path = self::SOLID[$name] ?? self::SOLID['settings'];
+        $gid = 'solid-'.preg_replace('/[^a-z0-9]+/i', '-', $name);
+
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="url(#'.$gid.')" '
+            .'class="'.$class.'" aria-hidden="true">'
+            .'<defs><linearGradient id="'.$gid.'" x1="0" y1="0" x2="0" y2="1">'
+            .'<stop offset="0" stop-color="#F0821B"/><stop offset="1" stop-color="#D46E12"/>'
+            .'</linearGradient></defs>'.$path.'</svg>';
     }
 
     public static function register(): void
@@ -113,6 +165,16 @@ class Icon
                 : 'w-5 h-5';
 
             return '<?php echo \\App\\Services\\Icon::render('.$parts[0].', '.var_export($class, true).'); ?>';
+        });
+
+        Blade::directive('iconsolid', function (string $expression) {
+            $parts = array_map('trim', explode(',', $expression, 2));
+
+            $class = isset($parts[1]) && $parts[1] !== ''
+                ? trim($parts[1], "'\"")
+                : 'w-5 h-5';
+
+            return '<?php echo \\App\\Services\\Icon::renderSolid('.$parts[0].', '.var_export($class, true).'); ?>';
         });
     }
 }

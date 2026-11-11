@@ -57,7 +57,7 @@
                     </a>
                 </div>
 
-                <div class="mt-10 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-white/65">
+                <div class="mt-10 hidden flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-white/65 sm:flex">
                     @foreach ([
                         ['icon' => 'check-circle', 'label' => 'Inscription sans engagement'],
                         ['icon' => 'shield', 'label' => 'Paiement sécurisé DexPay'],
@@ -69,28 +69,6 @@
                         </span>
                     @endforeach
                 </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- Chiffres clés --}}
-    <section class="border-y border-white/10 bg-ink-950">
-        <div class="mx-auto grid max-w-7xl grid-cols-2 gap-x-4 gap-y-8 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
-            <div class="text-center lg:text-left">
-                <p class="text-2xl font-extrabold text-white sm:text-3xl">+50K</p>
-                <p class="mt-1 text-sm leading-snug text-white/55">Billets vendus<br>au Sénégal</p>
-            </div>
-            <div class="text-center lg:border-l lg:border-white/10 lg:pl-8 lg:text-left">
-                <p class="text-2xl font-extrabold text-white sm:text-3xl">+20</p>
-                <p class="mt-1 text-sm leading-snug text-white/55">Événements<br>par an</p>
-            </div>
-            <div class="text-center lg:border-l lg:border-white/10 lg:pl-8 lg:text-left">
-                <p class="text-2xl font-extrabold text-white sm:text-3xl">QR</p>
-                <p class="mt-1 text-sm leading-snug text-white/55">Billets sécurisés,<br>scannés en 1 seconde</p>
-            </div>
-            <div class="text-center lg:border-l lg:border-white/10 lg:pl-8 lg:text-left">
-                <p class="text-base font-bold leading-snug text-white sm:text-lg">Wave · Orange Money</p>
-                <div class="mt-2 flex justify-center lg:justify-start">@include('partials.payment-methods')</div>
             </div>
         </div>
     </section>
@@ -120,12 +98,165 @@
                         ['icon' => 'store', 'title' => 'Réseau de points de vente', 'text' => 'Vendez aussi hors ligne grâce à vos points de vente agréés.'],
                         ['icon' => 'headset', 'title' => 'Une équipe à vos côtés', 'text' => 'Support réactif avant, pendant et après votre événement.'],
                     ] as $benefit)
-                        <div class="group rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:border-orange-400/40 hover:bg-white/[.07]">
-                            <span class="grid h-12 w-12 place-items-center rounded-xl border-2 border-orange-400/40 bg-orange-400/10 text-orange-400 transition group-hover:border-orange-400">
+                        <div class="group flex items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:border-orange-400/40 hover:bg-white/[.07]">
+                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl border-2 border-orange-400/40 bg-orange-400/10 text-orange-400 transition group-hover:border-orange-400">
                                 @icon($benefit['icon'], 'w-5 h-5')
                             </span>
-                            <h3 class="mt-4 text-sm font-bold text-white">{{ $benefit['title'] }}</h3>
-                            <p class="mt-1.5 text-sm leading-relaxed text-white/60">{{ $benefit['text'] }}</p>
+                            <div class="min-w-0">
+                                <h3 class="text-sm font-bold text-white">{{ $benefit['title'] }}</h3>
+                                <p class="mt-1.5 text-sm leading-relaxed text-white/60">{{ $benefit['text'] }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
+            {{-- Rejoignez notre réseau de partenaires (maquette) --}}
+            <section id="partenaires-form" class="scroll-mt-24">
+                <div class="relative overflow-hidden rounded-3xl border border-[#cf9563]/45 bg-white/5">
+                    {{-- Foule (photo détourée), bas-gauche : coupée sur le trait doré --}}
+                    <div class="pointer-events-none absolute -bottom-4 left-0 hidden h-[86px] w-[50%] lg:block" aria-hidden="true"
+                         style="-webkit-mask-image: linear-gradient(to right, #000 0 80%, transparent 86%); mask-image: linear-gradient(to right, #000 0 80%, transparent 86%);">
+                        <img src="{{ asset('images/foule.png') }}" alt="" class="h-full w-full object-cover object-bottom" loading="lazy" decoding="async">
+                    </div>
+
+                    <div class="relative z-10 grid gap-10 p-6 sm:p-10 lg:grid-cols-[36fr_64fr] lg:gap-0 lg:pb-7 lg:pl-24 lg:pr-10 lg:pt-10">
+                        {{-- Colonne gauche : icône + titre + paragraphe --}}
+                        <div class="text-center lg:-mt-5 lg:pr-8 lg:text-left">
+                            <span class="inline-flex text-orange-500 drop-shadow-[0_0_20px_rgba(249,115,22,.5)]">
+                                @icon('handshake', 'h-14 w-14 sm:h-[66px] sm:w-[76px]')
+                            </span>
+
+                            <h2 class="mt-3 text-[26px] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[32px] lg:-mt-1">
+                                Rejoignez notre<br class="hidden sm:block">
+                                réseau de <span class="text-orange-500">partenaires</span>
+                            </h2>
+
+                            <p class="mx-auto mt-4 max-w-[340px] text-[15px] leading-[22px] text-white/70 sm:text-base lg:mx-0 lg:mt-2">
+                                Remplissez le formulaire ci-contre et notre équipe vous contactera
+                                rapidement pour discuter de votre projet.
+                            </p>
+                        </div>
+
+                        {{-- Colonne droite : séparateur orange + formulaire --}}
+                        <div class="relative lg:pl-16">
+                            <span class="absolute -left-px top-[6px] bottom-[30px] hidden w-px lg:block" aria-hidden="true"
+                                  style="background: linear-gradient(180deg, transparent 0%, rgba(249,115,22,.85) 18%, rgba(249,115,22,.85) 82%, transparent 100%);"></span>
+
+                            @if (session('partner_success'))
+                                <div class="mb-4 flex items-start gap-3 rounded-2xl border border-emerald-400/30 bg-emerald-500/15 px-4 py-3 text-sm text-emerald-200"
+                                     x-data="{ show: true }" x-show="show" x-transition>
+                                    <span class="mt-0.5 text-emerald-400">@icon('check', 'w-5 h-5')</span>
+                                    <p class="flex-1 font-medium">{{ session('partner_success') }}</p>
+                                    <button type="button" @click="show = false" class="text-emerald-400 hover:text-emerald-200" aria-label="Fermer">@icon('close', 'w-4 h-4')</button>
+                                </div>
+                            @endif
+
+                            <form method="POST" action="{{ route('partners.store') }}" class="grid gap-x-5 gap-y-4 sm:grid-cols-2">
+                                @csrf
+
+                                {{-- Nom complet --}}
+                                <div class="relative">
+                                    <label for="pf-nom" class="sr-only">Nom complet</label>
+                                    <span class="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 text-white/55">@icon('user', 'h-6 w-6')</span>
+                                    <input id="pf-nom" name="nom" type="text" required autocomplete="name"
+                                           value="{{ old('nom') }}" placeholder=" "
+                                           class="peer h-[45px] w-full rounded-full border border-white/15 bg-ink-950 pl-[60px] pr-5 text-base text-white outline-none transition placeholder:text-transparent focus:border-orange-500 focus:ring-2 focus:ring-orange-500/25 {{ $errors->has('nom') ? '!border-rose-400/70' : '' }}">
+                                    <span class="pointer-events-none absolute left-[60px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap text-base text-white/75 peer-placeholder-shown:inline">
+                                        Nom complet <span class="text-[#ff5040]">*</span>
+                                    </span>
+                                </div>
+
+                                {{-- Email professionnel --}}
+                                <div class="relative">
+                                    <label for="pf-email" class="sr-only">Email professionnel</label>
+                                    <span class="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 text-white/55">@icon('mail', 'h-6 w-6')</span>
+                                    <input id="pf-email" name="email" type="email" required autocomplete="email"
+                                           value="{{ old('email') }}" placeholder=" "
+                                           class="peer h-[45px] w-full rounded-full border border-white/15 bg-ink-950 pl-[60px] pr-5 text-base text-white outline-none transition placeholder:text-transparent focus:border-orange-500 focus:ring-2 focus:ring-orange-500/25 {{ $errors->has('email') ? '!border-rose-400/70' : '' }}">
+                                    <span class="pointer-events-none absolute left-[60px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap text-base text-white/75 peer-placeholder-shown:inline">
+                                        Email professionnel <span class="text-[#ff5040]">*</span>
+                                    </span>
+                                </div>
+
+                                {{-- Nom de votre structure --}}
+                                <div class="relative">
+                                    <label for="pf-structure" class="sr-only">Nom de votre structure</label>
+                                    <span class="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 text-white/55">@icon('building', 'h-6 w-6')</span>
+                                    <input id="pf-structure" name="structure" type="text" required
+                                           value="{{ old('structure') }}" placeholder=" "
+                                           class="peer h-[45px] w-full rounded-full border border-white/15 bg-ink-950 pl-[60px] pr-5 text-base text-white outline-none transition placeholder:text-transparent focus:border-orange-500 focus:ring-2 focus:ring-orange-500/25 {{ $errors->has('structure') ? '!border-rose-400/70' : '' }}">
+                                    <span class="pointer-events-none absolute left-[60px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap text-base text-white/75 peer-placeholder-shown:inline">
+                                        Nom de votre structure <span class="text-[#ff5040]">*</span>
+                                    </span>
+                                </div>
+
+                                {{-- Type d'événement --}}
+                                <div class="relative">
+                                    <label for="pf-type" class="sr-only">Type d'événement</label>
+                                    <span class="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 text-white/55 z-10">@icon('ticket', 'h-6 w-6')</span>
+                                    <select id="pf-type" name="type_evenement" required
+                                            class="peer h-[45px] w-full appearance-none rounded-full border border-white/15 bg-ink-950 pl-[60px] pr-12 text-base text-white/75 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/25 valid:text-white {{ $errors->has('type_evenement') ? '!border-rose-400/70' : '' }}">
+                                        <option value="" selected></option>
+                                        @foreach (['Concert', 'Festival', 'Match de foot', 'Conférence', 'Soirée', 'Autre'] as $type)
+                                            <option value="{{ $type }}" @selected(old('type_evenement') === $type) class="bg-ink-950 text-white">{{ $type }}</option>
+                                        @endforeach
+                                    </select>
+                                    <span class="pointer-events-none absolute left-[60px] top-1/2 hidden -translate-y-1/2 whitespace-nowrap text-base text-white/75 peer-invalid:inline">
+                                        Type d'événement <span class="text-[#ff5040]">*</span>
+                                    </span>
+                                    <span class="pointer-events-none absolute right-5 top-1/2 flex -translate-y-1/2 items-center justify-center text-white/60">@icon('chevron-down', 'h-5 w-5')</span>
+                                </div>
+
+                                {{-- Votre message --}}
+                                <div class="relative sm:col-span-2">
+                                    <label for="pf-message" class="sr-only">Votre message</label>
+                                    <span class="pointer-events-none absolute left-6 top-5 text-white/55">@icon('message', 'h-6 w-6')</span>
+                                    <textarea id="pf-message" name="message" rows="2" placeholder=" "
+                                              class="peer block h-[78px] w-full resize-y rounded-2xl border border-white/15 bg-ink-950 py-4 pl-[60px] pr-5 text-base leading-6 text-white outline-none transition placeholder:text-transparent focus:border-orange-500 focus:ring-2 focus:ring-orange-500/25 {{ $errors->has('message') ? '!border-rose-400/70' : '' }}">{{ old('message') }}</textarea>
+                                    <span class="pointer-events-none absolute left-[60px] top-[18px] hidden whitespace-nowrap text-base leading-6 text-white/75 peer-placeholder-shown:inline">
+                                        Votre message (facultatif)
+                                    </span>
+                                </div>
+
+                                {{-- Envoyer --}}
+                                <div class="-mt-1 sm:col-span-2">
+                                    <button type="submit"
+                                            class="inline-flex h-[42px] w-full items-center justify-center gap-2.5 rounded-full text-base font-extrabold text-ink-950 transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 focus:ring-offset-[#1e2027]"
+                                            style="background: linear-gradient(135deg, #fb8a1e 0%, #f96d04 55%, #e86203 100%);">
+                                        @icon('send', 'h-5 w-5') Envoyer ma demande
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {{-- Nos partenaires (maquette) --}}
+            <section id="nos-partenaires" class="scroll-mt-24">
+                <div class="flex items-center gap-3">
+                    <span class="h-7 w-1.5 shrink-0 rounded-full bg-orange-500" aria-hidden="true"></span>
+                    <h2 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Nos partenaires</h2>
+                </div>
+                <p class="mt-3 text-sm leading-relaxed text-white/60 sm:text-base">
+                    Nous collaborons avec différents acteurs pour faire vivre les événements.
+                </p>
+
+                {{-- Mobile : défilement horizontal vers la droite — desktop : 5 colonnes --}}
+                <div class="mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-5 lg:overflow-visible lg:pb-0">
+                    @foreach ([
+                        ['icon' => 'calendar', 'title' => "Organisateurs<br>d'événements"],
+                        ['icon' => 'megaphone', 'title' => 'Sponsors<br>&amp; Marques'],
+                        ['icon' => 'play', 'title' => 'Médias<br>&amp; Influenceurs'],
+                        ['icon' => 'building', 'title' => 'Entreprises<br>&amp; Institutions'],
+                        ['icon' => 'settings', 'title' => 'Prestataires<br>de services'],
+                    ] as $partner)
+                        <div class="min-w-[132px] shrink-0 snap-start rounded-2xl border border-white/10 bg-white/5 px-3 py-4 text-center transition hover:border-orange-400/40 lg:min-w-0 lg:px-4 lg:py-5">
+                            <span class="mx-auto grid h-9 w-9 place-items-center lg:h-11 lg:w-11">
+                                @iconsolid($partner['icon'], 'w-8 h-8 lg:w-10 lg:h-10')
+                            </span>
+                            <p class="mt-2.5 text-xs font-bold leading-snug text-white lg:mt-3 lg:text-sm">{!! $partner['title'] !!}</p>
                         </div>
                     @endforeach
                 </div>

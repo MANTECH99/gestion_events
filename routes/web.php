@@ -24,6 +24,7 @@ use App\Http\Controllers\Organizer\StockController as OrganizerStock;
 use App\Http\Controllers\Organizer\TicketTypeController as OrganizerTicketType;
 use App\Http\Controllers\Organizer\UserController as OrganizerUser;
 use App\Http\Controllers\Organizer\ValidationHistoryController as OrganizerValidations;
+use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PointOfSaleController;
 use App\Http\Controllers\PwaController;
@@ -45,6 +46,9 @@ Route::post('/evenements/{event}/avis', [EventReviewController::class, 'store'])
     ->middleware('throttle:5,1');
 Route::get('/favoris', [FavorisController::class, 'index'])->name('favoris.index');
 Route::view('/devenir-partenaire', 'partners.become')->name('partners.become');
+Route::post('/devenir-partenaire', [PartnerController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('partners.store');
 
 /* ------------------------------------------------------------------ */
 /*  Réservation + paiement (avec ou sans compte) */
