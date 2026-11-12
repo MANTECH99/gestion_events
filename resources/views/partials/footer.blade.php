@@ -3,7 +3,7 @@
     {{-- =================================================================
          MOBILE — maquette dédiée (bloquée sous lg)
          ================================================================= --}}
-    <div class="relative overflow-hidden bg-[#0A0D15] lg:hidden">
+    <div class="relative overflow-hidden bg-[#12141c] lg:hidden">
         {{-- Décor : halo orange en haut à droite --}}
         <div class="pointer-events-none absolute -right-16 -top-14 h-44 w-44 rounded-full bg-orange-500/20 blur-3xl" aria-hidden="true"></div>
 
@@ -207,7 +207,7 @@
             <img src="{{ asset('images/hero-fans-v2.jpg') }}" alt="" loading="lazy"
                  class="absolute inset-0 h-full w-full object-cover" style="object-position: center 30%;">
             <div class="absolute inset-0" style="background:
-                linear-gradient(180deg, #0A0D15 0%, rgba(10,13,21,.78) 20%, rgba(10,13,21,.25) 55%, rgba(10,13,21,.55) 100%);"></div>
+                linear-gradient(180deg, #12141c 0%, rgba(18,20,28,.78) 20%, rgba(18,20,28,.25) 55%, rgba(18,20,28,.55) 100%);"></div>
             <svg class="absolute -left-8 bottom-6 h-28 w-64" viewBox="0 0 260 120" fill="none" preserveAspectRatio="none">
                 <defs>
                     <linearGradient id="beFooterRibbon" x1="0" y1="0" x2="1" y2="0">
@@ -223,7 +223,7 @@
     {{-- =================================================================
          DESKTOP — maquette footer_desktop.jpeg
          ================================================================= --}}
-    <div class="relative hidden overflow-hidden bg-[#0A0D15] lg:block">
+    <div class="relative hidden overflow-hidden bg-[#12141c] lg:block">
         {{-- Décor : halos orange dans les coins supérieurs --}}
         <div class="pointer-events-none absolute -left-24 -top-24 h-60 w-60 rounded-full bg-orange-600/30 blur-[90px]" aria-hidden="true"></div>
         <div class="pointer-events-none absolute -right-16 -top-28 h-72 w-[26rem] rounded-full bg-orange-500/35 blur-[100px]" aria-hidden="true"></div>
