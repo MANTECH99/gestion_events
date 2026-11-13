@@ -36,16 +36,16 @@ class BookingController extends Controller
      */
     public function create(Request $request, Event $event): View|RedirectResponse
     {
+        $artistPos = $this->artistPosFor($request, $event);
+
         if (! $event->isOnSale()) {
-            return redirect()->route('events.show', $event)
+            return redirect()->to($this->eventUrlWithPos($event, $artistPos))
                 ->with('error', 'Les réservations en ligne ne sont pas ouvertes pour cet événement.');
         }
 
         // Quota du point de vente artiste épuisé : le lien ne réserve plus.
-        $artistPos = $this->artistPosFor($request, $event);
-
         if ($artistPos?->isExhausted()) {
-            return redirect()->route('events.show', $event)
+            return redirect()->to($this->eventUrlWithPos($event, $artistPos))
                 ->with('error', 'Le stock assigné à ce lien d\'artiste est épuisé. Vous pouvez réserver sans son lien.');
         }
 
@@ -133,7 +133,7 @@ class BookingController extends Controller
                 return response()->json(['message' => $message], 422);
             }
 
-            return redirect()->route('events.show', $event)->with('error', $message);
+            return redirect()->to($this->eventUrlWithPos($event, $artistPos))->with('error', $message);
         }
 
         $operator = trim((string) $request->input('operator', ''));
@@ -344,6 +344,19 @@ class BookingController extends Controller
 
         return redirect()->route('payment.show', $reservations[0]->reference)
             ->with('error', 'Impossible de démarrer le paiement. Réessayez depuis la page de paiement.');
+    }
+
+    /**
+     * URL de retour vers la page de l'événement. Si l'utilisateur est dans
+     * le flux d'un lien d'artiste, le jeton est réinjecté (?pov=) : la trace
+     * en session est close dès qu'on revient sur la page sans le paramètre
+     * (le badge « Vous réservez via le lien de … » ne doit pas persister
+     * après avoir quitté le lien).
+     */
+    private function eventUrlWithPos(Event $event, ?ArtistPointOfSale $artistPos): string
+    {
+        return route('events.show', $event)
+            . ($artistPos ? '?pov=' . $artistPos->token : '');
     }
 
     /**

@@ -40,6 +40,12 @@ class EventController extends Controller
                     $request->session()->forget('artist_pos');
                 }
             }
+        } else {
+            // Arrivée SANS le lien de l'artiste (accueil, recherche,
+            // navigation normale sur le site) : on a quitté le lien —
+            // la trace est close et le badge « Vous réservez via le lien
+            // de … » ne doit pas persister sur les visites suivantes.
+            $request->session()->forget('artist_pos');
         }
 
         $stored = $request->session()->get('artist_pos');
