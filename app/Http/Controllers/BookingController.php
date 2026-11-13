@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\DexPayException;
+use App\Models\ArtistPointOfSale;
 use App\Models\Event;
 use App\Models\Reservation;
 use App\Models\TicketType;
@@ -38,6 +39,12 @@ class BookingController extends Controller
         if (! $event->isOnSale()) {
             return redirect()->route('events.show', $event)
                 ->with('error', 'Les réservations en ligne ne sont pas ouvertes pour cet événement.');
+        }
+
+        // Quota du point de vente artiste épuisé : le lien ne réserve plus.
+        if ($this->artistPosFor($request, $event)?->isExhausted()) {
+            return redirect()->route('events.show', $event)
+                ->with('error', 'Le stock assigné à ce lien d\'artiste est épuisé. Vous pouvez réserver sans son lien.');
         }
 
         $event->load('ticketTypes');
@@ -102,6 +109,20 @@ class BookingController extends Controller
     public function store(Request $request, Event $event): RedirectResponse|JsonResponse
     {
         abort_unless($event->isOnSale(), 404);
+
+        // Même garde-fou que create() : jamais de réservation attribuée à un
+        // lien d'artiste dont le quota est épuisé.
+        $artistPos = $this->artistPosFor($request, $event);
+
+        if ($artistPos?->isExhausted()) {
+            $message = 'Le stock assigné à ce lien d\'artiste est épuisé. Vous pouvez réserver sans son lien.';
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 422);
+            }
+
+            return redirect()->route('events.show', $event)->with('error', $message);
+        }
 
         $operator = trim((string) $request->input('operator', ''));
 
@@ -218,7 +239,7 @@ class BookingController extends Controller
             }
         }
 
-        $reservations = DB::transaction(function () use ($lines, $data, $event, $firstReference) {
+        $reservations = DB::transaction(function () use ($lines, $data, $event, $firstReference, $artistPos) {
             $created = [];
 
             foreach ($lines as $index => $line) {
@@ -242,6 +263,8 @@ class BookingController extends Controller
                     'total_amount' => $ticketType->price * $line['qty'],
                     'payment_status' => Reservation::STATUS_PENDING,
                     'channel' => Reservation::CHANNEL_ONLINE,
+                    // Traçage : créditée à l'artiste si créée via son lien.
+                    'artist_pos_id' => $artistPos?->id,
                 ]);
             }
 
@@ -301,5 +324,21 @@ class BookingController extends Controller
 
         return redirect()->route('payment.show', $reservations[0]->reference)
             ->with('error', 'Impossible de démarrer le paiement. Réessayez depuis la page de paiement.');
+    }
+
+    /**
+     * Point de vente artiste actif dans la session pour cet événement
+     * (positionné par EventController::show lors du passage par le lien
+     * partagé de l'artiste). Renvoie null hors lien d'artiste.
+     */
+    private function artistPosFor(Request $request, Event $event): ?ArtistPointOfSale
+    {
+        $stored = $request->session()->get('artist_pos');
+
+        if (! is_array($stored) || (int) ($stored['event_id'] ?? 0) !== $event->id) {
+            return null;
+        }
+
+        return ArtistPointOfSale::where('token', (string) ($stored['token'] ?? ''))->first();
     }
 }

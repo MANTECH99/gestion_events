@@ -13,6 +13,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyReservationsController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\Organizer\ArtistController as OrganizerArtist;
+use App\Http\Controllers\Organizer\ArtistPointOfSaleController as OrganizerArtistPos;
 use App\Http\Controllers\Organizer\DashboardController as OrganizerDashboard;
 use App\Http\Controllers\Organizer\EventController as OrganizerEvent;
 use App\Http\Controllers\Organizer\PaymentSessionController as OrganizerPaymentSession;
@@ -186,6 +187,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/points-de-vente', [OrganizerPointOfSale::class, 'index'])->name('pos.index');
         Route::get('/points-de-vente/{pointOfSale}', [OrganizerPointOfSale::class, 'show'])->name('pos.show');
 
+        /* Points de vente en ligne des artistes : lien partageable traçable
+           vers la page d'un événement, avec quota de billets assignés. */
+        Route::get('/points-de-vente-artistes', [OrganizerArtistPos::class, 'index'])->name('artist-pos.index');
+        Route::get('/points-de-vente-artistes/creer', [OrganizerArtistPos::class, 'create'])->name('artist-pos.create');
+        Route::post('/points-de-vente-artistes', [OrganizerArtistPos::class, 'store'])->name('artist-pos.store');
+        Route::get('/points-de-vente-artistes/{artistPos}', [OrganizerArtistPos::class, 'show'])->name('artist-pos.show');
+        Route::put('/points-de-vente-artistes/{artistPos}', [OrganizerArtistPos::class, 'update'])->name('artist-pos.update');
+        Route::delete('/points-de-vente-artistes/{artistPos}', [OrganizerArtistPos::class, 'destroy'])->name('artist-pos.destroy');
+
         Route::get('/retraits', [OrganizerPayout::class, 'index'])->name('payouts.index');
         Route::post('/retraits', [OrganizerPayout::class, 'store'])->name('payouts.store');
         Route::post('/retraits/{payout}/sync', [OrganizerPayout::class, 'sync'])->name('payouts.sync');
@@ -216,6 +226,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/reservations/{reservation}/telecharger', [OrganizerReservation::class, 'download'])->name('reservations.pdf');
         Route::get('/reservations/{reservation}/billets', [OrganizerReservation::class, 'downloadTickets'])->name('reservations.tickets');
         Route::get('/reservations/{reservation}/cartes', [OrganizerReservation::class, 'cards'])->name('reservations.cards');
+
+        /* Points de vente artistes : consultation seule (sans création,
+           mise à jour ni suppression, réservées à l'organisateur). */
+        Route::get('/points-de-vente-artistes', [OrganizerArtistPos::class, 'index'])->name('artist-pos.index');
+        Route::get('/points-de-vente-artistes/{artistPos}', [OrganizerArtistPos::class, 'show'])->name('artist-pos.show');
     });
 
     /* ---- Administration ---- */

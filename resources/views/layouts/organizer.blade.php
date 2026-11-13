@@ -20,6 +20,7 @@
                     ['label' => 'Réservations', 'route' => 'organizer.reservations.index', 'icon' => 'list'],
                     ['label' => 'Stock physique', 'route' => 'organizer.stocks.index', 'icon' => 'coins'],
                     ['label' => 'Point de vente', 'route' => 'organizer.pos.index', 'icon' => 'store', 'pattern' => 'organizer.pos.*'],
+                    ['label' => 'Point de vente artiste', 'route' => 'organizer.artist-pos.index', 'icon' => 'share', 'pattern' => 'organizer.artist-pos.*'],
                 ],
             ],
             [

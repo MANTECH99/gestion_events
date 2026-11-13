@@ -215,7 +215,7 @@
                 <div class="flex items-center justify-center gap-2.5 px-2">
                     <span class="shrink-0 text-white/90">@icon('users', 'w-5 h-5')</span>
                     <div class="min-w-0">
-                        <p class="text-[15px] font-extrabold leading-tight text-white">{{-- {{ $event->tickets_sold_short }} --}} 550</p>
+                        <p class="text-[15px] font-extrabold leading-tight text-white">{{-- {{ $event->tickets_sold_short }} --}} 610</p>
                         <p class="mt-0.5 text-[10px] font-medium text-white/45">Billets vendus</p>
                     </div>
                 </div>
@@ -546,6 +546,26 @@
                         </h2>
                         <p class="mt-1 text-xs text-white/50">Sélectionnez vos quantités, puis réservez en un clic.</p>
 
+                        {{-- Lien du point de vente artiste actif sur cette page --}}
+                        @if ($artistPosBlocked)
+                            <div class="mt-4 rounded-xl border border-rose-400/40 bg-rose-500/10 p-4 text-center">
+                                <p class="text-sm font-semibold text-rose-300">Stock épuisé pour ce lien d'artiste.</p>
+                                <p class="mt-1 text-xs text-white/60">
+                                    L'artiste n'a plus de billets disponibles via son lien.
+                                </p>
+                                <a href="{{ route('events.show', $event) }}?pov=off"
+                                   class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-ink-950 transition hover:bg-orange-100">
+                                    @icon('ticket', 'w-4 h-4') Réserver sans le lien de l'artiste
+                                </a>
+                            </div>
+                        @elseif ($artistPos)
+                            <div class="mt-4 flex items-center gap-2 rounded-xl border border-orange-500/25 bg-orange-500/10 px-3 py-2.5 text-xs font-semibold text-orange-200">
+                                @icon('share', 'w-4 h-4')
+                                <span class="min-w-0 truncate">Vous réservez via le lien de {{ $artistPos->artist?->name ?? 'l\'artiste' }}</span>
+                                <span class="ml-auto shrink-0 text-orange-300/90">{{ $artistPos->remaining() }} billet(s)</span>
+                            </div>
+                        @endif
+
                         @if ($activeTicketTypes->isEmpty())
                             <div class="mt-4 rounded-xl border border-dashed border-white/15 px-4 py-8 text-center">
                                 <p class="text-sm font-semibold text-white">Aucun type de ticket disponible pour le moment.</p>
@@ -562,7 +582,7 @@
                                     @php
                                         $available = $type->available_online;
                                         $maxQty = $available === null ? 20 : min(20, max(0, $available));
-                                        $pickable = $event->isOnSale() && $maxQty > 0;
+                                        $pickable = $event->isOnSale() && $maxQty > 0 && ! $artistPosBlocked;
                                         $gate = $pickable ? 'false' : 'true';
                                     @endphp
                                     <div class="rounded-xl border border-white/10 bg-white/[.04] p-4 transition hover:border-white/25">
@@ -636,7 +656,7 @@
                             @endif
                         @endif
 
-                        @if ($event->isOnSale())
+                        @if ($event->isOnSale() && ! $artistPosBlocked)
                             <a href="{{ route('booking.create', $event) }}" :href="reserveUrl()"
                                class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-ink-950 transition hover:bg-orange-100">
                                 @icon('ticket', 'w-4 h-4') Réserver maintenant

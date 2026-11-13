@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
     'reference', 'event_id', 'ticket_type_id', 'user_id', 'customer_name',
     'customer_email', 'customer_phone', 'customer_city', 'customer_address',
     'quantity', 'unit_price', 'total_amount',
-    'payment_status', 'channel', 'sold_by', 'paid_at', 'payment_operator',
+    'payment_status', 'channel', 'sold_by', 'artist_pos_id', 'paid_at', 'payment_operator',
 ])]
 class Reservation extends Model
 {
@@ -80,6 +80,12 @@ class Reservation extends Model
     public function soldBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sold_by');
+    }
+
+    /** Point de vente artiste emprunté pour cette réservation en ligne. */
+    public function artistPos(): BelongsTo
+    {
+        return $this->belongsTo(ArtistPointOfSale::class, 'artist_pos_id');
     }
 
     public function tickets(): HasMany

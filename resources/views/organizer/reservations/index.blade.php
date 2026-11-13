@@ -132,6 +132,8 @@
                                     </span>
                                     @if ($reservation->soldBy)
                                         <p class="mt-0.5 text-xs text-ink-500">{{ $reservation->soldBy->full_name }}</p>
+                                    @elseif ($reservation->artistPos?->artist)
+                                        <p class="mt-0.5 text-xs text-ink-500">{{ $reservation->artistPos->artist->name }}</p>
                                     @endif
                                 </td>
                                 <td>

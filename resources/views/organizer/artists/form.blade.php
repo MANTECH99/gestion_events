@@ -41,6 +41,15 @@
                 </div>
 
                 <div>
+                    <label for="phone" class="label">Numéro de téléphone</label>
+                    <input id="phone" name="phone" value="{{ old('phone', $artist->phone) }}"
+                           maxlength="30" inputmode="tel" placeholder="ex : 77 123 45 67"
+                           class="input @error('phone') input-error @enderror">
+                    <p class="mt-1.5 text-xs text-ink-500">Affiché à côté du nom de l'artiste sur ses points de vente.</p>
+                    @error('phone')<p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
                     <label for="bio" class="label">Biographie</label>
                     <textarea id="bio" name="bio" rows="5" maxlength="2000"
                               placeholder="Parcours, style, succès…"

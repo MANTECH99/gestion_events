@@ -71,11 +71,13 @@ class ArtistController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:120'],
             'title' => ['nullable', 'string', 'max:120'],
+            'phone' => ['nullable', 'string', 'max:30'],
             'bio' => ['nullable', 'string', 'max:2000'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ], [], [
             'name' => 'nom',
             'title' => 'titre / rôle',
+            'phone' => 'numéro de téléphone',
             'bio' => 'biographie',
             'image' => 'photo',
         ]);

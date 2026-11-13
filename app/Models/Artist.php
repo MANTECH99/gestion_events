@@ -7,12 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['name', 'title', 'bio', 'image_path'])]
+#[Fillable(['name', 'title', 'phone', 'bio', 'image_path'])]
 class Artist extends Model
 {
     public function events(): HasMany
     {
         return $this->hasMany(Event::class);
+    }
+
+    public function pointsOfSale(): HasMany
+    {
+        return $this->hasMany(ArtistPointOfSale::class);
     }
 
     public function getImageUrlAttribute(): ?string

@@ -17,6 +17,7 @@
                 'title' => 'Suivi',
                 'items' => [
                     ['label' => 'Réservations', 'route' => 'treasurer.reservations.index', 'icon' => 'list'],
+                    ['label' => 'Point de vente artiste', 'route' => 'treasurer.artist-pos.index', 'icon' => 'share', 'pattern' => 'treasurer.artist-pos.*'],
                 ],
             ],
         ],

@@ -43,7 +43,7 @@ class ReservationController extends Controller
             : $ownedIds;
 
         $query = Reservation::query()
-            ->with(['event', 'ticketType', 'user', 'soldBy'])
+            ->with(['event', 'ticketType', 'user', 'soldBy', 'artistPos.artist'])
             ->when(! $user->isAdmin(), fn ($q) => $q->whereHas('event', fn ($e) => $e->where('organizer_id', $user->organizerScopeId())))
             ->when($request->filled('event_id'), fn ($q) => $q->where('event_id', $request->integer('event_id')))
             ->when($request->filled('status'), fn ($q) => $q->where('payment_status', $request->string('status')->value()))
