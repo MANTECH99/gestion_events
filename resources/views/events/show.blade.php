@@ -565,10 +565,24 @@
                                 </a>
                             </div>
                         @elseif ($artistPos)
-                            <div class="mt-4 flex items-center gap-2 rounded-xl border border-orange-500/25 bg-orange-500/10 px-3 py-2.5 text-xs font-semibold text-orange-200">
-                                @icon('share', 'w-4 h-4')
-                                <span class="min-w-0 truncate">Vous réservez via le lien de {{ $artistPos->artist?->name ?? 'l\'artiste' }}</span>
-                                <span class="ml-auto shrink-0 text-orange-300/90">{{ $artistPos->remaining() }} billet(s)</span>
+                            {{-- Mobile : intro seule en haut, puis nom du
+                                 artiste + solde sur la SEULE même ligne
+                                 (2 lignes, aucun débordement horizontal) ;
+                                 desktop : ligne unique comme avant. --}}
+                            <div class="mt-4 flex flex-col gap-1 rounded-xl border border-orange-500/25 bg-orange-500/10 px-3 py-2.5 text-xs font-semibold text-orange-200 sm:flex-row sm:items-center sm:gap-2">
+                                <span class="flex min-w-0 items-center gap-2">
+                                    @icon('share', 'w-4 h-4 shrink-0')
+                                    <span class="min-w-0 truncate">Vous réservez via le lien de<span class="hidden sm:inline"> {{ $artistPos->artist?->name ?? 'l\'artiste' }}</span></span>
+                                </span>
+
+                                {{-- Ligne 2 (mobile) : nom + solde ensemble --}}
+                                <span class="flex min-w-0 items-center gap-2 pl-6 sm:hidden">
+                                    <span class="min-w-0 break-words">{{ $artistPos->artist?->name ?? 'l\'artiste' }}</span>
+                                    <span class="ml-auto shrink-0 text-orange-300/90">{{ $artistPos->remaining() }} billet(s)</span>
+                                </span>
+
+                                {{-- Desktop : solde à droite de la ligne unique --}}
+                                <span class="hidden text-orange-300/90 sm:ml-auto sm:shrink-0 sm:inline-block">{{ $artistPos->remaining() }} billet(s)</span>
                             </div>
                         @endif
 
