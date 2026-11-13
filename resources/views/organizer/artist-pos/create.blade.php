@@ -5,7 +5,7 @@
         <div>
             <h1 class="text-2xl font-extrabold tracking-tight text-ink-950">Nouveau point de vente artiste</h1>
             <p class="mt-1 text-sm text-ink-600">
-                Assignez un nombre de billets à un artiste : il recevra un lien vers la page de l'événement.
+                Assignez des billets (par type) à un artiste : il recevra un lien vers la page de l'événement.
             </p>
         </div>
         <a href="{{ route('organizer.artist-pos.index') }}" class="btn-ghost btn-sm">
@@ -26,7 +26,8 @@
             ])
         </div>
     @else
-        <form method="POST" action="{{ route('organizer.artist-pos.store') }}" class="max-w-2xl">
+        <form method="POST" action="{{ route('organizer.artist-pos.store') }}" class="max-w-2xl"
+              x-data="{ event: '{{ old('event_id') }}' }">
             @csrf
 
             <div class="card space-y-5 p-6">
@@ -45,7 +46,8 @@
 
                 <div>
                     <label for="event_id" class="label">Événement <span class="text-rose-500">*</span></label>
-                    <select id="event_id" name="event_id" required class="input @error('event_id') input-error @enderror">
+                    <select id="event_id" name="event_id" required x-model="event"
+                            class="input @error('event_id') input-error @enderror">
                         <option value="">Choisissez un événement…</option>
                         @foreach ($events as $event)
                             <option value="{{ $event->id }}" @selected((int) old('event_id') === $event->id)>
@@ -58,13 +60,46 @@
                 </div>
 
                 <div>
-                    <label for="ticket_limit" class="label">Nombre de billets assignés <span class="text-rose-500">*</span></label>
-                    <input id="ticket_limit" name="ticket_limit" type="number" min="1" step="1" required
-                           value="{{ old('ticket_limit', 1) }}"
-                           placeholder="ex : 50"
-                           class="input @error('ticket_limit') input-error @enderror">
-                    <p class="mt-1.5 text-xs text-ink-500">Vous pourrez l'augmenter à tout moment depuis la fiche du point de vente.</p>
-                    @error('ticket_limit')<p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p>@enderror
+                    <p class="label">Billets assignés <span class="text-rose-500">*</span></p>
+
+                    {{-- Un champ par type de billet, pour l'événement choisi
+                         (les groupes des autres événements sont désactivés et
+                         donc non transmis). --}}
+                    @foreach ($events as $groupEvent)
+                        <div x-show="event === '{{ $groupEvent->id }}'" x-cloak class="mt-2 space-y-4">
+                            @forelse ($groupEvent->ticketTypes as $type)
+                                @php $capacity = $capacities[$type->id] ?? null; @endphp
+                                <div>
+                                    <label for="alloc-{{ $type->id }}" class="label">
+                                        {{ $type->name }}
+                                        <span class="font-normal text-ink-400">
+                                            — {{ money($type->price) }}
+                                            · {{ $capacity === null ? 'stock illimité' : $capacity.' disponible(s)' }}
+                                        </span>
+                                    </label>
+                                    <input id="alloc-{{ $type->id }}" name="allocations[{{ $type->id }}]"
+                                           type="number" min="0" step="1"
+                                           @if ($capacity !== null) max="{{ $capacity }}" @endif
+                                           value="{{ old('allocations.'.$type->id, 0) }}"
+                                           :disabled="event !== '{{ $groupEvent->id }}'"
+                                           class="input @error('allocations.'.$type->id) input-error @enderror">
+                                    @error('allocations.'.$type->id)
+                                        <p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            @empty
+                                <p class="rounded-xl border border-dashed border-ink-200 px-4 py-6 text-center text-sm text-ink-500">
+                                    Aucun type de billet actif pour cet événement.
+                                </p>
+                            @endforelse
+                        </div>
+                    @endforeach
+
+                    <p class="mt-2 text-xs text-ink-500">
+                        Ces billets sont retirés du stock en ligne public : l'artiste est sûr de pouvoir les vendre.
+                        Vous pourrez augmenter chaque type à tout moment depuis la fiche.
+                    </p>
+                    @error('allocations')<p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p>@enderror
                 </div>
             </div>
 

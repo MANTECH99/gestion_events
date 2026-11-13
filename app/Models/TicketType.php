@@ -44,6 +44,12 @@ class TicketType extends Model
         return $this->hasMany(StockAllocation::class);
     }
 
+    /** Billets réservés aux points de vente artiste (par type). */
+    public function artistPosAllocations(): HasMany
+    {
+        return $this->hasMany(ArtistPosAllocation::class);
+    }
+
     public function posSales(): HasMany
     {
         return $this->hasMany(PosSale::class);
@@ -72,8 +78,9 @@ class TicketType extends Model
 
     /**
      * Stock dédié à la vente en ligne : stock total (quantity) moins le stock
-     * physique déjà attribué. L'attribution de stock physique réduit donc le
-     * stock en ligne.
+     * physique déjà attribué ET le stock réservé aux points de vente artiste
+     * (non vendus). L'attribution réduit donc le stock en ligne — physique
+     * comme artiste.
      */
     public function getOnlineQuantityAttribute(): int
     {
@@ -84,13 +91,22 @@ class TicketType extends Model
         return max(0, $this->quantity - $this->physical_allocated);
     }
 
+    /** Billets réservés aux points de vente artiste et pas encore vendus. */
+    public function getArtistPosRemainingAttribute(): int
+    {
+        return (int) $this->artistPosAllocations->sum(fn (ArtistPosAllocation $a) => $a->remaining);
+    }
+
     public function getAvailableOnlineAttribute(): ?int
     {
         if ($this->quantity === null) {
             return null;
         }
 
-        return max(0, $this->quantity - $this->physical_allocated - $this->sold_online);
+        // Les ventes via un lien d'artiste incrémentent sold_online ET
+        // décomptent le quota de l'artiste : deux effets qui se compensent,
+        // le stock public lui ne bouge pas.
+        return max(0, $this->quantity - $this->physical_allocated - $this->artist_pos_remaining - $this->sold_online);
     }
 
     public function isSoldOut(): bool

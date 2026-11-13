@@ -28,12 +28,16 @@ class EventController extends Controller
             } else {
                 $pos = ArtistPointOfSale::where('token', $token)->first();
 
-                // Seul un jeton rattaché à CET événement est retenu.
-                if ($pos && $pos->event_id === $event->id) {
+                // Seul un jeton rattaché à CET événement est retenu — et
+                // seulement s'il est actif (un lien désactivé ne trace rien :
+                // la visite retombe sur la page publique, sans attribution).
+                if ($pos && $pos->event_id === $event->id && $pos->is_active) {
                     $request->session()->put('artist_pos', [
                         'token' => $pos->token,
                         'event_id' => $pos->event_id,
                     ]);
+                } elseif ($pos && ! $pos->is_active) {
+                    $request->session()->forget('artist_pos');
                 }
             }
         }
@@ -41,7 +45,15 @@ class EventController extends Controller
         $stored = $request->session()->get('artist_pos');
 
         if (is_array($stored) && (int) ($stored['event_id'] ?? 0) === $event->id) {
-            $artistPos = ArtistPointOfSale::where('token', $stored['token'] ?? '')->first();
+            $artistPos = ArtistPointOfSale::where('token', $stored['token'] ?? '')
+                ->where('is_active', true)
+                ->first();
+
+            // Point de vente désactivé (ou supprimé) depuis la mise en
+            // session : on purge la trace pour ne pas créditer un lien mort.
+            if (! $artistPos) {
+                $request->session()->forget('artist_pos');
+            }
         }
 
         return view('events.show', [

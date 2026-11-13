@@ -42,7 +42,9 @@ class BookingController extends Controller
         }
 
         // Quota du point de vente artiste épuisé : le lien ne réserve plus.
-        if ($this->artistPosFor($request, $event)?->isExhausted()) {
+        $artistPos = $this->artistPosFor($request, $event);
+
+        if ($artistPos?->isExhausted()) {
             return redirect()->route('events.show', $event)
                 ->with('error', 'Le stock assigné à ce lien d\'artiste est épuisé. Vous pouvez réserver sans son lien.');
         }
@@ -61,6 +63,15 @@ class BookingController extends Controller
             }
 
             $available = $type->available_online;
+
+            // Sous le lien d'artiste, le plafond est aussi le solde restant
+            // sur son point de vente pour ce type de billet.
+            $posRemaining = $artistPos?->remainingFor($typeId);
+
+            if ($posRemaining !== null) {
+                $available = $available === null ? $posRemaining : min($available, $posRemaining);
+            }
+
             $limit = $available === null ? 20 : min(20, $available);
             $qty = (int) $qty;
 
@@ -96,6 +107,7 @@ class BookingController extends Controller
             'event' => $event,
             'types' => $types,
             'qtys' => $qtys,
+            'artistPos' => $artistPos,
             'operators' => $operators,
             'sandbox' => $this->dexpay->client()->isSandbox(),
             'configured' => $this->dexpay->client()->isConfigured(),
@@ -215,6 +227,14 @@ class BookingController extends Controller
         foreach ($lines as $line) {
             $available = $line['type']->available_online;
 
+            // Lien d'artiste : jamais plus que le solde assigné au point de
+            // vente pour ce type de billet.
+            $posRemaining = $artistPos?->remainingFor($line['type']->id);
+
+            if ($posRemaining !== null) {
+                $available = $available === null ? $posRemaining : min($available, $posRemaining);
+            }
+
             if ($available !== null && $line['qty'] > $available) {
                 $message = 'Il ne reste que '.($available ?: 0).' ticket(s) disponible(s) pour ce type.';
 
@@ -329,7 +349,9 @@ class BookingController extends Controller
     /**
      * Point de vente artiste actif dans la session pour cet événement
      * (positionné par EventController::show lors du passage par le lien
-     * partagé de l'artiste). Renvoie null hors lien d'artiste.
+     * partagé de l'artiste). Renvoie null hors lien d'artiste — ou si le
+     * point de vente a été désactivé entre-temps (lien mort : ni blocage,
+     * ni attribution).
      */
     private function artistPosFor(Request $request, Event $event): ?ArtistPointOfSale
     {
@@ -339,6 +361,8 @@ class BookingController extends Controller
             return null;
         }
 
-        return ArtistPointOfSale::where('token', (string) ($stored['token'] ?? ''))->first();
+        return ArtistPointOfSale::where('token', (string) ($stored['token'] ?? ''))
+            ->where('is_active', true)
+            ->first();
     }
 }

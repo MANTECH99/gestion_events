@@ -194,6 +194,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/points-de-vente-artistes', [OrganizerArtistPos::class, 'store'])->name('artist-pos.store');
         Route::get('/points-de-vente-artistes/{artistPos}', [OrganizerArtistPos::class, 'show'])->name('artist-pos.show');
         Route::put('/points-de-vente-artistes/{artistPos}', [OrganizerArtistPos::class, 'update'])->name('artist-pos.update');
+        Route::patch('/points-de-vente-artistes/{artistPos}/statut', [OrganizerArtistPos::class, 'toggle'])->name('artist-pos.toggle');
         Route::delete('/points-de-vente-artistes/{artistPos}', [OrganizerArtistPos::class, 'destroy'])->name('artist-pos.destroy');
 
         Route::get('/retraits', [OrganizerPayout::class, 'index'])->name('payouts.index');

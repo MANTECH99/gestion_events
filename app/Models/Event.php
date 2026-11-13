@@ -249,7 +249,7 @@ class Event extends Model
             ->where('is_active', true)
             ->whereNotNull('quantity')
             ->get(['id', 'quantity', 'sold_online'])
-            ->sum(fn (TicketType $type) => max(0, $type->quantity - $type->physical_allocated - $type->sold_online));
+            ->sum(fn (TicketType $type) => max(0, (int) $type->available_online));
     }
 
     public function getMinPriceLabelAttribute(): string

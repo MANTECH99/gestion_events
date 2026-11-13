@@ -10,13 +10,21 @@ use Illuminate\Support\Str;
 
 /**
  * Point de vente en ligne d'un artiste : un lien partageable vers la page
- * d'un événement, avec un quota de billets vendables via ce lien.
+ * d'un événement, avec un quota de billets RÉSERVÉS par type de billet —
+ * l'assignation réduit le stock en ligne public, comme le stock physique.
  */
-#[Fillable(['artist_id', 'event_id', 'token', 'ticket_limit'])]
+#[Fillable(['artist_id', 'event_id', 'token', 'is_active'])]
 class ArtistPointOfSale extends Model
 {
     /** Pluriel irrégulier : le modèle attend artist_point_of_sales. */
     protected $table = 'artist_points_of_sale';
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
 
     /* ------------------------------------------------------------------ */
     /* Relations */
@@ -37,6 +45,12 @@ class ArtistPointOfSale extends Model
         return $this->hasMany(Reservation::class, 'artist_pos_id');
     }
 
+    /** Billets réservés à ce lien, type par type. */
+    public function allocations(): HasMany
+    {
+        return $this->hasMany(ArtistPosAllocation::class, 'artist_pos_id');
+    }
+
     /* ------------------------------------------------------------------ */
     /* Statistiques (réservations payées uniquement) */
     /* ------------------------------------------------------------------ */
@@ -53,10 +67,22 @@ class ArtistPointOfSale extends Model
         return (int) $this->reservations()->paid()->sum('total_amount');
     }
 
-    /** Billets restants dans le quota assigné. */
+    /** Billets assignés au lien (tous types confondus). */
+    public function totalAllocated(): int
+    {
+        return (int) $this->allocations->sum('allocated');
+    }
+
+    /** Billets restants pour un type de billet (0 = type non assigné). */
+    public function remainingFor(int $ticketTypeId): int
+    {
+        return $this->allocations->firstWhere('ticket_type_id', $ticketTypeId)?->remaining ?? 0;
+    }
+
+    /** Billets restants dans le quota assigné (tous types). */
     public function remaining(): int
     {
-        return max(0, (int) $this->ticket_limit - $this->soldQuantity());
+        return (int) $this->allocations->sum(fn (ArtistPosAllocation $a) => $a->remaining);
     }
 
     /** Le quota est-il épuisé ? Le lien affiche alors « stock épuisé ». */

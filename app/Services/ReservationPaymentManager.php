@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\DexPayException;
+use App\Models\ArtistPosAllocation;
 use App\Models\Payment;
 use App\Models\Reservation;
 use App\Models\Ticket;
@@ -363,6 +364,16 @@ class ReservationPaymentManager
     private function incrementOnlineSales(Reservation $reservation): void
     {
         $reservation->ticketType?->increment('sold_online', $reservation->quantity);
+
+        // Lien d'artiste : le billet vendu sort du quota réservé à son point
+        // de vente. sold_online et artist_pos_remaining se compensent — le
+        // stock public, lui, ne bouge pas (le billet venait du quota).
+        if ($reservation->artist_pos_id) {
+            ArtistPosAllocation::query()
+                ->where('artist_pos_id', $reservation->artist_pos_id)
+                ->where('ticket_type_id', $reservation->ticket_type_id)
+                ->increment('sold', $reservation->quantity);
+        }
     }
 
     public function itemNameFor(Reservation $reservation): string

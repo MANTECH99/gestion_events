@@ -37,7 +37,8 @@
             @foreach ($pointsOfSale as $pos)
                 @php
                     $sold = (int) ($pos->tickets_sold_sum ?? 0);
-                    $remaining = max(0, (int) $pos->ticket_limit - $sold);
+                    $allocated = (int) ($pos->allocated_sum ?? 0);
+                    $remaining = max(0, $allocated - $sold);
                 @endphp
                 <div class="card flex flex-col p-5">
                     <div class="flex items-start gap-3">
@@ -66,18 +67,41 @@
                         </div>
 
                         <div class="flex shrink-0 items-center gap-1.5">
+                            @unless ($pos->is_active)
+                                <span class="badge bg-rose-100 text-rose-700">Désactivé</span>
+                            @endunless
+
                             <a href="{{ route($pfx.'.artist-pos.show', $pos) }}" class="btn-ghost btn-sm">
                                 @icon('eye', 'w-4 h-4') Voir
                             </a>
 
                             @unless ($isTreasurer)
-                                <form method="POST" action="{{ route('organizer.artist-pos.destroy', $pos) }}"
-                                      onsubmit="return confirm('Supprimer ce point de vente ? Le lien ne fonctionnera plus.');">
-                                    @csrf @method('DELETE')
-                                    <button class="btn-ghost btn-sm !px-2.5 text-rose-600" title="Supprimer le point de vente">
-                                        @icon('trash', 'w-4 h-4')
+                                {{-- Désactiver / réactiver : conserve l'historique
+                                     des ventes et l'attribution de l'artiste. --}}
+                                <form method="POST" action="{{ route('organizer.artist-pos.toggle', $pos) }}"
+                                      @if ($pos->is_active) onsubmit="return confirm('Désactiver ce lien ? L’artiste ne pourra plus vendre via ce lien — les ventes passées sont conservées.');" @endif>
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="btn-ghost btn-sm"
+                                            title="{{ $pos->is_active ? 'Désactiver le lien' : 'Réactiver le lien' }}">
+                                        @if ($pos->is_active)
+                                            @icon('wifi-off', 'w-4 h-4') Désactiver
+                                        @else
+                                            @icon('refresh', 'w-4 h-4') Réactiver
+                                        @endif
                                     </button>
                                 </form>
+
+                                {{-- Suppression : uniquement sans aucune vente
+                                     rattachée (sinon : désactiver). --}}
+                                @if ((int) ($pos->reservations_count ?? 0) === 0)
+                                    <form method="POST" action="{{ route('organizer.artist-pos.destroy', $pos) }}"
+                                          onsubmit="return confirm('Supprimer ce point de vente ? Le lien ne fonctionnera plus.');">
+                                        @csrf @method('DELETE')
+                                        <button class="btn-ghost btn-sm !px-2.5 text-rose-600" title="Supprimer le point de vente">
+                                            @icon('trash', 'w-4 h-4')
+                                        </button>
+                                    </form>
+                                @endif
                             @endunless
                         </div>
                     </div>
@@ -85,7 +109,7 @@
                     <div class="mt-4 grid grid-cols-3 gap-3 border-t border-ink-100 pt-4 text-sm">
                         <div>
                             <p class="text-xs text-ink-500">Billets assignés</p>
-                            <p class="mt-0.5 font-bold text-ink-900">{{ number_format((int) $pos->ticket_limit, 0, ',', ' ') }}</p>
+                            <p class="mt-0.5 font-bold text-ink-900">{{ number_format($allocated, 0, ',', ' ') }}</p>
                         </div>
                         <div>
                             <p class="text-xs text-ink-500">Billets vendus</p>

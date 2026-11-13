@@ -3,8 +3,23 @@
 @section('content')
     @php
         $prices = $types->pluck('price', 'id')->all();
+
+        // Disponibilité effective : stock public, plafonné par le solde
+        // assigné au point de vente artiste le cas échéant.
+        $artistPos = $artistPos ?? null;
+        $avail = $types->mapWithKeys(function ($t) use ($artistPos) {
+            $a = $t->available_online;
+            $posRemaining = $artistPos?->remainingFor($t->id);
+
+            if ($posRemaining !== null) {
+                $a = $a === null ? $posRemaining : min($a, $posRemaining);
+            }
+
+            return [$t->id => $a];
+        })->all();
+
         $limits = $types->mapWithKeys(fn ($t) => [
-            $t->id => $t->available_online === null ? 20 : min(20, (int) $t->available_online),
+            $t->id => $avail[$t->id] === null ? 20 : min(20, (int) $avail[$t->id]),
         ])->all();
         $totalTickets = array_sum($qtys);
         $totalAmount = (int) $types->sum(fn ($t) => ($prices[$t->id] ?? 0) * ($qtys[$t->id] ?? 0));
@@ -152,7 +167,7 @@
 
                         @forelse ($types as $type)
                             @php
-                                $available = $type->available_online;
+                                $available = $avail[$type->id];
                                 $limit = $limits[$type->id];
                                 $qty = $qtys[$type->id] ?? null;
                                 $isSelected = $qty !== null;
@@ -234,10 +249,10 @@
                                 <option value="">Choisir un type de billet…</option>
                                 @foreach ($types as $type)
                                     <option value="{{ $type->id }}"
-                                            @disabled($type->available_online !== null && $type->available_online < 1)
+                                            @disabled($avail[$type->id] !== null && $avail[$type->id] < 1)
                                             {{-- Désactivé tant que le type est au panier (et s'il est épuisé) :
                                                  la suppression depuis le panier rend l'option réajoutable sans recharger. --}}
-                                            :disabled="{{ $type->available_online !== null && $type->available_online < 1 ? 'true' : 'false' }} || isSel({{ $type->id }})">
+                                            :disabled="{{ $avail[$type->id] !== null && $avail[$type->id] < 1 ? 'true' : 'false' }} || isSel({{ $type->id }})">
                                         {{ $type->name }} — {{ money($type->price) }}
                                     </option>
                                 @endforeach

@@ -14,12 +14,18 @@
         $similarEvents = $event->similarEvents(3);
         $galleryImages = $event->images;
         $activeTicketTypes = $event->ticketTypes->where('is_active', true)->values();
-        $pickerTypes = $activeTicketTypes->map(fn ($t) => [
-            'id' => $t->id,
-            'max' => $event->isOnSale()
+        $pickerTypes = $activeTicketTypes->map(function ($t) use ($event, $artistPos) {
+            $max = $event->isOnSale()
                 ? ($t->available_online === null ? 20 : min(20, max(0, (int) $t->available_online)))
-                : 0,
-        ])->values()->all();
+                : 0;
+
+            // Sous le lien d'artiste : jamais plus que son solde assigné.
+            if ($artistPos && $event->isOnSale()) {
+                $max = min($max, $artistPos->remainingFor($t->id));
+            }
+
+            return ['id' => $t->id, 'max' => $max];
+        })->values()->all();
 
         $typeBadges = [
             'concert'    => 'bg-violet-500 text-white',
@@ -581,6 +587,17 @@
                                 @foreach ($activeTicketTypes as $type)
                                     @php
                                         $available = $type->available_online;
+
+                                        // Sous le lien d'artiste, le plafond est
+                                        // aussi le solde assigné au point de vente.
+                                        $posRemaining = $artistPos?->remainingFor($type->id);
+
+                                        if ($posRemaining !== null) {
+                                            $available = $available === null
+                                                ? $posRemaining
+                                                : min($available, $posRemaining);
+                                        }
+
                                         $maxQty = $available === null ? 20 : min(20, max(0, $available));
                                         $pickable = $event->isOnSale() && $maxQty > 0 && ! $artistPosBlocked;
                                         $gate = $pickable ? 'false' : 'true';

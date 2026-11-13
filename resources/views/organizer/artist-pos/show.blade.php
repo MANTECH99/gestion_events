@@ -51,10 +51,10 @@
         ])
         @include('partials.stat', [
             'label' => 'Solde de billet total',
-            'value' => number_format((int) $artistPos->ticket_limit, 0, ',', ' '),
+            'value' => number_format($totalAllocated, 0, ',', ' '),
             'icon' => 'ticket',
             'tone' => 'brand',
-            'hint' => 'billets assignés au lien',
+            'hint' => 'billets réservés au lien',
         ])
         @include('partials.stat', [
             'label' => 'Billets vendus',
@@ -77,15 +77,39 @@
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 class="flex items-center gap-2 font-semibold text-ink-900">
                 @icon('share', 'w-4 h-4 text-brand-600') Lien de partage
-                @if ($remaining > 0)
-                    <span class="badge bg-emerald-100 text-emerald-700">{{ $remaining }} billet(s) restant(s)</span>
+                @if ($artistPos->is_active)
+                    <span class="badge bg-emerald-100 text-emerald-700">Lien actif</span>
+                    @if ($remaining > 0)
+                        <span class="badge bg-emerald-100 text-emerald-700">{{ $remaining }} billet(s) restant(s)</span>
+                    @else
+                        <span class="badge bg-rose-100 text-rose-700">Stock épuisé</span>
+                    @endif
                 @else
-                    <span class="badge bg-rose-100 text-rose-700">Stock épuisé</span>
+                    <span class="badge bg-rose-100 text-rose-700">Lien désactivé</span>
                 @endif
             </h2>
-            <a href="{{ $artistPos->url() }}" target="_blank" rel="noopener" class="btn-ghost btn-sm">
-                @icon('arrow-right', 'w-4 h-4') Ouvrir le lien
-            </a>
+
+            <div class="flex flex-wrap items-center gap-2">
+                @unless ($isTreasurer)
+                    {{-- Désactiver / réactiver : l'historique des ventes et
+                         l'attribution de l'artiste sont conservés. --}}
+                    <form method="POST" action="{{ route('organizer.artist-pos.toggle', $artistPos) }}"
+                          @if ($artistPos->is_active) onsubmit="return confirm('Désactiver ce lien ? L’artiste ne pourra plus vendre via ce lien — les ventes passées sont conservées.');" @endif>
+                        @csrf @method('PATCH')
+                        <button type="submit" class="btn-ghost btn-sm">
+                            @if ($artistPos->is_active)
+                                @icon('wifi-off', 'w-4 h-4') Désactiver
+                            @else
+                                @icon('refresh', 'w-4 h-4') Réactiver
+                            @endif
+                        </button>
+                    </form>
+                @endunless
+
+                <a href="{{ $artistPos->url() }}" target="_blank" rel="noopener" class="btn-ghost btn-sm">
+                    @icon('arrow-right', 'w-4 h-4') Ouvrir le lien
+                </a>
+            </div>
         </div>
 
         <div class="mt-3 flex flex-wrap items-center gap-2">
@@ -102,29 +126,80 @@
             L'artiste partage ce lien : chaque réservation en ligne créée par ici lui est créditée
             (le nom de l'artiste apparaît sous « En ligne » dans la liste des réservations).
         </p>
+
+        @unless ($artistPos->is_active)
+            <p class="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">
+                Ce lien est désactivé : il ouvre la page publique sans attribution, et aucune vente ne peut s'y faire.
+                Les ventes passées restent rattachées à l'artiste.
+            </p>
+        @endunless
     </div>
 
-    {{-- Ajustement du quota (organisateur) --}}
+    {{-- Ajustement du quota, par type de billet (organisateur) --}}
     @unless ($isTreasurer)
-        <form method="POST" action="{{ route('organizer.artist-pos.update', $artistPos) }}" class="card mt-6 p-5">
-            @csrf @method('PUT')
-            <label for="ticket_limit" class="label">Nombre de billets assignés</label>
-
-            {{-- Champ et bouton alignés sur la même ligne (desktop comme mobile) --}}
-            <div class="flex items-center gap-3">
-                <input id="ticket_limit" name="ticket_limit" type="number" min="1" step="1" required
-                       value="{{ old('ticket_limit', $artistPos->ticket_limit) }}"
-                       class="input min-w-0 flex-1 @error('ticket_limit') input-error @enderror">
-                <button type="submit" class="btn-primary shrink-0 whitespace-nowrap">
-                    @icon('check', 'w-4 h-4') Mettre à jour
-                </button>
-            </div>
-
-            <p class="mt-1.5 text-xs text-ink-500">
-                Vous pouvez l'augmenter à tout moment — jamais en dessous de {{ $sold }} (déjà vendu(s)).
+        <div class="card mt-6 p-5">
+            <h2 class="flex items-center gap-2 font-semibold text-ink-900">
+                @icon('ticket', 'w-4 h-4 text-brand-600') Billets assignés par type
+            </h2>
+            <p class="mt-1 text-xs text-ink-500">
+                Ces billets sont réservés et retirés du stock en ligne public.
+                Vous pouvez augmenter à tout moment — jamais en dessous du nombre déjà vendu pour ce type.
             </p>
-            @error('ticket_limit')<p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p>@enderror
-        </form>
+
+            <div class="mt-4 space-y-5">
+                @forelse ($types as $type)
+                    @php
+                        $allocation = $allocations[$type->id] ?? null;
+                        $soldForType = (int) ($allocation->sold ?? 0);
+                        $oldValue = old('allocations.'.$type->id, $allocation?->allocated ?? 0);
+                    @endphp
+
+                    <form method="POST" action="{{ route('organizer.artist-pos.update', $artistPos) }}"
+                          class="border-t border-ink-100 pt-5 first:border-t-0 first:pt-0">
+                        @csrf @method('PUT')
+                        <input type="hidden" name="ticket_type_id" value="{{ $type->id }}">
+
+                        <label for="alloc-{{ $type->id }}" class="label">
+                            {{ $type->name }}
+                            <span class="font-normal text-ink-400">
+                                — {{ money($type->price) }}
+                                @if ($allocation)
+                                    · {{ $allocation->remaining }} restant(s) sur {{ $allocation->allocated }}
+                                @else
+                                    · non assigné
+                                @endif
+                            </span>
+                        </label>
+
+                        {{-- Champ et bouton alignés sur la même ligne (desktop comme mobile) --}}
+                        <div class="flex items-center gap-3">
+                            <input id="alloc-{{ $type->id }}" name="allocations[{{ $type->id }}]"
+                                   type="number" min="{{ $soldForType }}" step="1" required
+                                   value="{{ $oldValue }}"
+                                   class="input min-w-0 flex-1 @error('allocations.'.$type->id) input-error @enderror">
+                            <button type="submit" class="btn-primary shrink-0 whitespace-nowrap">
+                                @icon('check', 'w-4 h-4') Mettre à jour
+                            </button>
+                        </div>
+
+                        <p class="mt-1.5 text-xs text-ink-500">
+                            @if ($soldForType > 0)
+                                Jamais en dessous de {{ $soldForType }} (déjà vendu(s) via ce lien).
+                            @else
+                                Aucun billet vendu pour ce type — libre d'ajuster.
+                            @endif
+                        </p>
+                        @error('allocations.'.$type->id)
+                            <p class="mt-1.5 text-sm text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </form>
+                @empty
+                    <p class="rounded-xl border border-dashed border-ink-200 px-4 py-6 text-center text-sm text-ink-500">
+                        Aucun type de billet actif pour cet événement.
+                    </p>
+                @endforelse
+            </div>
+        </div>
     @endunless
 
     {{-- Ventes réalisées via le lien --}}
