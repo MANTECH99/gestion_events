@@ -221,7 +221,7 @@
                 <div class="flex items-center justify-center gap-2.5 px-2">
                     <span class="shrink-0 text-white/90">@icon('users', 'w-5 h-5')</span>
                     <div class="min-w-0">
-                        <p class="text-[15px] font-extrabold leading-tight text-white">{{-- {{ $event->tickets_sold_short }} --}} 610</p>
+                        <p class="text-[15px] font-extrabold leading-tight text-white">{{-- {{ $event->tickets_sold_short }} --}} 705</p>
                         <p class="mt-0.5 text-[10px] font-medium text-white/45">Billets vendus</p>
                     </div>
                 </div>
