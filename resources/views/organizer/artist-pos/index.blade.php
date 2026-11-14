@@ -54,9 +54,6 @@
                         <div class="min-w-0 flex-1">
                             <p class="truncate font-bold text-ink-950">
                                 {{ $pos->artist?->name ?? 'Artiste supprimé' }}
-                                @if ($pos->artist?->phone)
-                                    <span class="ml-1.5 text-xs font-normal text-ink-500">{{ $pos->artist->phone }}</span>
-                                @endif
                             </p>
                             <p class="truncate text-xs text-ink-500">
                                 {{ $pos->event?->title ?? 'Événement supprimé' }}
